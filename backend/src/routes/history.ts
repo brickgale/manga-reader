@@ -38,7 +38,7 @@ router.get('/manga/:mangaId', async (req, res) => {
   }
 });
 
-// Add history entry
+// Add or update history entry
 router.post('/', async (req, res) => {
   const { mangaId, chapterPath, pageNumber } = req.body;
 
@@ -47,8 +47,14 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const history = await prisma.readingHistory.create({
-      data: {
+    const history = await prisma.readingHistory.upsert({
+      where: { mangaId },
+      update: {
+        chapterPath,
+        pageNumber,
+        timestamp: new Date()
+      },
+      create: {
         mangaId,
         chapterPath,
         pageNumber

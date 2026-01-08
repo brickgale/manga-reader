@@ -68,6 +68,18 @@
           </p>
         </div>
 
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="pages.length"
+          :chapters="chapters"
+          :current-chapter-path="currentChapter?.path"
+          @prev="previousPage"
+          @next="nextPage"
+          @change-page="goToPage"
+          @change-chapter="changeChapter"
+          class="mb-4"
+        />
+
         <div v-if="pages.length > 0" class="flex justify-center mb-4">
           <img
             :src="api.getImageUrl(pages[currentPage].path)"
@@ -77,22 +89,16 @@
           />
         </div>
 
-        <div class="flex justify-center gap-4">
-          <Button
-            variant="outline"
-            @click="previousPage"
-            :disabled="currentPage === 0"
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            @click="nextPage"
-            :disabled="currentPage === pages.length - 1"
-          >
-            Next
-          </Button>
-        </div>
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="pages.length"
+          :chapters="chapters"
+          :current-chapter-path="currentChapter?.path"
+          @prev="previousPage"
+          @next="nextPage"
+          @change-page="goToPage"
+          @change-chapter="changeChapter"
+        />
       </div>
     </div>
   </div>
@@ -103,6 +109,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
 import { Button } from '@/components/ui'
+import { Pagination } from '@/components/pagination'
 
 const route = useRoute()
 const manga = ref<Manga | null>(null)
@@ -169,15 +176,27 @@ const updateProgress = async () => {
 const nextPage = () => {
   if (currentPage.value < pages.value.length - 1) {
     currentPage.value++
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 }
 
 const previousPage = () => {
   if (currentPage.value > 0) {
     currentPage.value--
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
   }
 }
+const goToPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'instant' })
+}
 
+const changeChapter = async (chapterPath: string) => {
+  const chapter = chapters.value.find(c => c.path === chapterPath)
+  if (chapter) {
+    await selectChapter(chapter)
+  }
+}
 const handleBookmark = async () => {
   if (!manga.value || !currentChapter.value) return
   
