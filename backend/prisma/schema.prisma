@@ -1,0 +1,63 @@
+// Prisma schema for manga reader
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Manga {
+  id          String   @id @default(uuid())
+  title       String
+  path        String   @unique
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  histories   ReadingHistory[]
+  bookmarks   Bookmark[]
+  progress    ReadingProgress[]
+}
+
+model ReadingHistory {
+  id          String   @id @default(uuid())
+  mangaId     String
+  chapterPath String
+  pageNumber  Int
+  timestamp   DateTime @default(now())
+
+  manga       Manga    @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+
+  @@index([mangaId])
+  @@index([timestamp])
+}
+
+model Bookmark {
+  id          String   @id @default(uuid())
+  mangaId     String
+  chapterPath String
+  pageNumber  Int
+  note        String?
+  createdAt   DateTime @default(now())
+
+  manga       Manga    @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+
+  @@index([mangaId])
+}
+
+model ReadingProgress {
+  id              String   @id @default(uuid())
+  mangaId         String
+  lastChapterPath String
+  lastPageNumber  Int
+  farthestChapterPath String
+  farthestPageNumber  Int
+  updatedAt       DateTime @updatedAt
+
+  manga           Manga    @relation(fields: [mangaId], references: [id], onDelete: Cascade)
+
+  @@unique([mangaId])
+}

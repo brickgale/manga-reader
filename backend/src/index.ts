@@ -1,0 +1,38 @@
+import express from 'express';
+import cors from 'cors';
+import { PrismaClient } from '@prisma/client';
+import mangaRoutes from './routes/manga';
+import historyRoutes from './routes/history';
+import bookmarkRoutes from './routes/bookmark';
+import progressRoutes from './routes/progress';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+export const prisma = new PrismaClient();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use('/api/manga', mangaRoutes);
+app.use('/api/history', historyRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/progress', progressRoutes);
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
