@@ -2,30 +2,30 @@
   <div>
     <div class="mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl font-bold">Manga Library</h2>
-        <button
+        <h2 class="text-3xl font-bold">Library</h2>
+        <Button
+          variant="outline"
           @click="showScanInput = !showScanInput"
-          class="px-4 py-2 border rounded-md hover:bg-muted flex items-center gap-2"
         >
-          <span>{{ showScanInput ? '✕' : '⚙️' }}</span>
-          <span>{{ showScanInput ? 'Close' : 'Scan Directory' }}</span>
-        </button>
+          <Folder v-if="!showScanInput" class="h-4 w-4" />
+          <X v-else class="h-4 w-4" />
+          <span>Scan Directory</span>
+        </Button>
       </div>
       
       <div v-if="showScanInput" class="flex gap-4 mb-6 p-4 border rounded-lg bg-muted/50">
-        <input
+        <Input
           v-model="scanPath"
           type="text"
           placeholder="Enter manga directory path..."
-          class="flex-1 px-4 py-2 border rounded-md bg-background"
+          class="flex-1"
         />
-        <button
+        <Button
           @click="handleScan"
           :disabled="scanning"
-          class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
         >
           {{ scanning ? 'Scanning...' : 'Scan' }}
-        </button>
+        </Button>
       </div>
       
       <div v-if="savedDirectory" class="text-sm text-muted-foreground mb-4">
@@ -41,20 +41,23 @@
       <p>No manga found. Scan a directory to get started.</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
       <router-link
         v-for="manga in mangaList"
         :key="manga.id"
         :to="`/manga/${manga.id}`"
-        class="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
       >
-        <div class="aspect-[3/4] bg-muted flex items-center justify-center">
-          <p class="text-muted-foreground">No Cover</p>
-        </div>
-        <div class="p-4">
-          <h3 class="font-semibold truncate">{{ manga.title }}</h3>
-          <p class="text-sm text-muted-foreground truncate">{{ manga.path }}</p>
-        </div>
+        <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+          <div class="aspect-[3/4] bg-muted flex items-center justify-center">
+            <p class="text-muted-foreground">No Cover</p>
+          </div>
+          <CardHeader>
+            <CardTitle class="truncate">{{ manga.title }}</CardTitle>
+          </CardHeader>
+          <CardContent class="pt-0">
+            <p class="text-sm text-muted-foreground truncate">{{ manga.path }}</p>
+          </CardContent>
+        </Card>
       </router-link>
     </div>
   </div>
@@ -62,7 +65,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { Folder, X } from 'lucide-vue-next'
 import { api, type Manga } from '../api'
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
@@ -75,6 +80,16 @@ const loadManga = async () => {
   loading.value = true
   try {
     mangaList.value = await api.getManga()
+    
+    // Extract the parent directory from existing manga if available
+    if (mangaList.value.length > 0) {
+      const firstMangaPath = mangaList.value[0].path
+      const parentDir = firstMangaPath.substring(0, firstMangaPath.lastIndexOf('/'))
+      if (parentDir) {
+        savedDirectory.value = parentDir
+        scanPath.value = parentDir
+      }
+    }
   } catch (error) {
     console.error('Failed to load manga:', error)
   } finally {
@@ -94,8 +109,6 @@ const handleScan = async () => {
     const result = await api.scanDirectory(scanPath.value)
     console.log('Scan result:', result)
     
-    // Save the directory to localStorage
-    localStorage.setItem('mangaDirectory', scanPath.value)
     savedDirectory.value = scanPath.value
     
     await loadManga()
@@ -111,12 +124,6 @@ const handleScan = async () => {
 }
 
 onMounted(() => {
-  // Load saved directory from localStorage
-  const saved = localStorage.getItem('mangaDirectory')
-  if (saved) {
-    savedDirectory.value = saved
-    scanPath.value = saved
-  }
   loadManga()
 })
 </script>

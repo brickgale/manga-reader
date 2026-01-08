@@ -30,33 +30,34 @@
 
         <h3 class="text-xl font-semibold mb-4">Chapters</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <button
+          <Button
             v-for="chapter in chapters"
             :key="chapter.path"
             @click="selectChapter(chapter)"
-            class="p-4 border rounded-lg hover:shadow-md transition-shadow text-left"
+            variant="outline"
+            class="h-auto p-4 justify-start"
           >
             {{ chapter.name }}
-          </button>
+          </Button>
         </div>
       </div>
 
       <!-- Reader View -->
       <div v-else>
         <div class="mb-4 flex items-center justify-between">
-          <button
+          <Button
+            variant="outline"
             @click="currentChapter = null"
-            class="px-4 py-2 border rounded-md hover:bg-muted"
           >
             ← Back to Chapters
-          </button>
+          </Button>
           <div class="flex gap-2">
-            <button
+            <Button
+              variant="outline"
               @click="handleBookmark"
-              class="px-4 py-2 border rounded-md hover:bg-muted"
             >
               🔖 Bookmark
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -77,20 +78,20 @@
         </div>
 
         <div class="flex justify-center gap-4">
-          <button
+          <Button
+            variant="outline"
             @click="previousPage"
             :disabled="currentPage === 0"
-            class="px-6 py-2 border rounded-md hover:bg-muted disabled:opacity-50"
           >
             Previous
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             @click="nextPage"
             :disabled="currentPage === pages.length - 1"
-            class="px-6 py-2 border rounded-md hover:bg-muted disabled:opacity-50"
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -101,6 +102,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
+import { Button } from '@/components/ui'
 
 const route = useRoute()
 const manga = ref<Manga | null>(null)
