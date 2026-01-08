@@ -84,8 +84,8 @@
           <img
             :src="api.getImageUrl(pages[currentPage].path)"
             :alt="`Page ${currentPage + 1}`"
-            class="max-w-full h-auto"
-            @click="nextPage"
+            class="max-w-full h-auto cursor-pointer"
+            @click="scrollDownPage"
           />
         </div>
 
@@ -170,6 +170,25 @@ const updateProgress = async () => {
     progress.value = await api.getProgress(manga.value.id)
   } catch (error) {
     console.error('Failed to update progress:', error)
+  }
+}
+
+const scrollDownPage = () => {
+  const viewportHeight = window.innerHeight
+  const scrollAmount = viewportHeight * 0.8 // Scroll 80% of viewport height
+  
+  window.scrollBy({
+    top: scrollAmount,
+    behavior: 'smooth'
+  })
+  
+  // Check if we've reached near the bottom of the page
+  const scrollPosition = window.scrollY + window.innerHeight
+  const pageHeight = document.documentElement.scrollHeight
+  
+  // If we're within 100px of the bottom, go to next page
+  if (scrollPosition >= pageHeight - 100) {
+    nextPage()
   }
 }
 
