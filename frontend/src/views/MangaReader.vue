@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
 import { Button } from '@/components/ui'
@@ -176,19 +176,31 @@ const updateProgress = async () => {
 const scrollDownPage = () => {
   const viewportHeight = window.innerHeight
   const scrollAmount = viewportHeight * 0.8 // Scroll 80% of viewport height
-  
-  window.scrollBy({
-    top: scrollAmount,
-    behavior: 'smooth'
-  })
-  
-  // Check if we've reached near the bottom of the page
-  const scrollPosition = window.scrollY + window.innerHeight
+  const currentScrollPosition = window.scrollY + window.innerHeight
   const pageHeight = document.documentElement.scrollHeight
   
-  // If we're within 100px of the bottom, go to next page
-  if (scrollPosition >= pageHeight - 100) {
-    nextPage()
+  // Check if we're already near the bottom or will be after scrolling
+  const willBeAtBottom = (currentScrollPosition + scrollAmount) >= pageHeight - 100
+  
+  if (willBeAtBottom || currentScrollPosition >= pageHeight - 100) {
+    // If this is the last page of the chapter
+    if (currentPage.value >= pages.value.length - 1) {
+      // Find and go to next chapter
+      const currentIndex = chapters.value.findIndex(c => c.path === currentChapter.value?.path)
+      if (currentIndex >= 0 && currentIndex < chapters.value.length - 1) {
+        const nextChapter = chapters.value[currentIndex + 1]
+        changeChapter(nextChapter.path)
+      }
+    } else {
+      // Go to next page in current chapter
+      nextPage()
+    }
+  } else {
+    // Just scroll down
+    window.scrollBy({
+      top: scrollAmount,
+      behavior: 'smooth'
+    })
   }
 }
 
@@ -237,7 +249,42 @@ watch(currentPage, () => {
   updateProgress()
 })
 
+const handleScroll = () => {
+  // Check if we're at the top of the page and on the first page
+  if (window.scrollY === 0 && currentPage.value === 0 && currentChapter.value) {
+    const currentIndex = chapters.value.findIndex(c => c.path === currentChapter.value?.path)
+    // If there's a previous chapter
+    if (currentIndex > 0) {
+      const previousChapter = chapters.value[currentIndex - 1]
+      goToPreviousChapter(previousChapter.path)
+    }
+  }
+}
+
+const goToPreviousChapter = async (chapterPath: string) => {
+  const chapter = chapters.value.find(c => c.path === chapterPath)
+  if (chapter && manga.value) {
+    currentChapter.value = chapter
+    try {
+      pages.value = await api.getPages(manga.value.id, chapter.path)
+      // Go to the last page of the previous chapter
+      currentPage.value = pages.value.length - 1
+      // Scroll to bottom
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
+      }, 100)
+    } catch (error) {
+      console.error('Failed to load pages:', error)
+    }
+  }
+}
+
 onMounted(() => {
   loadMangaDetails()
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>
