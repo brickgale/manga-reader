@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- Recently Read Section -->
+    <RecentReads />
+
     <div class="mb-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-3xl font-bold">Library</h2>
@@ -68,6 +71,7 @@ import { ref, onMounted } from 'vue'
 import { Folder, X } from 'lucide-vue-next'
 import { api, type Manga } from '../api'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
+import RecentReads from '@/components/reader/RecentReads.vue'
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)

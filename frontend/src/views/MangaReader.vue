@@ -130,6 +130,20 @@ const loadMangaDetails = async () => {
     if (manga.value) {
       chapters.value = await api.getChapters(manga.value.id)
       progress.value = await api.getProgress(manga.value.id)
+      
+      // Auto-load chapter and page from query parameters
+      const chapterPath = route.query.chapter as string
+      const pageNum = route.query.page as string
+      
+      if (chapterPath && chapters.value.length > 0) {
+        const chapter = chapters.value.find(c => c.path === chapterPath)
+        if (chapter) {
+          await selectChapter(chapter)
+          if (pageNum) {
+            currentPage.value = parseInt(pageNum)
+          }
+        }
+      }
     }
   } catch (error) {
     console.error('Failed to load manga:', error)
@@ -248,7 +262,22 @@ const handleBookmark = async () => {
 
 watch(currentPage, () => {
   updateProgress()
+  updatePageTitle()
 })
+
+watch([manga, currentChapter], () => {
+  updatePageTitle()
+})
+
+const updatePageTitle = () => {
+  if (manga.value && currentChapter.value && pages.value.length > 0) {
+    document.title = `${manga.value.title} - ${currentChapter.value.name} - Page ${currentPage.value + 1} | Manga Reader`
+  } else if (manga.value) {
+    document.title = `${manga.value.title} | Manga Reader`
+  } else {
+    document.title = 'Manga Reader'
+  }
+}
 
 onMounted(() => {
   loadMangaDetails()

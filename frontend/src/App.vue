@@ -8,8 +8,30 @@
             <span class="text-2xl font-bold hidden md:inline-block">Manga Reader</span>
           </router-link>
           <div class="flex items-center gap-4">
-            <router-link to="/history" class="hover:text-primary transition-colors">History</router-link>
-            <router-link to="/bookmarks" class="hover:text-primary transition-colors">Bookmarks</router-link>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <router-link to="/history" class="hover:text-primary transition-colors">
+                    <History class="h-5 w-5" />
+                  </router-link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>History</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger as-child>
+                  <router-link to="/bookmarks" class="hover:text-primary transition-colors">
+                    <Bookmark class="h-5 w-5" />
+                  </router-link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Bookmarks</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
             <ThemeToggle />
           </div>
         </div>
@@ -22,6 +44,8 @@
 </template>
 
 <script setup lang="ts">
+import { History, Bookmark } from 'lucide-vue-next'
 import ThemeToggle from './components/ThemeToggle.vue'
 import Logo from './components/Logo.vue'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 </script>
