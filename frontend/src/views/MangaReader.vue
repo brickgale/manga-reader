@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
 import { Button } from '@/components/ui'
@@ -179,10 +179,10 @@ const scrollDownPage = () => {
   const currentScrollPosition = window.scrollY + window.innerHeight
   const pageHeight = document.documentElement.scrollHeight
   
-  // Check if we're already near the bottom or will be after scrolling
-  const willBeAtBottom = (currentScrollPosition + scrollAmount) >= pageHeight - 100
+  // Check if we're already at the very bottom (within 10px tolerance)
+  const isAtBottom = currentScrollPosition >= pageHeight - 10
   
-  if (willBeAtBottom || currentScrollPosition >= pageHeight - 100) {
+  if (isAtBottom) {
     // If this is the last page of the chapter
     if (currentPage.value >= pages.value.length - 1) {
       // Find and go to next chapter
@@ -226,6 +226,7 @@ const changeChapter = async (chapterPath: string) => {
   const chapter = chapters.value.find(c => c.path === chapterPath)
   if (chapter) {
     await selectChapter(chapter)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 }
 const handleBookmark = async () => {
@@ -249,42 +250,7 @@ watch(currentPage, () => {
   updateProgress()
 })
 
-const handleScroll = () => {
-  // Check if we're at the top of the page and on the first page
-  if (window.scrollY === 0 && currentPage.value === 0 && currentChapter.value) {
-    const currentIndex = chapters.value.findIndex(c => c.path === currentChapter.value?.path)
-    // If there's a previous chapter
-    if (currentIndex > 0) {
-      const previousChapter = chapters.value[currentIndex - 1]
-      goToPreviousChapter(previousChapter.path)
-    }
-  }
-}
-
-const goToPreviousChapter = async (chapterPath: string) => {
-  const chapter = chapters.value.find(c => c.path === chapterPath)
-  if (chapter && manga.value) {
-    currentChapter.value = chapter
-    try {
-      pages.value = await api.getPages(manga.value.id, chapter.path)
-      // Go to the last page of the previous chapter
-      currentPage.value = pages.value.length - 1
-      // Scroll to bottom
-      setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
-      }, 100)
-    } catch (error) {
-      console.error('Failed to load pages:', error)
-    }
-  }
-}
-
 onMounted(() => {
   loadMangaDetails()
-  window.addEventListener('scroll', handleScroll)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
 })
 </script>
