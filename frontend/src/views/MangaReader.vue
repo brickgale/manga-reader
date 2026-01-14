@@ -107,6 +107,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
 import { Button } from '@/components/ui'
 import { Pagination } from '@/components/pagination'
@@ -254,7 +255,7 @@ const handleBookmark = async () => {
       currentPage.value,
       note || undefined
     )
-    alert('Bookmark added!')
+    toast.success('Bookmark added!')
   } catch (error) {
     console.error('Failed to create bookmark:', error)
   }

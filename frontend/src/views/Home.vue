@@ -51,8 +51,15 @@
         :to="`/manga/${manga.id}`"
       >
         <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="aspect-[3/4] bg-muted flex items-center justify-center">
-            <p class="text-muted-foreground">No Cover</p>
+          <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
+            <img 
+              v-if="manga.coverImage" 
+              :src="manga.coverImage" 
+              :alt="manga.title"
+              class="w-full h-full object-cover"
+              @error="(e) => (e.target as HTMLImageElement).style.display = 'none'"
+            />
+            <p v-else class="text-muted-foreground">No Cover</p>
           </div>
           <CardHeader>
             <CardTitle class="truncate">{{ manga.title }}</CardTitle>
@@ -69,6 +76,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Folder, X } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { api, type Manga } from '../api'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import RecentReads from '@/components/reader/RecentReads.vue'
@@ -103,7 +111,7 @@ const loadManga = async () => {
 
 const handleScan = async () => {
   if (!scanPath.value.trim()) {
-    alert('Please enter a directory path')
+    toast.error('Please enter a directory path')
     return
   }
   
@@ -117,11 +125,13 @@ const handleScan = async () => {
     
     await loadManga()
     showScanInput.value = false
-    alert(`Successfully scanned! Found ${result.length} manga.`)
+    toast.success(`Successfully scanned! Found ${result.length} manga.`)
   } catch (error: any) {
     console.error('Failed to scan directory:', error)
     const errorMsg = error.response?.data?.error || error.message || 'Unknown error'
-    alert(`Failed to scan directory: ${errorMsg}\nMake sure the path exists and is accessible.`)
+    toast.error(`Failed to scan directory: ${errorMsg}`, {
+      description: 'Make sure the path exists and is accessible.'
+    })
   } finally {
     scanning.value = false
   }

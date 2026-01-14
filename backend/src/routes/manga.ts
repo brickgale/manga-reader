@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../index';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { searchMangaBatch } from '../services/mangadex';
 
 const router = Router();
 
@@ -29,10 +30,30 @@ router.post('/scan', async (req, res) => {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
     const directories = entries.filter(entry => entry.isDirectory());
 
+    // Extract titles for batch processing
+    const titles = directories.map(dir => dir.name);
+    
+    console.log(`Found ${titles.length} directories.`);
+    
+    // Fetch metadata from Kitsu API in batches
+    let metadataMap = new Map<string, any>();
+    
+    if (titles.length > 0) {
+      console.log('Fetching metadata from Kitsu API in batches...');
+      try {
+        metadataMap = await searchMangaBatch(titles);
+        console.log('Metadata fetched successfully.');
+      } catch (apiError) {
+        console.error('Failed to fetch metadata from Kitsu API:', apiError);
+        console.log('Continuing with local directory names...');
+      }
+    }
+
     const mangaList = [];
 
     for (const dir of directories) {
       const mangaPath = path.join(dirPath, dir.name);
+      const metadata = metadataMap.get(dir.name);
       
       // Check if manga already exists
       let manga = await prisma.manga.findUnique({
@@ -40,19 +61,34 @@ router.post('/scan', async (req, res) => {
       });
 
       if (!manga) {
+        // Create new manga with Kitsu metadata
         manga = await prisma.manga.create({
           data: {
-            title: dir.name,
-            path: mangaPath
+            title: metadata?.title || dir.name,
+            path: mangaPath,
+            coverImage: metadata?.coverImage
           }
         });
+        console.log(`Created: ${manga.title}${metadata ? ' (with Kitsu metadata)' : ''}`);
+      } else if (metadata && !manga.coverImage) {
+        // Update existing manga if we have new metadata and no cover image yet
+        manga = await prisma.manga.update({
+          where: { id: manga.id },
+          data: {
+            coverImage: metadata.coverImage,
+            title: metadata.title || manga.title
+          }
+        });
+        console.log(`Updated: ${manga.title} with Kitsu metadata`);
       }
 
       mangaList.push(manga);
     }
 
+    console.log(`Scan complete! Processed ${mangaList.length} manga.`);
     res.json(mangaList);
   } catch (error) {
+    console.error('Scan error:', error);
     res.status(500).json({ error: 'Failed to scan directory' });
   }
 });

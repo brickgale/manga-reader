@@ -11,8 +11,15 @@
         }"
       >
         <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="aspect-[3/4] bg-muted flex items-center justify-center">
-            <p class="text-muted-foreground text-sm">No Cover</p>
+          <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
+            <img 
+              v-if="item.manga?.coverImage" 
+              :src="item.manga.coverImage" 
+              :alt="item.manga.title"
+              class="w-full h-full object-cover"
+              @error="(e) => (e.target as HTMLImageElement).style.display = 'none'"
+            />
+            <p v-else class="text-muted-foreground text-sm">No Cover</p>
           </div>
           <CardHeader class="p-3">
             <CardTitle class="text-sm truncate">{{ item.manga?.title || 'Unknown' }}</CardTitle>

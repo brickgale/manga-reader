@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-background text-foreground">
+    <Toaster />
     <nav class="border-b">
       <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
@@ -45,6 +46,7 @@
 
 <script setup lang="ts">
 import { History, Bookmark } from 'lucide-vue-next'
+import { Toaster } from '@/components/ui/sonner'
 import ThemeToggle from './components/ThemeToggle.vue'
 import Logo from './components/Logo.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
