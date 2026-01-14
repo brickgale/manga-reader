@@ -27,7 +27,13 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Serve static files from frontend build
 app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'dist')));
+
+// Catch-all route for SPA - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'dist', 'index.html'));
+});
 
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
