@@ -89,13 +89,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
 import { Button } from '@/components/ui'
 import { Pagination } from '@/components/pagination'
 
 const route = useRoute()
+const router = useRouter()
 const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const currentChapter = ref<Chapter | null>(null)
@@ -225,8 +226,22 @@ const changeChapter = async (chapterPath: string) => {
   if (chapter) {
     await selectChapter(chapter)
     window.scrollTo({ top: 0, behavior: 'instant' })
+    updateURL()
   }
 }
+
+const updateURL = () => {
+  if (!manga.value || !currentChapter.value) return
+  
+  router.replace({
+    path: `/manga/${manga.value.id}`,
+    query: {
+      chapter: currentChapter.value.path,
+      page: currentPage.value.toString()
+    }
+  })
+}
+
 const handleBookmark = async () => {
   if (!manga.value || !currentChapter.value) return
   
@@ -247,10 +262,14 @@ const handleBookmark = async () => {
 watch(currentPage, () => {
   updateProgress()
   updatePageTitle()
+  updateURL()
 })
 
 watch([manga, currentChapter], () => {
   updatePageTitle()
+  if (currentChapter.value) {
+    updateURL()
+  }
 })
 
 const updatePageTitle = () => {
