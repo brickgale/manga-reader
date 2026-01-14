@@ -178,4 +178,29 @@ router.get('/image', async (req, res) => {
   }
 });
 
+// Serve cover images
+router.get('/covers/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const coverPath = path.join(process.cwd(), 'images', 'covers', filename);
+    
+    const imageBuffer = await fs.readFile(coverPath);
+    const ext = path.extname(filename).toLowerCase();
+    
+    const contentType: { [key: string]: string } = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp'
+    };
+
+    res.set('Content-Type', contentType[ext] || 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.send(imageBuffer);
+  } catch (error) {
+    res.status(404).json({ error: 'Cover image not found' });
+  }
+});
+
 export default router;

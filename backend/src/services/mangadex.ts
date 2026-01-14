@@ -1,4 +1,7 @@
 import https from 'https';
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
 
 const MANGADEX_API_BASE = 'https://api.mangadex.org';
 const KITSU_API_BASE = 'https://kitsu.io/api/edge';
@@ -63,6 +66,83 @@ export interface MangaMetadata {
   synopsis?: string;
   rating?: string;
   status?: string;
+}
+
+/**
+ * Download image and save it locally
+ */
+async function downloadImage(url: string, mangaTitle: string): Promise<string | null> {
+  try {
+    // Create a safe filename from manga title
+    const hash = crypto.createHash('md5').update(mangaTitle).digest('hex');
+    const ext = path.extname(url.split('?')[0]) || '.jpg';
+    const filename = `${hash}${ext}`;
+    const coverDir = path.join(process.cwd(), 'images', 'covers');
+    const filePath = path.join(coverDir, filename);
+    
+    // Check if file already exists
+    try {
+      await fs.access(filePath);
+      console.log(`Cover already exists: ${filename}`);
+      return `/covers/${filename}`;
+    } catch {
+      // File doesn't exist, download it
+    }
+    
+    return new Promise((resolve, reject) => {
+      const options = {
+        headers: {
+          'User-Agent': 'MangaReader/1.0',
+          'Referer': 'https://mangadex.org/'
+        }
+      };
+      
+      https.get(url, options, (res) => {
+        // Handle redirects
+        if (res.statusCode === 301 || res.statusCode === 302) {
+          if (res.headers.location) {
+            console.log(`Following redirect to: ${res.headers.location}`);
+            https.get(res.headers.location, options, handleResponse).on('error', reject);
+            return;
+          }
+        }
+        
+        handleResponse(res);
+      }).on('error', (error) => {
+        console.error(`Download error for ${mangaTitle}:`, error.message);
+        resolve(null); // Return null instead of rejecting
+      });
+      
+      function handleResponse(res: any) {
+        if (res.statusCode !== 200) {
+          console.error(`Failed to download image for ${mangaTitle}: HTTP ${res.statusCode}`);
+          resolve(null); // Return null instead of rejecting
+          return;
+        }
+        
+        const chunks: Buffer[] = [];
+        
+        res.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+        
+        res.on('end', async () => {
+          try {
+            const buffer = Buffer.concat(chunks);
+            await fs.writeFile(filePath, buffer);
+            console.log(`Saved cover image: ${filename}`);
+            resolve(`/covers/${filename}`);
+          } catch (error) {
+            console.error(`Failed to save image for ${mangaTitle}:`, error);
+            resolve(null);
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error(`Failed to download image for ${mangaTitle}:`, error);
+    return null;
+  }
 }
 
 /**
@@ -199,6 +279,18 @@ export async function searchManga(title: string): Promise<MangaMetadata | null> 
         metadata.coverImage = metadata.coverImage || kitsuMetadata.coverImage;
         metadata.synopsis = metadata.synopsis || kitsuMetadata.synopsis;
       }
+    }
+  }
+  
+  // Download and save cover image locally
+  if (metadata && metadata.coverImage && metadata.coverImage.startsWith('http')) {
+    console.log(`Downloading cover for "${title}" from: ${metadata.coverImage}`);
+    const localPath = await downloadImage(metadata.coverImage, title);
+    if (localPath) {
+      console.log(`Cover saved locally: ${localPath}`);
+      metadata.coverImage = localPath;
+    } else {
+      console.log(`Failed to download cover for "${title}"`);
     }
   }
   

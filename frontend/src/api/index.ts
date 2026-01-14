@@ -54,7 +54,13 @@ export const api = {
   // Manga endpoints
   async getManga(): Promise<Manga[]> {
     const { data } = await axios.get(`${API_URL}/manga`)
-    return data
+    // Convert cover image paths to full URLs
+    return data.map((manga: Manga) => ({
+      ...manga,
+      coverImage: manga.coverImage?.startsWith('/covers/') 
+        ? `${API_URL}/manga${manga.coverImage}`
+        : manga.coverImage
+    }))
   },
 
   async scanDirectory(dirPath: string): Promise<Manga[]> {
@@ -81,7 +87,16 @@ export const api = {
   // History endpoints
   async getHistory(): Promise<ReadingHistory[]> {
     const { data } = await axios.get(`${API_URL}/history`)
-    return data
+    // Convert cover image paths to full URLs in nested manga objects
+    return data.map((item: ReadingHistory) => ({
+      ...item,
+      manga: item.manga ? {
+        ...item.manga,
+        coverImage: item.manga.coverImage?.startsWith('/covers/') 
+          ? `${API_URL}/manga${item.manga.coverImage}`
+          : item.manga.coverImage
+      } : undefined
+    }))
   },
 
   async getMangaHistory(mangaId: string): Promise<ReadingHistory[]> {
