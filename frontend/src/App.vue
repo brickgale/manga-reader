@@ -9,6 +9,40 @@
             <span class="text-2xl font-bold hidden md:inline-block">Manga Reader</span>
           </router-link>
           <div class="flex items-center gap-4">
+            <!-- Reader Controls (only visible in reader) -->
+            <template v-if="isReaderPage">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      @click="emitReaderAction('chapters')"
+                    >
+                      <List class="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Chapters</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger as-child>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      @click="emitReaderAction('bookmark')"
+                    >
+                      <BookmarkPlus class="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add Bookmark</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </template>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger as-child>
@@ -45,9 +79,19 @@
 </template>
 
 <script setup lang="ts">
-import { History, Bookmark } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { History, Bookmark, List, BookmarkPlus } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner'
+import { Button } from '@/components/ui'
 import ThemeToggle from './components/ThemeToggle.vue'
 import Logo from './components/Logo.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
+const route = useRoute()
+const isReaderPage = computed(() => route.path.startsWith('/manga/'))
+
+const emitReaderAction = (action: string) => {
+  window.dispatchEvent(new CustomEvent('reader-action', { detail: action }))
+}
 </script>

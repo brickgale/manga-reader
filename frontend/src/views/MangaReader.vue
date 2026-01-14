@@ -44,23 +44,6 @@
 
       <!-- Reader View -->
       <div v-else>
-        <div class="mb-4 flex items-center justify-between">
-          <Button
-            variant="outline"
-            @click="currentChapter = null"
-          >
-            ← Back to Chapters
-          </Button>
-          <div class="flex gap-2">
-            <Button
-              variant="outline"
-              @click="handleBookmark"
-            >
-              🔖 Bookmark
-            </Button>
-          </div>
-        </div>
-
         <div class="mb-4 text-center">
           <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
           <p class="text-sm text-muted-foreground">
@@ -282,5 +265,16 @@ const updatePageTitle = () => {
 
 onMounted(() => {
   loadMangaDetails()
+  
+  // Listen for header actions
+  window.addEventListener('reader-action', handleReaderAction as EventListener)
 })
+
+const handleReaderAction = (event: CustomEvent) => {
+  if (event.detail === 'chapters') {
+    currentChapter.value = null
+  } else if (event.detail === 'bookmark') {
+    handleBookmark()
+  }
+}
 </script>
