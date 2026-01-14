@@ -5,6 +5,7 @@ import mangaRoutes from './routes/manga';
 import historyRoutes from './routes/history';
 import bookmarkRoutes from './routes/bookmark';
 import progressRoutes from './routes/progress';
+import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,8 +27,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'dist')));
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
