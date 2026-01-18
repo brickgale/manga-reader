@@ -1,0 +1,24 @@
+FROM node:24-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Build the frontend
+FROM base AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build the Vue app
+RUN npm run build
+
+# Export stage - just the built files
+FROM scratch AS export
+COPY --from=builder /app/dist /dist

@@ -8,7 +8,7 @@ import progressRoutes from './routes/progress';
 import path from 'path';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 export const prisma = new PrismaClient();
 
@@ -27,12 +27,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Config endpoint
+app.get('/api/config', (req, res) => {
+  res.json({ 
+    mangaStoragePath: process.env.MANGA_STORAGE_PATH || '/manga'
+  });
+});
+
 // Serve static files from frontend build
-app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'dist')));
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 // Catch-all route for SPA - serve index.html for all non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'dist', 'index.html'));
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
 });
 
 // Start server

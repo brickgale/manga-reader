@@ -20,7 +20,7 @@
         <Input
           v-model="scanPath"
           type="text"
-          placeholder="Enter manga directory path..."
+          placeholder="Default: /manga"
           class="flex-1"
         />
         <Button
@@ -84,7 +84,7 @@ import RecentReads from '@/components/reader/RecentReads.vue'
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
 const scanning = ref(false)
-const scanPath = ref('')
+const scanPath = ref('/manga')
 const showScanInput = ref(false)
 const savedDirectory = ref<string>('')
 
@@ -99,7 +99,6 @@ const loadManga = async () => {
       const parentDir = firstMangaPath.substring(0, firstMangaPath.lastIndexOf('/'))
       if (parentDir) {
         savedDirectory.value = parentDir
-        scanPath.value = parentDir
       }
     }
   } catch (error) {

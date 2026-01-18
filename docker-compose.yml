@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Frontend build service - only builds, doesn't run
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+      target: builder
+    volumes:
+      - frontend-dist:/app/dist
+    command: /bin/sh -c "echo 'Frontend built successfully'"
+
+  # Backend service - serves API and frontend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=file:/data/dev.db
+      - MANGA_STORAGE_PATH=/manga
+    volumes:
+      - frontend-dist:/app/frontend/dist:ro
+      - backend-data:/data
+      - ./images:/app/images:ro
+      - manga-storage:/manga:ro
+    depends_on:
+      - frontend
+    restart: unless-stopped
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        node dist/index.js
+      "
+
+volumes:
+  frontend-dist:
+  backend-data:
+  # Manga storage volume - mounts host directory specified in MANGA_STORAGE_PATH (.env)
+  # Default path: /mnt/d/Manhwa (host) -> /manga (container)
+  # To change the host path, update MANGA_STORAGE_PATH in .env file
+  manga-storage:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MANGA_STORAGE_PATH:-/mnt/d/Manhwa}

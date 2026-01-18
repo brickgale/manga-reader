@@ -50,7 +50,17 @@ export interface ReadingProgress {
   updatedAt: string
 }
 
+export interface Config {
+  mangaStoragePath: string
+}
+
 export const api = {
+  // Config endpoints
+  async getConfig(): Promise<Config> {
+    const { data } = await axios.get(`${API_URL}/config`)
+    return data
+  },
+
   // Manga endpoints
   async getManga(): Promise<Manga[]> {
     const { data } = await axios.get(`${API_URL}/manga`)
