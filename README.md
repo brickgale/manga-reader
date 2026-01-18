@@ -23,9 +23,14 @@ A simple manga/manhwa reader application with reading history, bookmarks, and pr
    cd manga-reader
    ```
 
-2. **Configure manga storage path** (optional)
+2. **Configure manga storage path**
    
-   Edit `.env` file and set your manga directory:
+   Create `.env` file from the example:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and set your manga directory:
    ```bash
    MANGA_STORAGE_PATH=/path/to/your/manga
    ```
