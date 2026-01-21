@@ -19,7 +19,7 @@ services:
         if [ \"$$APP_MODE\" = \"development\" ]; then
           npm run dev -- --host 0.0.0.0;
         else
-          echo 'Frontend built successfully';
+          npm run build && echo 'Frontend built successfully';
         fi
       "
 
