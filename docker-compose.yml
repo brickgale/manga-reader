@@ -1,15 +1,27 @@
-version: '3.8'
-
 services:
-  # Frontend build service - only builds, doesn't run
+  # Frontend service - builds for production or runs dev server
   frontend:
     build:
       context: ./frontend
       dockerfile: ../Dockerfile.frontend
       target: builder
+    ports:
+      - "5173:5173"
     volumes:
       - frontend-dist:/app/dist
-    command: /bin/sh -c "echo 'Frontend built successfully'"
+      - ./frontend:/app:cached
+      - /app/node_modules
+    environment:
+      - NODE_ENV=${APP_MODE:-production}
+      - APP_MODE=${APP_MODE:-production}
+    command: >
+      sh -c "
+        if [ \"$$APP_MODE\" = \"development\" ]; then
+          npm run dev -- --host 0.0.0.0;
+        else
+          echo 'Frontend built successfully';
+        fi
+      "
 
   # Backend service - serves API and frontend
   backend:
