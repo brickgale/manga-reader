@@ -1,5 +1,0 @@
-# Ignore all cover images
-covers/*
-
-# Keep the directory structure
-!covers/.gitkeep

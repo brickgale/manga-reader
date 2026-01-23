@@ -55,31 +55,56 @@ router.post('/scan', async (req, res) => {
       const mangaPath = path.join(dirPath, dir.name);
       const metadata = metadataMap.get(dir.name);
       
+      // Check for local cover image in manga folder
+      let localCoverPath: string | null = null;
+      const possibleCovers = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'];
+      
+      for (const coverName of possibleCovers) {
+        const coverPath = path.join(mangaPath, coverName);
+        try {
+          await fs.access(coverPath);
+          localCoverPath = coverPath;
+          console.log(`Found local cover: ${coverName} for ${dir.name}`);
+          break;
+        } catch {
+          // Cover doesn't exist, try next
+        }
+      }
+      
       // Check if manga already exists
       let manga = await prisma.manga.findUnique({
         where: { path: mangaPath }
       });
 
+      // Only use local covers - filter out external URLs
+      const coverToSave = localCoverPath || 
+                          (metadata?.coverImage && !metadata.coverImage.startsWith('http') ? metadata.coverImage : null);
+
       if (!manga) {
-        // Create new manga with Kitsu metadata
+        // Create new manga - only with local covers
         manga = await prisma.manga.create({
           data: {
             title: metadata?.title || dir.name,
             path: mangaPath,
-            coverImage: metadata?.coverImage
+            coverImage: coverToSave
           }
         });
-        console.log(`Created: ${manga.title}${metadata ? ' (with Kitsu metadata)' : ''}`);
-      } else if (metadata && !manga.coverImage) {
-        // Update existing manga if we have new metadata and no cover image yet
-        manga = await prisma.manga.update({
-          where: { id: manga.id },
-          data: {
-            coverImage: metadata.coverImage,
-            title: metadata.title || manga.title
-          }
-        });
-        console.log(`Updated: ${manga.title} with Kitsu metadata`);
+        console.log(`Created: ${manga.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`);
+      } else {
+        // Update existing manga - prefer local covers, remove external URLs
+        const hasExternalUrl = manga.coverImage?.startsWith('http');
+        const shouldUpdate = localCoverPath || !manga.coverImage || hasExternalUrl;
+        
+        if (shouldUpdate) {
+          manga = await prisma.manga.update({
+            where: { id: manga.id },
+            data: {
+              coverImage: coverToSave,
+              title: metadata?.title || manga.title
+            }
+          });
+          console.log(`Updated: ${manga.title} with ${localCoverPath ? 'local cover' : coverToSave ? 'downloaded cover' : 'no cover (removed external URL)'}`);
+        }
       }
 
       mangaList.push(manga);

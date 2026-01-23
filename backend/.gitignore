@@ -3,3 +3,5 @@ dist/
 *.db
 *.db-journal
 .env
+images/covers/*
+!images/covers/.gitkeep

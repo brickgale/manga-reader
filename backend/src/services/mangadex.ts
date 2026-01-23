@@ -80,6 +80,9 @@ async function downloadImage(url: string, mangaTitle: string): Promise<string | 
     const coverDir = path.join(process.cwd(), 'images', 'covers');
     const filePath = path.join(coverDir, filename);
     
+    // Ensure directory exists
+    await fs.mkdir(coverDir, { recursive: true });
+    
     // Check if file already exists
     try {
       await fs.access(filePath);

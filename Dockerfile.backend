@@ -45,6 +45,9 @@ RUN mkdir -p /data && chown -R backend:nodejs /data
 # Create manga storage mount point
 RUN mkdir -p /manga && chown -R backend:nodejs /manga
 
+# Create images directory for covers
+RUN mkdir -p /app/images/covers && chown -R backend:nodejs /app/images
+
 # Set ownership
 RUN chown -R backend:nodejs /app
 

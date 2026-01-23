@@ -71,6 +71,8 @@ docker compose down
 manga-reader/
 ├── backend/          # Backend API server
 ├── frontend/         # Vue frontend application
+├── storage/          # Data storage (covers, etc.)
+│   └── images/       # Downloaded cover images
 ├── docker-compose.yml
 └── README.md
 ```

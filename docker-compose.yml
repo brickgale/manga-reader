@@ -38,7 +38,7 @@ services:
     volumes:
       - frontend-dist:/app/frontend/dist:ro
       - backend-data:/data
-      - ./images:/app/images:ro
+      - ./storage/images:/app/images
       - manga-storage:/manga:ro
     depends_on:
       - frontend

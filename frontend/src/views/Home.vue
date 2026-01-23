@@ -20,7 +20,7 @@
         <Input
           v-model="scanPath"
           type="text"
-          placeholder="Default: /manga"
+          placeholder="/manga"
           class="flex-1"
         />
         <Button
@@ -87,6 +87,8 @@ const scanning = ref(false)
 const scanPath = ref('/manga')
 const showScanInput = ref(false)
 const savedDirectory = ref<string>('')
+
+console.log(scanPath.value, '--- initial scan path ---')
 
 const loadManga = async () => {
   loading.value = true
