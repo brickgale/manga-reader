@@ -216,14 +216,12 @@ The frontend is built as a static site and served by the backend.
 
 ## Environment Configuration
 
-The frontend uses environment variables for API configuration:
+The frontend uses ports configured in the project's `.env` file:
 
-```bash
-# API URL (development)
-VITE_API_URL=http://localhost:3000
-```
+- `FRONTEND_PORT` (default: 5173) - Dev server port
+- `BACKEND_PORT` (default: 3000) - Backend API port for proxy
 
-In production, API requests use relative URLs (proxied by the backend).
+The Vite dev server automatically proxies `/api` requests to the backend. In production, the frontend is built as static files and served by the backend.
 
 ## Notes
 

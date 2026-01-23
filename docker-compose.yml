@@ -6,7 +6,7 @@ services:
       dockerfile: ../Dockerfile.frontend
       target: builder
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}"
     volumes:
       - frontend-dist:/app/dist
       - ./frontend:/app:cached
@@ -14,6 +14,8 @@ services:
     environment:
       - NODE_ENV=${APP_MODE:-production}
       - APP_MODE=${APP_MODE:-production}
+      - FRONTEND_PORT=${FRONTEND_PORT:-5173}
+      - BACKEND_PORT=${BACKEND_PORT:-3000}
     command: >
       sh -c "
         if [ \"$$APP_MODE\" = \"development\" ]; then
@@ -28,11 +30,13 @@ services:
     build:
       context: ./backend
       dockerfile: ../Dockerfile.backend
+      args:
+        - BACKEND_PORT=${BACKEND_PORT:-3000}
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
+      - NODE_ENV=${APP_MODE:-production}
+      - PORT=${BACKEND_PORT:-3000}
       - DATABASE_URL=file:/data/dev.db
       - MANGA_STORAGE_PATH=/manga
     volumes:

@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
+const BACKEND_PORT = parseInt(process.env.BACKEND_PORT || '3000')
+const FRONTEND_PORT = parseInt(process.env.FRONTEND_PORT || '5173')
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -10,14 +13,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: FRONTEND_PORT,
     host: true,
     watch: {
       usePolling: true,
     },
     proxy: {
       '/api': {
-        target: 'http://backend:3000',
+        target: `http://backend:${BACKEND_PORT}`,
         changeOrigin: true,
       },
     },
