@@ -1,4 +1,20 @@
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.vhost.conf.template:/etc/nginx/conf.d/default.conf.template:ro
+      - ./nginx-entrypoint.sh:/nginx-entrypoint.sh:ro
+    entrypoint: ["/nginx-entrypoint.sh"]
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - mangareader
+    environment:
+      - VHOST_DOMAIN=${VHOST_DOMAIN}
+      
   # Frontend service - builds for production or runs dev server
   frontend:
     build:
@@ -24,6 +40,8 @@ services:
           npm run build && echo 'Frontend built successfully';
         fi
       "
+    networks:
+      - mangareader
 
   # Backend service - serves API and frontend
   backend:
@@ -52,16 +70,20 @@ services:
         npx prisma migrate deploy &&
         node dist/index.js
       "
+    networks:
+      - mangareader
 
 volumes:
   frontend-dist:
   backend-data:
-  # Manga storage volume - mounts host directory specified in MANGA_STORAGE_PATH (.env)
-  # Default path: /mnt/d/Manhwa (host) -> /manga (container)
-  # To change the host path, update MANGA_STORAGE_PATH in .env file
+
   manga-storage:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${MANGA_STORAGE_PATH:-/mnt/d/Manhwa}
+
+networks:
+  mangareader:
+    driver: bridge
