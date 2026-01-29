@@ -1,6 +1,9 @@
 # Manga Reader
 
+
 A simple manga/manhwa reader application with reading history, bookmarks, and progress tracking.
+
+![Manga Reader Preview](/frontend/public/images/preview-mangareader.png)
 
 ## Features
 
@@ -80,6 +83,7 @@ manga-reader/
 For detailed information about the backend or frontend, see their respective README files:
 - [Backend Documentation](./backend/README.md)
 - [Frontend Documentation](./frontend/README.md)
+- [Nginx Documentation](./docker/nginx/README.md)
 
 ## License
 

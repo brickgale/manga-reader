@@ -4,8 +4,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.vhost.conf.template:/etc/nginx/conf.d/default.conf.template:ro
-      - ./nginx-entrypoint.sh:/nginx-entrypoint.sh:ro
+      - ./docker/nginx/nginx.vhost.conf.template:/etc/nginx/conf.d/default.conf.template:ro
+      - ./docker/nginx/nginx-entrypoint.sh:/nginx-entrypoint.sh:ro
     entrypoint: ["/nginx-entrypoint.sh"]
     depends_on:
       - frontend
