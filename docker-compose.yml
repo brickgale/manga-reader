@@ -4,7 +4,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./docker/nginx/nginx.vhost.conf.template:/etc/nginx/conf.d/default.conf.template:ro
+      - ./docker/nginx/nginx.vhost.dev.conf.template:/etc/nginx/conf.d/nginx.vhost.dev.conf.template:ro
+      - ./docker/nginx/nginx.vhost.prod.conf.template:/etc/nginx/conf.d/nginx.vhost.prod.conf.template:ro
       - ./docker/nginx/nginx-entrypoint.sh:/nginx-entrypoint.sh
     entrypoint: ["sh", "-c", "chmod +x /nginx-entrypoint.sh && exec /nginx-entrypoint.sh"]
     depends_on:
@@ -16,6 +17,7 @@ services:
       - VHOST_DOMAIN=${VHOST_DOMAIN}
       - FRONTEND_PORT=${FRONTEND_PORT}
       - BACKEND_PORT=${BACKEND_PORT}
+      - APP_MODE=${APP_MODE}
       
   # Frontend service - builds for production or runs dev server
   frontend:

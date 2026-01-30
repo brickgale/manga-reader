@@ -156,8 +156,11 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
     }
 
     const chapterPath = decodeURIComponent(req.params.chapterPath);
+    console.log('[DEBUG] pages API - chapterPath:', chapterPath);
+    // Early debug response
+    // return res.json({ debug: 'chapterPath', value: chapterPath });
+
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    
     const entries = await fs.readdir(chapterPath, { withFileTypes: true });
     const pages = entries
       .filter(entry => 
@@ -170,9 +173,12 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
       }))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
+    console.log('[DEBUG] pages API - pages:', pages.map(p => p.path));
     res.json(pages);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch pages' });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[DEBUG] pages API error:', message);
+    res.status(500).json({ error: 'Failed to fetch pages', debug: message });
   }
 });
 
@@ -180,14 +186,13 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
 router.get('/image', async (req, res) => {
   try {
     const { imagePath } = req.query;
-    
+    console.log('[DEBUG] image API - imagePath:', imagePath);
     if (!imagePath || typeof imagePath !== 'string') {
       return res.status(400).json({ error: 'Image path is required' });
     }
 
     const imageBuffer = await fs.readFile(imagePath);
     const ext = path.extname(imagePath).toLowerCase();
-    
     const contentType: { [key: string]: string } = {
       '.jpg': 'image/jpeg',
       '.jpeg': 'image/jpeg',
@@ -195,11 +200,12 @@ router.get('/image', async (req, res) => {
       '.gif': 'image/gif',
       '.webp': 'image/webp'
     };
-
     res.set('Content-Type', contentType[ext] || 'image/jpeg');
     res.send(imageBuffer);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to load image' });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[DEBUG] image API error:', message);
+    res.status(500).json({ error: 'Failed to load image', debug: message });
   }
 });
 
