@@ -74,8 +74,8 @@ const endItem = computed(() => props.totalItems === 0 ? 0 : Math.min(props.curre
       <!-- Page Numbers -->
       <div class="flex items-center gap-1">
         <Button
-          v-for="page in pageNumbers"
-          :key="page"
+          v-for="(page, idx) in pageNumbers"
+          :key="`${page}-${idx}`"
           @click="typeof page === 'number' && emit('update-page', page)"
           :variant="currentPage === page ? 'default' : 'outline'"
           :disabled="page === '...'"
