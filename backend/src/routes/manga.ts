@@ -18,7 +18,8 @@ router.get('/', async (req, res) => {
         orderBy: { updatedAt: 'desc' }
       });
       const totalItems = manga.length;
-      const response = buildPaginatedResponse(manga, totalItems, 1, totalItems);
+      const pageSize = totalItems === 0 ? 1 : manga.length;
+      const response = buildPaginatedResponse(manga, totalItems, 1, pageSize);
       return res.json(response);
     }
 
