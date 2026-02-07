@@ -66,13 +66,18 @@ services:
       - backend-data:/data
       - ./storage/images:/app/images
       - manga-storage:/manga:ro
+      - ./backend/src:/app/src
     depends_on:
       - frontend
     restart: unless-stopped
     command: >
       sh -c "
         npx prisma migrate deploy &&
-        node dist/index.js
+        if [ \"$$APP_MODE\" = \"development\" ]; then
+          npm run dev;
+        else
+          node dist/index.js;
+        fi
       "
     networks:
       - mangareader
