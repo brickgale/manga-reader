@@ -17,7 +17,7 @@ services:
       - VHOST_DOMAIN=${VHOST_DOMAIN}
       - FRONTEND_PORT=${FRONTEND_PORT}
       - BACKEND_PORT=${BACKEND_PORT}
-      - APP_MODE=${APP_MODE}
+      - APP_ENV=${APP_ENV}
       
   # Frontend service - builds for production or runs dev server
   frontend:
@@ -32,13 +32,13 @@ services:
       - ./frontend:/app:cached
       - /app/node_modules
     environment:
-      - NODE_ENV=${APP_MODE:-production}
-      - APP_MODE=${APP_MODE:-production}
+      - NODE_ENV=${APP_ENV:-production}
+      - APP_ENV=${APP_ENV:-production}
       - FRONTEND_PORT=${FRONTEND_PORT:-5173}
       - BACKEND_PORT=${BACKEND_PORT:-3000}
     command: >
       sh -c "
-        if [ \"$$APP_MODE\" = \"development\" ]; then
+        if [ \"$$APP_ENV\" = \"development\" ]; then
           npm run dev -- --host 0.0.0.0;
         else
           npm run build && echo 'Frontend built successfully';
@@ -57,7 +57,8 @@ services:
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     environment:
-      - NODE_ENV=${APP_MODE:-production}
+      - NODE_ENV=${APP_ENV:-production}
+      - APP_ENV=${APP_ENV:-development}
       - PORT=${BACKEND_PORT:-3000}
       - DATABASE_URL=file:/data/dev.db
       - MANGA_STORAGE_PATH=/manga
@@ -66,15 +67,15 @@ services:
       - backend-data:/data
       - ./storage/images:/app/images
       - manga-storage:/manga:ro
-      - ./backend/src:/app/src
+      - ./backend/src:/app/src:cached
     depends_on:
       - frontend
     restart: unless-stopped
     command: >
       sh -c "
         npx prisma migrate deploy &&
-        if [ \"$$APP_MODE\" = \"development\" ]; then
-          npm run dev;
+        if [ \"$$APP_ENV\" = \"development\" ]; then
+          npx nodemon --exec tsx --watch src src/index.ts;
         else
           node dist/index.js;
         fi
