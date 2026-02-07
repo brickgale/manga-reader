@@ -109,8 +109,8 @@ const loadMangaDetails = async () => {
   loading.value = true
   try {
     const mangaId = route.params.id as string
-    const allManga = await api.getManga()
-    manga.value = allManga.find(m => m.id === mangaId) || null
+    const response = await api.getManga()
+    manga.value = response.data.find(m => m.id === mangaId) || null
     
     if (manga.value) {
       chapters.value = await api.getChapters(manga.value.id)

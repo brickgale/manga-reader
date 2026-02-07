@@ -54,6 +54,20 @@ export interface Config {
   mangaStoragePath: string
 }
 
+export interface PaginationInfo {
+  currentPage: number
+  pageSize: number
+  totalPages: number
+  totalItems: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  pagination: PaginationInfo
+}
+
 export const api = {
   // Config endpoints
   async getConfig(): Promise<Config> {
@@ -62,15 +76,23 @@ export const api = {
   },
 
   // Manga endpoints
-  async getManga(): Promise<Manga[]> {
-    const { data } = await axios.get(`${API_URL}/manga`)
+  async getManga(page?: number, pageSize?: number): Promise<PaginatedResponse<Manga>> {
+    const params = new URLSearchParams()
+    if (page !== undefined) params.append('page', String(page))
+    if (pageSize !== undefined) params.append('pageSize', String(pageSize))
+    
+    const { data } = await axios.get(`${API_URL}/manga${params.toString() ? '?' + params : ''}`)
+    
     // Convert cover image paths to full URLs
-    return data.map((manga: Manga) => ({
-      ...manga,
-      coverImage: manga.coverImage?.startsWith('/covers/') 
-        ? `${API_URL}/manga${manga.coverImage}`
-        : manga.coverImage
-    }))
+    return {
+      ...data,
+      data: data.data.map((manga: Manga) => ({
+        ...manga,
+        coverImage: manga.coverImage?.startsWith('/covers/') 
+          ? `${API_URL}/manga${manga.coverImage}`
+          : manga.coverImage
+      }))
+    }
   },
 
   async scanDirectory(dirPath: string): Promise<Manga[]> {
@@ -95,18 +117,26 @@ export const api = {
   },
 
   // History endpoints
-  async getHistory(): Promise<ReadingHistory[]> {
-    const { data } = await axios.get(`${API_URL}/history`)
+  async getHistory(page?: number, pageSize?: number): Promise<PaginatedResponse<ReadingHistory>> {
+    const params = new URLSearchParams()
+    if (page !== undefined) params.append('page', String(page))
+    if (pageSize !== undefined) params.append('pageSize', String(pageSize))
+    
+    const { data } = await axios.get(`${API_URL}/history${params.toString() ? '?' + params : ''}`)
+    
     // Convert cover image paths to full URLs in nested manga objects
-    return data.map((item: ReadingHistory) => ({
-      ...item,
-      manga: item.manga ? {
-        ...item.manga,
-        coverImage: item.manga.coverImage?.startsWith('/covers/') 
-          ? `${API_URL}/manga${item.manga.coverImage}`
-          : item.manga.coverImage
-      } : undefined
-    }))
+    return {
+      ...data,
+      data: data.data.map((item: ReadingHistory) => ({
+        ...item,
+        manga: item.manga ? {
+          ...item.manga,
+          coverImage: item.manga.coverImage?.startsWith('/covers/') 
+            ? `${API_URL}/manga${item.manga.coverImage}`
+            : item.manga.coverImage
+        } : undefined
+      }))
+    }
   },
 
   async getMangaHistory(mangaId: string): Promise<ReadingHistory[]> {
@@ -128,9 +158,26 @@ export const api = {
   },
 
   // Bookmark endpoints
-  async getBookmarks(): Promise<Bookmark[]> {
-    const { data } = await axios.get(`${API_URL}/bookmarks`)
-    return data
+  async getBookmarks(page?: number, pageSize?: number): Promise<PaginatedResponse<Bookmark>> {
+    const params = new URLSearchParams()
+    if (page !== undefined) params.append('page', String(page))
+    if (pageSize !== undefined) params.append('pageSize', String(pageSize))
+    
+    const { data } = await axios.get(`${API_URL}/bookmarks${params.toString() ? '?' + params : ''}`)
+    
+    // Convert cover image paths to full URLs in nested manga objects
+    return {
+      ...data,
+      data: data.data.map((item: Bookmark) => ({
+        ...item,
+        manga: item.manga ? {
+          ...item.manga,
+          coverImage: item.manga.coverImage?.startsWith('/covers/') 
+            ? `${API_URL}/manga${item.manga.coverImage}`
+            : item.manga.coverImage
+        } : undefined
+      }))
+    }
   },
 
   async getMangaBookmarks(mangaId: string): Promise<Bookmark[]> {

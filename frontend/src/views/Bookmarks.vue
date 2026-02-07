@@ -57,7 +57,8 @@ const loading = ref(false)
 const loadBookmarks = async () => {
   loading.value = true
   try {
-    bookmarks.value = await api.getBookmarks()
+    const response = await api.getBookmarks()
+    bookmarks.value = response.data
   } catch (error) {
     console.error('Failed to load bookmarks:', error)
   } finally {

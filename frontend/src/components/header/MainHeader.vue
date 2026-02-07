@@ -9,7 +9,7 @@
         <div class="flex items-center gap-2">
           <TooltipProvider>
             <!-- Reader Controls -->
-            <Tooltip v-for="item in readerActions" :key="item.label" v-show="isReaderPage">
+            <Tooltip v-for="item in readerActions" :key="item.label" v-if="isReaderPage">
               <TooltipTrigger as-child>
                 <Button
                   variant="ghost"
@@ -60,7 +60,9 @@ import Logo from '@/components/Logo.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const route = useRoute()
-const isReaderPage = computed(() => route.path.startsWith('/manga/'))
+const isReaderPage = computed(() => 
+  route.path.startsWith('/manga/') && route.query.chapter !== undefined
+)
 
 const readerActions = [
   { icon: List, label: 'Chapters', action: 'chapters' },

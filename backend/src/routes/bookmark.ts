@@ -1,20 +1,42 @@
 import { Router } from 'express';
 import { prisma } from '../index';
+import { getPagination, buildPaginatedResponse } from '../utils/pagination';
 
 const router = Router();
 
 // Get all bookmarks
 router.get('/', async (req, res) => {
   try {
-    const bookmarks = await prisma.bookmark.findMany({
-      include: {
-        manga: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-    res.json(bookmarks);
+    const pagination = getPagination(req.query, { defaultPageSize: 20 });
+    
+    let paginationParams = { skip: 0, take: 50 };
+    let totalItems = 0;
+    let page = 1;
+    let pageSize = 50;
+
+    if (pagination) {
+      paginationParams = { skip: pagination.skip, take: pagination.take };
+      page = pagination.page;
+      pageSize = pagination.pageSize;
+    }
+
+    const [bookmarks, count] = await Promise.all([
+      prisma.bookmark.findMany({
+        include: {
+          manga: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: paginationParams.skip,
+        take: paginationParams.take
+      }),
+      prisma.bookmark.count()
+    ]);
+
+    totalItems = count;
+    const response = buildPaginatedResponse(bookmarks, totalItems, page, pageSize);
+    res.json(response);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch bookmarks' });
   }
