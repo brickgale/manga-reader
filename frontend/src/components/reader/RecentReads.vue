@@ -64,15 +64,8 @@ const toggleExpanded = () => {
 const loadRecentlyRead = async () => {
   loading.value = true
   try {
-    const history = await api.getHistory()
-    // Get unique manga (latest read first) - limit to 5
-    const uniqueManga = new Map<string, ReadingHistory>()
-    for (const item of history) {
-      if (!uniqueManga.has(item.mangaId) && uniqueManga.size < 5) {
-        uniqueManga.set(item.mangaId, item)
-      }
-    }
-    recentlyRead.value = Array.from(uniqueManga.values())
+    const response = await api.getHistory(1, 5)
+    recentlyRead.value = response.data
   } catch (error) {
     console.error('Failed to load recently read:', error)
   } finally {

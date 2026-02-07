@@ -46,7 +46,8 @@ const loading = ref(false)
 const loadHistory = async () => {
   loading.value = true
   try {
-    history.value = await api.getHistory()
+    const response = await api.getHistory()
+    history.value = response.data
   } catch (error) {
     console.error('Failed to load history:', error)
   } finally {

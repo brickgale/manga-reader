@@ -70,6 +70,20 @@
         </Card>
       </router-link>
     </div>
+
+    <!-- Pagination -->
+    <div v-if="pagination">
+      <ListPagination
+        :current-page="pagination.currentPage"
+        :page-size="pagination.pageSize"
+        :total-pages="pagination.totalPages"
+        :total-items="pagination.totalItems"
+        :has-next="pagination.hasNext"
+        :has-prev="pagination.hasPrev"
+        @update-page="(page) => { currentPage = page; loadManga() }"
+        @update-page-size="(size) => { pageSize = size; currentPage = 1; loadManga() }"
+      />
+    </div>
   </div>
 </template>
 
@@ -77,8 +91,9 @@
 import { ref, onMounted } from 'vue'
 import { Folder, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import { api, type Manga } from '../api'
+import { api, type Manga, type PaginationInfo } from '@/api'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
+import { ListPagination } from '@/components/pagination'
 import RecentReads from '@/components/reader/RecentReads.vue'
 
 const mangaList = ref<Manga[]>([])
@@ -87,13 +102,18 @@ const scanning = ref(false)
 const scanPath = ref('/manga')
 const showScanInput = ref(false)
 const savedDirectory = ref<string>('')
+const currentPage = ref(1)
+const pageSize = ref(12)
+const pagination = ref<PaginationInfo | null>(null)
 
 console.log(scanPath.value, '--- initial scan path ---')
 
 const loadManga = async () => {
   loading.value = true
   try {
-    mangaList.value = await api.getManga()
+    const response = await api.getManga(currentPage.value, pageSize.value)
+    mangaList.value = response.data
+    pagination.value = response.pagination
     
     // Extract the parent directory from existing manga if available
     if (mangaList.value.length > 0) {

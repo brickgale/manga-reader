@@ -3,16 +3,36 @@ import { prisma } from '../index';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { searchMangaBatch } from '../services/mangadex';
+import { getPagination, buildPaginatedResponse } from '../utils/pagination';
 
 const router = Router();
 
 // Get all manga from database
 router.get('/', async (req, res) => {
   try {
-    const manga = await prisma.manga.findMany({
-      orderBy: { updatedAt: 'desc' }
-    });
-    res.json(manga);
+    const pagination = getPagination(req.query, { defaultPageSize: 20 });
+    
+    if (!pagination) {
+      // No pagination params, return all
+      const manga = await prisma.manga.findMany({
+        orderBy: { updatedAt: 'desc' }
+      });
+      const totalItems = manga.length;
+      const response = buildPaginatedResponse(manga, totalItems, 1, totalItems);
+      return res.json(response);
+    }
+
+    const [manga, totalItems] = await Promise.all([
+      prisma.manga.findMany({
+        orderBy: { updatedAt: 'desc' },
+        skip: pagination.skip,
+        take: pagination.take
+      }),
+      prisma.manga.count()
+    ]);
+
+    const response = buildPaginatedResponse(manga, totalItems, pagination.page, pagination.pageSize);
+    res.json(response);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch manga' });
   }

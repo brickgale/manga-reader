@@ -1,21 +1,42 @@
 import { Router } from 'express';
 import { prisma } from '../index';
+import { getPagination, buildPaginatedResponse } from '../utils/pagination';
 
 const router = Router();
 
 // Get reading history
 router.get('/', async (req, res) => {
   try {
-    const history = await prisma.readingHistory.findMany({
-      include: {
-        manga: true
-      },
-      orderBy: {
-        timestamp: 'desc'
-      },
-      take: 50
-    });
-    res.json(history);
+    const pagination = getPagination(req.query, { defaultPageSize: 20 });
+    
+    let paginationParams = { skip: 0, take: 50 };
+    let totalItems = 0;
+    let page = 1;
+    let pageSize = 50;
+
+    if (pagination) {
+      paginationParams = { skip: pagination.skip, take: pagination.take };
+      page = pagination.page;
+      pageSize = pagination.pageSize;
+    }
+
+    const [history, count] = await Promise.all([
+      prisma.readingHistory.findMany({
+        include: {
+          manga: true
+        },
+        orderBy: {
+          timestamp: 'desc'
+        },
+        skip: paginationParams.skip,
+        take: paginationParams.take
+      }),
+      prisma.readingHistory.count()
+    ]);
+
+    totalItems = count;
+    const response = buildPaginatedResponse(history, totalItems, page, pageSize);
+    res.json(response);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch history' });
   }
