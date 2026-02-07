@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 interface Props {
@@ -19,8 +18,6 @@ const emit = defineEmits<{
   (e: 'update-page', page: number): void
   (e: 'update-page-size', size: number): void
 }>()
-
-const pageSizeOptions = [10, 20, 50, 100]
 
 const pageNumbers = computed(() => {
   const pages: (number | string)[] = []
@@ -49,12 +46,12 @@ const pageNumbers = computed(() => {
   return pages
 })
 
-const startItem = computed(() => (props.currentPage - 1) * props.pageSize + 1)
-const endItem = computed(() => Math.min(props.currentPage * props.pageSize, props.totalItems))
+const startItem = computed(() => props.totalItems === 0 ? 0 : (props.currentPage - 1) * props.pageSize + 1)
+const endItem = computed(() => props.totalItems === 0 ? 0 : Math.min(props.currentPage * props.pageSize, props.totalItems))
 </script>
 
 <template>
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 py-4">
+  <div v-if="totalItems > 0" class="flex flex-col sm:flex-row justify-between items-center gap-4 py-4">
     <!-- Info Text -->
     <div class="text-sm text-muted-foreground">
       Showing <span class="font-semibold">{{ startItem }}</span>
