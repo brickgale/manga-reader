@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <router-link to="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <Logo :width="36" :height="36" />
+          <Logo :width="36" :height="36" class="-ml-[6px]" />
           <span class="text-2xl font-bold hidden md:inline-block">Manga Reader</span>
         </router-link>
         <div class="flex items-center gap-2">

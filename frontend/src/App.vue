@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-background text-foreground">
     <Toaster />
     <MainHeader />
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 overflow-visible">
       <router-view />
     </main>
   </div>
