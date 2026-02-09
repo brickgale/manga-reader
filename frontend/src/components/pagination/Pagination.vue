@@ -14,6 +14,7 @@ interface Props {
   disabled?: boolean
   chapters?: Chapter[]
   currentChapterPath?: string
+  hidePageSelector?: boolean
 }
 
 const props = defineProps<Props>()
@@ -72,13 +73,13 @@ const handleChapterChange = (value: any) => {
       <Button
         variant="outline"
         @click="emit('prev')"
-        :disabled="props.disabled || props.currentPage === 0"
+        :disabled="(props.disabled || props.currentPage === 0) && !props.hidePageSelector"
       >
         Previous
       </Button>
       
       <!-- Page Selector -->
-      <Select v-if="totalPages > 0" :model-value="String(currentPage)" @update:model-value="handlePageChange">
+      <Select v-if="totalPages > 0 && !hidePageSelector" :model-value="String(currentPage)" @update:model-value="handlePageChange">
         <SelectTrigger class="w-[130px]">
           <SelectValue placeholder="Select page" />
         </SelectTrigger>

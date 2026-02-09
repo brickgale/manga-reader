@@ -44,11 +44,20 @@
 
       <!-- Reader View -->
       <div v-else>
-        <div class="mb-4 text-center">
-          <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
-          <p class="text-sm text-muted-foreground">
-            Page {{ currentPage + 1 }} of {{ pages.length }}
-          </p>
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
+            <p v-if="!chapterViewMode" class="text-sm text-muted-foreground">
+              Page {{ currentPage + 1 }} of {{ pages.length }}
+            </p>
+          </div>
+          <Button
+            @click="toggleChapterViewMode"
+            :variant="chapterViewMode ? 'default' : 'outline'"
+            size="sm"
+          >
+            {{ chapterViewMode ? 'Single Page' : 'Chapter View' }}
+          </Button>
         </div>
 
         <Pagination
@@ -56,6 +65,7 @@
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
+          :hide-page-selector="chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -63,8 +73,18 @@
           class="mb-4"
         />
 
-        <div v-if="pages.length > 0" class="flex justify-center mb-4">
+        <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4">
           <img
+            v-if="chapterViewMode"
+            v-for="(page, idx) in pages"
+            :key="page.path"
+            :src="api.getImageUrl(page.path)"
+            :alt="`Page ${idx + 1}`"
+            class="max-w-full h-auto cursor-pointer"
+            @click="scrollDownPage"
+          />
+          <img
+            v-else
             :src="api.getImageUrl(pages[currentPage].path)"
             :alt="`Page ${currentPage + 1}`"
             class="max-w-full h-auto cursor-pointer"
@@ -77,6 +97,7 @@
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
+          :hide-page-selector="chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -101,9 +122,11 @@ const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const currentChapter = ref<Chapter | null>(null)
 const pages = ref<Page[]>([])
+const currentChapterIndex = ref(0)
 const currentPage = ref(0)
 const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
+const chapterViewMode = ref(false)
 
 const loadMangaDetails = async () => {
   loading.value = true
@@ -121,8 +144,9 @@ const loadMangaDetails = async () => {
       const pageNum = route.query.page as string
       
       if (chapterPath && chapters.value.length > 0) {
-        const chapter = chapters.value.find(c => c.path === chapterPath)
-        if (chapter) {
+        currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterPath)
+        if (currentChapterIndex.value !== -1) {
+          const chapter = chapters.value[currentChapterIndex.value]
           await selectChapter(chapter)
           if (pageNum) {
             currentPage.value = parseInt(pageNum)
@@ -135,6 +159,11 @@ const loadMangaDetails = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const toggleChapterViewMode = () => {
+  chapterViewMode.value = !chapterViewMode.value
+  localStorage.setItem('chapterViewMode', String(chapterViewMode.value))
 }
 
 const selectChapter = async (chapter: Chapter) => {
@@ -203,33 +232,6 @@ const scrollDownPage = () => {
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < pages.value.length - 1) {
-    currentPage.value++
-    window.scrollTo({ top: 0, behavior: 'instant' })
-  }
-}
-
-const previousPage = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
-  }
-}
-const goToPage = (page: number) => {
-  currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'instant' })
-}
-
-const changeChapter = async (chapterPath: string) => {
-  const chapter = chapters.value.find(c => c.path === chapterPath)
-  if (chapter) {
-    await selectChapter(chapter)
-    window.scrollTo({ top: 0, behavior: 'instant' })
-    updateURL()
-  }
-}
-
 const updateURL = () => {
   if (!manga.value || !currentChapter.value) return
   
@@ -240,6 +242,49 @@ const updateURL = () => {
       page: currentPage.value.toString()
     }
   })
+}
+
+const changeChapter = async (chapterPath: string) => {
+  const chapter = chapters.value.find(c => c.path === chapterPath)
+  currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterPath)
+  if (chapter) {
+    await selectChapter(chapter)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    updateURL()
+  }
+}
+
+const nextPage = () => {
+  if(chapterViewMode.value) {
+    changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+    return;
+  }
+
+  if (currentPage.value < pages.value.length - 1) {
+    currentPage.value++
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+}
+
+const previousPage = () => {
+  if(chapterViewMode.value) {
+    changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+    return;
+  }
+
+  if (currentPage.value > 0) {
+    currentPage.value--
+    // Only change page if at the top, otherwise just scroll
+    console.log('Previous page clicked, current scrollY:', window.scrollY)
+    if (window.scrollY > 10) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
+    }
+  }
+}
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'instant' })
 }
 
 const handleBookmark = async () => {
@@ -283,6 +328,12 @@ const updatePageTitle = () => {
 }
 
 onMounted(() => {
+  // Restore chapter view mode preference
+  const saved = localStorage.getItem('chapterViewMode')
+  if (saved !== null) {
+    chapterViewMode.value = saved === 'true'
+  }
+  
   loadMangaDetails()
   
   // Listen for header actions
