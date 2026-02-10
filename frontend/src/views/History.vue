@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api, type ReadingHistory } from '../api'
+import { api, type ReadingHistory } from '@/api'
 
 const history = ref<ReadingHistory[]>([])
 const loading = ref(false)

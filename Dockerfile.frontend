@@ -1,12 +1,15 @@
 FROM node:24-alpine AS base
 
+# Enable corepack for pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Build the frontend
 FROM base AS builder
@@ -17,7 +20,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the Vue app
-RUN npm run build
+RUN pnpm run build
 
 # Export stage - just the built files
 FROM scratch AS export

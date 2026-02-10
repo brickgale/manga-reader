@@ -49,7 +49,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api, type Bookmark } from '../api'
+import { api, type Bookmark } from '@/api'
 
 const bookmarks = ref<Bookmark[]>([])
 const loading = ref(false)

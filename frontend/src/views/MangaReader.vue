@@ -47,16 +47,16 @@
         <div class="mb-4 flex items-center justify-between">
           <div>
             <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
-            <p v-if="!chapterViewMode" class="text-sm text-muted-foreground">
+            <p v-if="!readerStore.chapterViewMode" class="text-sm text-muted-foreground">
               Page {{ currentPage + 1 }} of {{ pages.length }}
             </p>
           </div>
           <Button
-            @click="toggleChapterViewMode"
-            :variant="chapterViewMode ? 'default' : 'outline'"
+            @click="readerStore.toggleChapterViewMode"
+            :variant="readerStore.chapterViewMode ? 'default' : 'outline'"
             size="sm"
           >
-            {{ chapterViewMode ? 'Single Page' : 'Chapter View' }}
+            {{ readerStore.chapterViewMode ? 'Single Page' : 'Chapter View' }}
           </Button>
         </div>
 
@@ -65,7 +65,7 @@
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
-          :hide-page-selector="chapterViewMode"
+          :hide-page-selector="readerStore.chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -75,7 +75,7 @@
 
         <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4">
           <img
-            v-if="chapterViewMode"
+            v-if="readerStore.chapterViewMode"
             v-for="(page, idx) in pages"
             :key="page.path"
             :src="api.getImageUrl(page.path)"
@@ -97,7 +97,7 @@
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
-          :hide-page-selector="chapterViewMode"
+          :hide-page-selector="readerStore.chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -112,12 +112,14 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
+import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
 import { Button } from '@/components/ui'
 import { Pagination } from '@/components/pagination'
+import { useReaderStore } from '@/stores/reader'
 
 const route = useRoute()
 const router = useRouter()
+const readerStore = useReaderStore()
 const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const currentChapter = ref<Chapter | null>(null)
@@ -126,7 +128,6 @@ const currentChapterIndex = ref(0)
 const currentPage = ref(0)
 const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
-const chapterViewMode = ref(false)
 
 const loadMangaDetails = async () => {
   loading.value = true
@@ -159,11 +160,6 @@ const loadMangaDetails = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const toggleChapterViewMode = () => {
-  chapterViewMode.value = !chapterViewMode.value
-  localStorage.setItem('chapterViewMode', String(chapterViewMode.value))
 }
 
 const selectChapter = async (chapter: Chapter) => {
@@ -255,7 +251,7 @@ const changeChapter = async (chapterPath: string) => {
 }
 
 const nextPage = () => {
-  if(chapterViewMode.value) {
+  if(readerStore.chapterViewMode) {
     changeChapter(chapters.value[currentChapterIndex.value + 1].path)
     return;
   }
@@ -267,7 +263,7 @@ const nextPage = () => {
 }
 
 const previousPage = () => {
-  if(chapterViewMode.value) {
+  if(readerStore.chapterViewMode) {
     changeChapter(chapters.value[currentChapterIndex.value - 1].path)
     return;
   }
@@ -328,12 +324,6 @@ const updatePageTitle = () => {
 }
 
 onMounted(() => {
-  // Restore chapter view mode preference
-  const saved = localStorage.getItem('chapterViewMode')
-  if (saved !== null) {
-    chapterViewMode.value = saved === 'true'
-  }
-  
   loadMangaDetails()
   
   // Listen for header actions
