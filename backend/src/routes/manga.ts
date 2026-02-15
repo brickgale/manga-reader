@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { prisma } from '../index';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { searchMangaBatch } from '../services/mangadex';
+import { searchMangaBatch, getMangaByMangaDexId } from '../services/mangadex';
 import { getPagination, buildPaginatedResponse } from '../utils/pagination';
 
 const router = Router();
@@ -136,6 +136,171 @@ router.post('/scan', async (req, res) => {
   } catch (error) {
     console.error('Scan error:', error);
     res.status(500).json({ error: 'Failed to scan directory' });
+  }
+});
+
+// Refresh metadata for existing manga
+router.post('/refresh-metadata', async (req, res) => {
+  try {
+    const { mangaIds } = req.body; // Optional: array of specific manga IDs to refresh
+    
+    // Get manga to refresh
+    let mangaList;
+    if (mangaIds && Array.isArray(mangaIds) && mangaIds.length > 0) {
+      mangaList = await prisma.manga.findMany({
+        where: { id: { in: mangaIds } }
+      });
+      console.log(`Refreshing metadata for ${mangaList.length} specific manga...`);
+    } else {
+      mangaList = await prisma.manga.findMany();
+      console.log(`Refreshing metadata for all ${mangaList.length} manga...`);
+    }
+
+    if (mangaList.length === 0) {
+      return res.json({ message: 'No manga to refresh', updated: [] });
+    }
+
+    // Extract titles from directory names for batch processing
+    const titleMap = new Map<string, { id: string; path: string }>();
+    
+    for (const manga of mangaList) {
+      const dirName = path.basename(manga.path);
+      titleMap.set(dirName, { id: manga.id, path: manga.path });
+    }
+    
+    const titles = Array.from(titleMap.keys());
+    
+    // Fetch updated metadata from APIs
+    let metadataMap = new Map<string, any>();
+    
+    if (titles.length > 0) {
+      console.log('Fetching updated metadata from APIs...');
+      try {
+        metadataMap = await searchMangaBatch(titles);
+        console.log('Metadata fetched successfully.');
+      } catch (apiError) {
+        console.error('Failed to fetch metadata:', apiError);
+        return res.status(500).json({ error: 'Failed to fetch metadata from APIs' });
+      }
+    }
+
+    const updatedManga = [];
+
+    for (const [dirName, mangaInfo] of titleMap.entries()) {
+      const metadata = metadataMap.get(dirName);
+      const mangaPath = mangaInfo.path;
+      
+      // Check for local cover image in manga folder
+      let localCoverPath: string | null = null;
+      const possibleCovers = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'];
+      
+      for (const coverName of possibleCovers) {
+        const coverPath = path.join(mangaPath, coverName);
+        try {
+          await fs.access(coverPath);
+          localCoverPath = coverPath;
+          console.log(`Found local cover: ${coverName} for ${dirName}`);
+          break;
+        } catch {
+          // Cover doesn't exist, try next
+        }
+      }
+      
+      // Prefer local covers, then downloaded covers (but not external URLs)
+      const coverToSave = localCoverPath || 
+                          (metadata?.coverImage && !metadata.coverImage.startsWith('http') ? metadata.coverImage : null);
+
+      // Update the manga with new metadata
+      const updated = await prisma.manga.update({
+        where: { id: mangaInfo.id },
+        data: {
+          title: metadata?.title || dirName,
+          coverImage: coverToSave,
+          updatedAt: new Date()
+        }
+      });
+
+      console.log(`Updated: ${updated.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`);
+      updatedManga.push(updated);
+    }
+
+    console.log(`Refresh complete! Updated ${updatedManga.length} manga.`);
+    res.json({ 
+      message: `Successfully refreshed ${updatedManga.length} manga`, 
+      updated: updatedManga 
+    });
+  } catch (error) {
+    console.error('Refresh error:', error);
+    res.status(500).json({ error: 'Failed to refresh metadata' });
+  }
+});
+
+// Manually update manga metadata using MangaDex ID or URL
+router.post('/update-metadata/:id', async (req, res) => {
+  try {
+    const { mangadexId } = req.body;
+    
+    if (!mangadexId) {
+      return res.status(400).json({ error: 'MangaDex ID or URL is required' });
+    }
+
+    // Check if manga exists
+    const manga = await prisma.manga.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!manga) {
+      return res.status(404).json({ error: 'Manga not found' });
+    }
+
+    console.log(`Manually updating manga ${manga.path} with MangaDex ID: ${mangadexId}`);
+
+    // Fetch metadata from MangaDex by ID
+    const metadata = await getMangaByMangaDexId(mangadexId);
+
+    if (!metadata) {
+      return res.status(404).json({ error: 'MangaDex manga not found or failed to fetch' });
+    }
+
+    // Check for local cover image in manga folder
+    let localCoverPath: string | null = null;
+    const possibleCovers = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'];
+    
+    for (const coverName of possibleCovers) {
+      const coverPath = path.join(manga.path, coverName);
+      try {
+        await fs.access(coverPath);
+        localCoverPath = coverPath;
+        console.log(`Found local cover: ${coverName}`);
+        break;
+      } catch {
+        // Cover doesn't exist, try next
+      }
+    }
+    
+    // Prefer local covers, then downloaded covers (but not external URLs)
+    const coverToSave = localCoverPath || 
+                        (metadata.coverImage && !metadata.coverImage.startsWith('http') ? metadata.coverImage : null);
+
+    // Update the manga with new metadata
+    const updated = await prisma.manga.update({
+      where: { id: req.params.id },
+      data: {
+        title: metadata.title,
+        coverImage: coverToSave,
+        updatedAt: new Date()
+      }
+    });
+
+    console.log(`Manually updated: ${updated.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`);
+    
+    res.json({ 
+      message: 'Successfully updated manga metadata', 
+      manga: updated 
+    });
+  } catch (error) {
+    console.error('Manual update error:', error);
+    res.status(500).json({ error: 'Failed to update manga metadata' });
   }
 });
 
