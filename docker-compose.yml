@@ -68,6 +68,7 @@ services:
       - ./storage/images:/app/images
       - ${MANGA_STORAGE_PATH:-/mnt/d/Manhwa}:/manga:ro
       - ./backend/src:/app/src:cached
+      - ./backend/prisma:/app/prisma:cached
     depends_on:
       - frontend
     restart: unless-stopped
