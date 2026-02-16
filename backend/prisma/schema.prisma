@@ -24,13 +24,14 @@ model Manga {
 
 model ReadingHistory {
   id          String   @id @default(uuid())
-  mangaId     String   @unique
+  mangaId     String
   chapterPath String
   pageNumber  Int
   timestamp   DateTime @default(now()) @updatedAt
 
   manga       Manga    @relation(fields: [mangaId], references: [id], onDelete: Cascade)
 
+  @@index([mangaId])
   @@index([timestamp])
 }
 

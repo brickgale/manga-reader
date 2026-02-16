@@ -68,19 +68,32 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const history = await prisma.readingHistory.upsert({
-      where: { mangaId },
-      update: {
-        chapterPath,
-        pageNumber,
-        timestamp: new Date()
-      },
-      create: {
-        mangaId,
-        chapterPath,
-        pageNumber
-      }
+    // Find existing history entry for this manga
+    const existing = await prisma.readingHistory.findFirst({
+      where: { mangaId }
     });
+
+    let history;
+    if (existing) {
+      // Update existing entry
+      history = await prisma.readingHistory.update({
+        where: { id: existing.id },
+        data: {
+          chapterPath,
+          pageNumber,
+          timestamp: new Date()
+        }
+      });
+    } else {
+      // Create new entry
+      history = await prisma.readingHistory.create({
+        data: {
+          mangaId,
+          chapterPath,
+          pageNumber
+        }
+      });
+    }
     res.json(history);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create history entry' });
