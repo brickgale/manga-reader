@@ -25,7 +25,7 @@
         >
           <h3 class="font-semibold text-lg mb-2">{{ item.manga?.title }}</h3>
           <p class="text-sm text-muted-foreground mb-1">
-            Chapter: {{ item.chapterPath }}
+            Chapter: {{ item.chapterPath.split('/').pop() }}
           </p>
           <p class="text-sm text-muted-foreground mb-1">
             Page: {{ item.pageNumber }}

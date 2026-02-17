@@ -26,7 +26,7 @@
           >
             <h3 class="font-semibold text-lg mb-2">{{ bookmark.manga?.title }}</h3>
             <p class="text-sm text-muted-foreground mb-1">
-              Chapter: {{ bookmark.chapterPath }}
+              Chapter: {{ bookmark.chapterPath.split('/').pop() }}
             </p>
             <p class="text-sm text-muted-foreground mb-1">
               Page: {{ bookmark.pageNumber }}
