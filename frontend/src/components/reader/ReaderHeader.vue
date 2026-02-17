@@ -6,19 +6,31 @@
         Page {{ currentPage + 1 }} of {{ totalPages }}
       </p>
     </div>
-    <Button
-      @click="$emit('toggle-view-mode')"
-      :variant="chapterViewMode ? 'default' : 'outline'"
-      size="sm"
-    >
-      {{ chapterViewMode ? 'Single Page' : 'Chapter View' }}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <Button
+            @click="$emit('toggle-view-mode')"
+            :variant="chapterViewMode ? 'default' : 'outline'"
+            size="icon"
+          >
+            <BookOpen v-if="chapterViewMode" class="h-5 w-5" />
+            <FileText v-else class="h-5 w-5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{{ chapterViewMode ? 'Chapter View' : 'Page View' }}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Chapter } from '@/api'
 import { Button } from '@/components/ui'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { BookOpen, FileText } from 'lucide-vue-next'
 
 defineProps<{
   currentChapter: Chapter
