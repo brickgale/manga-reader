@@ -2,32 +2,31 @@
   <div v-if="!loading && recentlyRead.length > 0" class="mb-8">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-2xl font-bold">Continue Reading</h2>
-      <Button
-        variant="ghost"
-        size="icon"
-        @click="toggleExpanded"
-      >
+      <Button variant="ghost" size="icon" @click="toggleExpanded">
         <ChevronDown v-if="isExpanded" class="h-5 w-5" />
         <ChevronRight v-else class="h-5 w-5" />
       </Button>
     </div>
-    <div v-if="isExpanded" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div
+      v-if="isExpanded"
+      class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 [&>*:last-child]:hidden xl:[&>*:last-child]:block"
+    >
       <router-link
         v-for="item in recentlyRead"
         :key="item.id"
         :to="{
           path: `/manga/${item.mangaId}`,
-          query: { chapter: item.chapterPath, page: item.pageNumber.toString() }
+          query: { chapter: item.chapterPath, page: item.pageNumber.toString() },
         }"
       >
         <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
           <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
-            <img 
-              v-if="item.manga?.coverImage" 
-              :src="item.manga.coverImage" 
+            <img
+              v-if="item.manga?.coverImage"
+              :src="item.manga.coverImage"
               :alt="item.manga.title"
               class="w-full h-full object-cover"
-              @error="(e) => (e.target as HTMLImageElement).style.display = 'none'"
+              @error="e => ((e.target as HTMLImageElement).style.display = 'none')"
             />
             <p v-else class="text-muted-foreground text-sm">No Cover</p>
           </div>
