@@ -17,12 +17,15 @@
         class="border rounded-lg p-4 hover:shadow-md transition-shadow"
       >
         <router-link
-          :to="`/manga/${item.mangaId}`"
+          :to="{
+            path: `/manga/${item.mangaId}`,
+            query: { chapter: item.chapterPath, page: item.pageNumber.toString() }
+          }"
           class="block"
         >
           <h3 class="font-semibold text-lg mb-2">{{ item.manga?.title }}</h3>
           <p class="text-sm text-muted-foreground mb-1">
-            Chapter: {{ item.chapterPath.split('/').pop() }}
+            Chapter: {{ item.chapterPath }}
           </p>
           <p class="text-sm text-muted-foreground mb-1">
             Page: {{ item.pageNumber }}

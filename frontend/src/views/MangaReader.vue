@@ -90,6 +90,11 @@ const currentPage = ref(0)
 const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
 
+// Helper to extract chapter name from path (handles both old full paths and new chapter names)
+const getChapterName = (chapterPath: string) => {
+  return chapterPath.split('/').pop() || chapterPath
+}
+
 const loadMangaDetails = async () => {
   loading.value = true
   try {
@@ -106,7 +111,8 @@ const loadMangaDetails = async () => {
       const pageNum = route.query.page as string
       
       if (chapterPath && chapters.value.length > 0) {
-        currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterPath)
+        const normalizedQueryChapter = getChapterName(chapterPath)
+        currentChapterIndex.value = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
         if (currentChapterIndex.value !== -1) {
           const chapter = chapters.value[currentChapterIndex.value]
           await selectChapter(chapter)
@@ -139,7 +145,8 @@ const selectChapter = async (chapter: Chapter) => {
 const resumeReading = async () => {
   if (!progress.value || !manga.value) return
   
-  const chapter = chapters.value.find(c => c.path === progress.value!.lastChapterPath)
+  const normalizedProgressChapter = getChapterName(progress.value.lastChapterPath)
+  const chapter = chapters.value.find(c => c.path === normalizedProgressChapter)
   if (chapter) {
     await selectChapter(chapter)
     currentPage.value = progress.value.lastPageNumber

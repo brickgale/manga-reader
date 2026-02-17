@@ -18,12 +18,15 @@
       >
         <div class="flex justify-between items-start">
           <router-link
-            :to="`/manga/${bookmark.mangaId}`"
+            :to="{
+              path: `/manga/${bookmark.mangaId}`,
+              query: { chapter: bookmark.chapterPath, page: bookmark.pageNumber.toString() }
+            }"
             class="flex-1"
           >
             <h3 class="font-semibold text-lg mb-2">{{ bookmark.manga?.title }}</h3>
             <p class="text-sm text-muted-foreground mb-1">
-              Chapter: {{ bookmark.chapterPath.split('/').pop() }}
+              Chapter: {{ bookmark.chapterPath }}
             </p>
             <p class="text-sm text-muted-foreground mb-1">
               Page: {{ bookmark.pageNumber }}

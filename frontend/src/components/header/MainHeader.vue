@@ -41,9 +41,16 @@
                 <p>{{ item.label }}</p>
               </TooltipContent>
             </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <ThemeToggle />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle Theme</p>
+              </TooltipContent>
+            </Tooltip>
           </TooltipProvider>
-          
-          <ThemeToggle />
         </div>
       </div>
     </div>

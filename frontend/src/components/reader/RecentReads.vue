@@ -36,7 +36,7 @@
           </CardHeader>
           <CardContent class="p-3 pt-0">
             <p class="text-xs text-muted-foreground truncate">
-              {{ item.chapterPath.split('/').pop() }} - Page {{ item.pageNumber + 1 }}
+              {{ item.chapterPath }} - Page {{ item.pageNumber + 1 }}
             </p>
           </CardContent>
         </Card>

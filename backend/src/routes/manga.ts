@@ -320,7 +320,7 @@ router.get('/:id/chapters', async (req, res) => {
       .filter(entry => entry.isDirectory())
       .map(entry => ({
         name: entry.name,
-        path: path.join(manga.path, entry.name)
+        path: entry.name
       }))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
@@ -341,13 +341,15 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
       return res.status(404).json({ error: 'Manga not found' });
     }
 
-    const chapterPath = decodeURIComponent(req.params.chapterPath);
-    console.log('[DEBUG] pages API - chapterPath:', chapterPath);
+    const chapterName = decodeURIComponent(req.params.chapterPath);
+    const fullChapterPath = path.join(manga.path, chapterName);
+    console.log('[DEBUG] pages API - chapterName:', chapterName);
+    console.log('[DEBUG] pages API - fullChapterPath:', fullChapterPath);
     // Early debug response
     // return res.json({ debug: 'chapterPath', value: chapterPath });
 
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    const entries = await fs.readdir(chapterPath, { withFileTypes: true });
+    const entries = await fs.readdir(fullChapterPath, { withFileTypes: true });
     const pages = entries
       .filter(entry => 
         entry.isFile() && 
@@ -355,7 +357,7 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
       )
       .map(entry => ({
         name: entry.name,
-        path: path.join(chapterPath, entry.name)
+        path: path.join(fullChapterPath, entry.name)
       }))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
