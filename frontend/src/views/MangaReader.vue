@@ -10,52 +10,28 @@
 
     <div v-else>
       <!-- Manga Info & Chapter Selection -->
-      <div v-if="!currentChapter" class="mb-6">
-        <h2 class="text-3xl font-bold mb-4">{{ manga.title }}</h2>
-        
-        <div v-if="progress" class="mb-6 p-4 bg-muted rounded-lg">
-          <p class="text-sm mb-2">
-            <strong>Last Read:</strong> Chapter {{ progress.lastChapterPath.split('/').pop() }}, Page {{ progress.lastPageNumber }}
-          </p>
-          <p class="text-sm">
-            <strong>Farthest:</strong> Chapter {{ progress.farthestChapterPath.split('/').pop() }}, Page {{ progress.farthestPageNumber }}
-          </p>
-          <button
-            @click="resumeReading"
-            class="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Resume Reading
-          </button>
-        </div>
+      <div v-if="!currentChapter">
+        <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
 
-        <h3 class="text-xl font-semibold mb-4">Chapters</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Button
-            v-for="chapter in chapters"
-            :key="chapter.path"
-            @click="selectChapter(chapter)"
-            variant="outline"
-            class="h-auto p-4 justify-start"
-          >
-            {{ chapter.name }}
-          </Button>
-        </div>
+        <ChapterList :chapters="chapters" @select="selectChapter" />
       </div>
 
       <!-- Reader View -->
       <div v-else>
-        <div class="mb-4 text-center">
-          <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
-          <p class="text-sm text-muted-foreground">
-            Page {{ currentPage + 1 }} of {{ pages.length }}
-          </p>
-        </div>
+        <ReaderHeader
+          :current-chapter="currentChapter"
+          :current-page="currentPage"
+          :total-pages="pages.length"
+          :chapter-view-mode="readerStore.chapterViewMode"
+          @toggle-view-mode="readerStore.toggleChapterViewMode"
+        />
 
         <Pagination
           :current-page="currentPage"
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
+          :hide-page-selector="readerStore.chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -63,20 +39,19 @@
           class="mb-4"
         />
 
-        <div v-if="pages.length > 0" class="flex justify-center mb-4">
-          <img
-            :src="api.getImageUrl(pages[currentPage].path)"
-            :alt="`Page ${currentPage + 1}`"
-            class="max-w-full h-auto cursor-pointer"
-            @click="scrollDownPage"
-          />
-        </div>
+        <PageViewer
+          :pages="pages"
+          :current-page="currentPage"
+          :chapter-view-mode="readerStore.chapterViewMode"
+          @page-click="scrollDownPage"
+        />
 
         <Pagination
           :current-page="currentPage"
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
+          :hide-page-selector="readerStore.chapterViewMode"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -91,19 +66,27 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '../api'
-import { Button } from '@/components/ui'
+import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
 import { Pagination } from '@/components/pagination'
+import { MangaInfo, ChapterList, ReaderHeader, PageViewer } from '@/components/reader'
+import { useReaderStore } from '@/stores/reader'
 
 const route = useRoute()
 const router = useRouter()
+const readerStore = useReaderStore()
 const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const currentChapter = ref<Chapter | null>(null)
 const pages = ref<Page[]>([])
+const currentChapterIndex = ref(0)
 const currentPage = ref(0)
 const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
+
+// Helper to extract chapter name from path (handles both old full paths and new chapter names)
+const getChapterName = (chapterPath: string) => {
+  return chapterPath.split('/').pop() || chapterPath
+}
 
 const loadMangaDetails = async () => {
   loading.value = true
@@ -111,18 +94,20 @@ const loadMangaDetails = async () => {
     const mangaId = route.params.id as string
     const response = await api.getManga()
     manga.value = response.data.find(m => m.id === mangaId) || null
-    
+
     if (manga.value) {
       chapters.value = await api.getChapters(manga.value.id)
       progress.value = await api.getProgress(manga.value.id)
-      
+
       // Auto-load chapter and page from query parameters
       const chapterPath = route.query.chapter as string
       const pageNum = route.query.page as string
-      
+
       if (chapterPath && chapters.value.length > 0) {
-        const chapter = chapters.value.find(c => c.path === chapterPath)
-        if (chapter) {
+        const normalizedQueryChapter = getChapterName(chapterPath)
+        currentChapterIndex.value = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
+        if (currentChapterIndex.value !== -1) {
+          const chapter = chapters.value[currentChapterIndex.value]
           await selectChapter(chapter)
           if (pageNum) {
             currentPage.value = parseInt(pageNum)
@@ -139,10 +124,10 @@ const loadMangaDetails = async () => {
 
 const selectChapter = async (chapter: Chapter) => {
   if (!manga.value) return
-  
+
   currentChapter.value = chapter
   currentPage.value = 0
-  
+
   try {
     pages.value = await api.getPages(manga.value.id, chapter.path)
   } catch (error) {
@@ -152,8 +137,9 @@ const selectChapter = async (chapter: Chapter) => {
 
 const resumeReading = async () => {
   if (!progress.value || !manga.value) return
-  
-  const chapter = chapters.value.find(c => c.path === progress.value!.lastChapterPath)
+
+  const normalizedProgressChapter = getChapterName(progress.value.lastChapterPath)
+  const chapter = chapters.value.find(c => c.path === normalizedProgressChapter)
   if (chapter) {
     await selectChapter(chapter)
     currentPage.value = progress.value.lastPageNumber
@@ -162,7 +148,7 @@ const resumeReading = async () => {
 
 const updateProgress = async () => {
   if (!manga.value || !currentChapter.value) return
-  
+
   try {
     await api.updateProgress(manga.value.id, currentChapter.value.path, currentPage.value)
     await api.addHistory(manga.value.id, currentChapter.value.path, currentPage.value)
@@ -177,10 +163,10 @@ const scrollDownPage = () => {
   const scrollAmount = viewportHeight * 0.8 // Scroll 80% of viewport height
   const currentScrollPosition = window.scrollY + window.innerHeight
   const pageHeight = document.documentElement.scrollHeight
-  
+
   // Check if we're already at the very bottom (within 10px tolerance)
   const isAtBottom = currentScrollPosition >= pageHeight - 10
-  
+
   if (isAtBottom) {
     // If this is the last page of the chapter
     if (currentPage.value >= pages.value.length - 1) {
@@ -198,31 +184,26 @@ const scrollDownPage = () => {
     // Just scroll down
     window.scrollBy({
       top: scrollAmount,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 }
 
-const nextPage = () => {
-  if (currentPage.value < pages.value.length - 1) {
-    currentPage.value++
-    window.scrollTo({ top: 0, behavior: 'instant' })
-  }
-}
+const updateURL = () => {
+  if (!manga.value || !currentChapter.value) return
 
-const previousPage = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
-  }
-}
-const goToPage = (page: number) => {
-  currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'instant' })
+  router.replace({
+    path: `/manga/${manga.value.id}`,
+    query: {
+      chapter: currentChapter.value.path,
+      page: currentPage.value.toString(),
+    },
+  })
 }
 
 const changeChapter = async (chapterPath: string) => {
   const chapter = chapters.value.find(c => c.path === chapterPath)
+  currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterPath)
   if (chapter) {
     await selectChapter(chapter)
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -230,21 +211,42 @@ const changeChapter = async (chapterPath: string) => {
   }
 }
 
-const updateURL = () => {
-  if (!manga.value || !currentChapter.value) return
-  
-  router.replace({
-    path: `/manga/${manga.value.id}`,
-    query: {
-      chapter: currentChapter.value.path,
-      page: currentPage.value.toString()
+const nextPage = () => {
+  if (readerStore.chapterViewMode) {
+    changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+    return
+  }
+
+  if (currentPage.value < pages.value.length - 1) {
+    currentPage.value++
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+}
+
+const previousPage = () => {
+  if (readerStore.chapterViewMode) {
+    changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+    return
+  }
+
+  if (currentPage.value > 0) {
+    currentPage.value--
+    // Only change page if at the top, otherwise just scroll
+    console.log('Previous page clicked, current scrollY:', window.scrollY)
+    if (window.scrollY > 10) {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
     }
-  })
+  }
+}
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'instant' })
 }
 
 const handleBookmark = async () => {
   if (!manga.value || !currentChapter.value) return
-  
+
   const note = prompt('Add a note (optional):')
   try {
     await api.createBookmark(
@@ -284,7 +286,7 @@ const updatePageTitle = () => {
 
 onMounted(() => {
   loadMangaDetails()
-  
+
   // Listen for header actions
   window.addEventListener('reader-action', handleReaderAction as EventListener)
 })

@@ -88,12 +88,14 @@ frontend/
 ## Development
 
 ### Prerequisites
+
 - Node.js 24+
 - npm
 
 ### Local Development
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -182,12 +184,14 @@ Theme colors are defined using CSS variables in `src/style.css`:
 The frontend is built as a static site and served by the backend.
 
 ### Build Process
+
 1. Dependencies are installed
 2. Vite builds the production bundle
 3. Output is placed in `/app/dist`
 4. Backend serves the static files
 
 ### Container Details
+
 - Base image: `node:24-alpine`
 - Build output: `/app/dist`
 - Served by backend on port 3000
@@ -195,6 +199,7 @@ The frontend is built as a static site and served by the backend.
 ## Dependencies
 
 ### Production
+
 - `vue` - Framework
 - `vue-router` - Routing
 - `axios` - HTTP client
@@ -207,6 +212,7 @@ The frontend is built as a static site and served by the backend.
 - `clsx` & `tailwind-merge` - Class utilities
 
 ### Development
+
 - `vite` - Build tool
 - `@vitejs/plugin-vue` - Vue plugin for Vite
 - `typescript` - TypeScript compiler

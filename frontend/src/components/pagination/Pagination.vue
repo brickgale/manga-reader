@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Button } from '@/components/ui'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 interface Chapter {
   name: string
@@ -14,6 +22,7 @@ interface Props {
   disabled?: boolean
   chapters?: Chapter[]
   currentChapterPath?: string
+  hidePageSelector?: boolean
 }
 
 const props = defineProps<Props>()
@@ -28,13 +37,18 @@ const emit = defineEmits<{
 const pageOptions = computed(() => {
   return Array.from({ length: props.totalPages }, (_, i) => ({
     value: String(i),
-    label: `Page ${i + 1}`
+    label: `Page ${i + 1}`,
   }))
 })
 
 const handlePageChange = (value: any) => {
   if (value !== null && value !== undefined) {
-    const numValue = typeof value === 'string' ? parseInt(value) : typeof value === 'bigint' ? Number(value) : value
+    const numValue =
+      typeof value === 'string'
+        ? parseInt(value)
+        : typeof value === 'bigint'
+          ? Number(value)
+          : value
     emit('changePage', numValue)
   }
 }
@@ -56,11 +70,7 @@ const handleChapterChange = (value: any) => {
           <SelectValue placeholder="Select chapter" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem
-            v-for="chapter in chapters"
-            :key="chapter.path"
-            :value="chapter.path"
-          >
+          <SelectItem v-for="chapter in chapters" :key="chapter.path" :value="chapter.path">
             {{ chapter.name }}
           </SelectItem>
         </SelectContent>
@@ -68,38 +78,56 @@ const handleChapterChange = (value: any) => {
     </div>
 
     <!-- Page Navigation -->
-    <div class="flex items-center gap-2">
-      <Button
-        variant="outline"
-        @click="emit('prev')"
-        :disabled="props.disabled || props.currentPage === 0"
-      >
-        Previous
-      </Button>
-      
-      <!-- Page Selector -->
-      <Select v-if="totalPages > 0" :model-value="String(currentPage)" @update:model-value="handlePageChange">
-        <SelectTrigger class="w-[130px]">
-          <SelectValue placeholder="Select page" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
-            v-for="option in pageOptions"
-            :key="option.value"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      
-      <Button
-        variant="outline"
-        @click="emit('next')"
-        :disabled="props.disabled || props.currentPage === props.totalPages - 1"
-      >
-        Next
-      </Button>
-    </div>
+    <TooltipProvider>
+      <div class="flex items-center gap-2">
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Button
+              variant="outline"
+              size="icon"
+              @click="emit('prev')"
+              :disabled="(props.disabled || props.currentPage === 0) && !props.hidePageSelector"
+            >
+              <ChevronLeft class="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Previous</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <!-- Page Selector -->
+        <Select
+          v-if="totalPages > 0 && !hidePageSelector"
+          :model-value="String(currentPage)"
+          @update:model-value="handlePageChange"
+        >
+          <SelectTrigger class="w-[130px]">
+            <SelectValue placeholder="Select page" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="option in pageOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Button
+              variant="outline"
+              size="icon"
+              @click="emit('next')"
+              :disabled="props.disabled || props.currentPage === props.totalPages - 1"
+            >
+              <ChevronRight class="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Next</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   </div>
 </template>

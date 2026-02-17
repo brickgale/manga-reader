@@ -80,18 +80,18 @@ export const api = {
     const params = new URLSearchParams()
     if (page !== undefined) params.append('page', String(page))
     if (pageSize !== undefined) params.append('pageSize', String(pageSize))
-    
+
     const { data } = await axios.get(`${API_URL}/manga${params.toString() ? '?' + params : ''}`)
-    
+
     // Convert cover image paths to full URLs
     return {
       ...data,
       data: data.data.map((manga: Manga) => ({
         ...manga,
-        coverImage: manga.coverImage?.startsWith('/covers/') 
+        coverImage: manga.coverImage?.startsWith('/covers/')
           ? `${API_URL}/manga${manga.coverImage}`
-          : manga.coverImage
-      }))
+          : manga.coverImage,
+      })),
     }
   },
 
@@ -121,21 +121,23 @@ export const api = {
     const params = new URLSearchParams()
     if (page !== undefined) params.append('page', String(page))
     if (pageSize !== undefined) params.append('pageSize', String(pageSize))
-    
+
     const { data } = await axios.get(`${API_URL}/history${params.toString() ? '?' + params : ''}`)
-    
+
     // Convert cover image paths to full URLs in nested manga objects
     return {
       ...data,
       data: data.data.map((item: ReadingHistory) => ({
         ...item,
-        manga: item.manga ? {
-          ...item.manga,
-          coverImage: item.manga.coverImage?.startsWith('/covers/') 
-            ? `${API_URL}/manga${item.manga.coverImage}`
-            : item.manga.coverImage
-        } : undefined
-      }))
+        manga: item.manga
+          ? {
+              ...item.manga,
+              coverImage: item.manga.coverImage?.startsWith('/covers/')
+                ? `${API_URL}/manga${item.manga.coverImage}`
+                : item.manga.coverImage,
+            }
+          : undefined,
+      })),
     }
   },
 
@@ -162,21 +164,23 @@ export const api = {
     const params = new URLSearchParams()
     if (page !== undefined) params.append('page', String(page))
     if (pageSize !== undefined) params.append('pageSize', String(pageSize))
-    
+
     const { data } = await axios.get(`${API_URL}/bookmarks${params.toString() ? '?' + params : ''}`)
-    
+
     // Convert cover image paths to full URLs in nested manga objects
     return {
       ...data,
       data: data.data.map((item: Bookmark) => ({
         ...item,
-        manga: item.manga ? {
-          ...item.manga,
-          coverImage: item.manga.coverImage?.startsWith('/covers/') 
-            ? `${API_URL}/manga${item.manga.coverImage}`
-            : item.manga.coverImage
-        } : undefined
-      }))
+        manga: item.manga
+          ? {
+              ...item.manga,
+              coverImage: item.manga.coverImage?.startsWith('/covers/')
+                ? `${API_URL}/manga${item.manga.coverImage}`
+                : item.manga.coverImage,
+            }
+          : undefined,
+      })),
     }
   },
 

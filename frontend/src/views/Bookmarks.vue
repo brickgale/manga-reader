@@ -18,19 +18,16 @@
       >
         <div class="flex justify-between items-start">
           <router-link
-            :to="`/manga/${bookmark.mangaId}`"
+            :to="{
+              path: `/manga/${bookmark.mangaId}`,
+              query: { chapter: bookmark.chapterPath, page: bookmark.pageNumber.toString() },
+            }"
             class="flex-1"
           >
             <h3 class="font-semibold text-lg mb-2">{{ bookmark.manga?.title }}</h3>
-            <p class="text-sm text-muted-foreground mb-1">
-              Chapter: {{ bookmark.chapterPath.split('/').pop() }}
-            </p>
-            <p class="text-sm text-muted-foreground mb-1">
-              Page: {{ bookmark.pageNumber }}
-            </p>
-            <p v-if="bookmark.note" class="text-sm mt-2 italic">
-              "{{ bookmark.note }}"
-            </p>
+            <p class="text-sm text-muted-foreground mb-1">Chapter: {{ bookmark.chapterPath }}</p>
+            <p class="text-sm text-muted-foreground mb-1">Page: {{ bookmark.pageNumber }}</p>
+            <p v-if="bookmark.note" class="text-sm mt-2 italic">"{{ bookmark.note }}"</p>
             <p class="text-xs text-muted-foreground mt-2">
               {{ new Date(bookmark.createdAt).toLocaleString() }}
             </p>
@@ -49,7 +46,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api, type Bookmark } from '../api'
+import { api, type Bookmark } from '@/api'
 
 const bookmarks = ref<Bookmark[]>([])
 const loading = ref(false)
@@ -68,7 +65,7 @@ const loadBookmarks = async () => {
 
 const handleDelete = async (id: string) => {
   if (!confirm('Are you sure you want to delete this bookmark?')) return
-  
+
   try {
     await api.deleteBookmark(id)
     await loadBookmarks()
