@@ -11,11 +11,7 @@
             <!-- Reader Controls -->
             <Tooltip v-for="item in readerActions" :key="item.label" v-if="isReaderPage">
               <TooltipTrigger as-child>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  @click="emitReaderAction(item.action)"
-                >
+                <Button variant="ghost" size="icon" @click="emitReaderAction(item.action)">
                   <component :is="item.icon" class="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
@@ -27,11 +23,7 @@
             <!-- Navigation Links -->
             <Tooltip v-for="item in navItems" :key="item.label">
               <TooltipTrigger as-child>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  as-child
-                >
+                <Button variant="ghost" size="icon" as-child>
                   <router-link :to="item.to">
                     <component :is="item.icon" class="h-5 w-5" />
                   </router-link>
@@ -41,7 +33,7 @@
                 <p>{{ item.label }}</p>
               </TooltipContent>
             </Tooltip>
-            
+
             <Tooltip>
               <TooltipTrigger as-child>
                 <ThemeToggle />
@@ -67,8 +59,8 @@ import Logo from '@/components/Logo.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const route = useRoute()
-const isReaderPage = computed(() => 
-  route.path.startsWith('/manga/') && route.query.chapter !== undefined
+const isReaderPage = computed(
+  () => route.path.startsWith('/manga/') && route.query.chapter !== undefined
 )
 
 const readerActions = [

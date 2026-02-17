@@ -46,20 +46,27 @@ const pageNumbers = computed(() => {
   return pages
 })
 
-const startItem = computed(() => props.totalItems === 0 ? 0 : (props.currentPage - 1) * props.pageSize + 1)
-const endItem = computed(() => props.totalItems === 0 ? 0 : Math.min(props.currentPage * props.pageSize, props.totalItems))
+const startItem = computed(() =>
+  props.totalItems === 0 ? 0 : (props.currentPage - 1) * props.pageSize + 1
+)
+const endItem = computed(() =>
+  props.totalItems === 0 ? 0 : Math.min(props.currentPage * props.pageSize, props.totalItems)
+)
 </script>
 
 <template>
-  <div v-if="totalItems > 0" class="flex flex-col sm:flex-row justify-between items-center gap-4 py-4">
+  <div
+    v-if="totalItems > 0"
+    class="flex flex-col sm:flex-row justify-between items-center gap-4 py-4"
+  >
     <!-- Info Text -->
     <div class="text-sm text-muted-foreground">
-      Showing <span class="font-semibold">{{ startItem }}</span>
-      to <span class="font-semibold">{{ endItem }}</span>
-      of <span class="font-semibold">{{ totalItems }}</span>
+      Showing <span class="font-semibold">{{ startItem }}</span> to
+      <span class="font-semibold">{{ endItem }}</span> of
+      <span class="font-semibold">{{ totalItems }}</span>
       items
     </div>
-    
+
     <!-- Page Navigation -->
     <div class="flex items-center gap-2">
       <Button

@@ -1,13 +1,15 @@
 <template>
   <div class="mb-6">
     <h2 class="text-3xl font-bold mb-4">{{ manga.title }}</h2>
-    
+
     <div v-if="progress" class="mb-6 p-4 bg-muted rounded-lg">
       <p class="text-sm mb-2">
-        <strong>Last Read:</strong> Chapter {{ progress.lastChapterPath.split('/').pop() }}, Page {{ progress.lastPageNumber + 1 }}
+        <strong>Last Read:</strong> Chapter {{ progress.lastChapterPath.split('/').pop() }}, Page
+        {{ progress.lastPageNumber + 1 }}
       </p>
       <p class="text-sm">
-        <strong>Farthest:</strong> Chapter {{ progress.farthestChapterPath.split('/').pop() }}, Page {{ progress.farthestPageNumber + 1 }}
+        <strong>Farthest:</strong> Chapter {{ progress.farthestChapterPath.split('/').pop() }}, Page
+        {{ progress.farthestPageNumber + 1 }}
       </p>
       <button
         @click="$emit('resume')"

@@ -23,6 +23,6 @@ export const useReaderStore = defineStore('reader', () => {
   return {
     chapterViewMode,
     toggleChapterViewMode,
-    setChapterViewMode
+    setChapterViewMode,
   }
 })

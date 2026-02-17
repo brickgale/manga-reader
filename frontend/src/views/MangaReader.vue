@@ -11,16 +11,9 @@
     <div v-else>
       <!-- Manga Info & Chapter Selection -->
       <div v-if="!currentChapter">
-        <MangaInfo 
-          :manga="manga" 
-          :progress="progress" 
-          @resume="resumeReading" 
-        />
-        
-        <ChapterList 
-          :chapters="chapters" 
-          @select="selectChapter" 
-        />
+        <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
+
+        <ChapterList :chapters="chapters" @select="selectChapter" />
       </div>
 
       <!-- Reader View -->
@@ -101,15 +94,15 @@ const loadMangaDetails = async () => {
     const mangaId = route.params.id as string
     const response = await api.getManga()
     manga.value = response.data.find(m => m.id === mangaId) || null
-    
+
     if (manga.value) {
       chapters.value = await api.getChapters(manga.value.id)
       progress.value = await api.getProgress(manga.value.id)
-      
+
       // Auto-load chapter and page from query parameters
       const chapterPath = route.query.chapter as string
       const pageNum = route.query.page as string
-      
+
       if (chapterPath && chapters.value.length > 0) {
         const normalizedQueryChapter = getChapterName(chapterPath)
         currentChapterIndex.value = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
@@ -131,10 +124,10 @@ const loadMangaDetails = async () => {
 
 const selectChapter = async (chapter: Chapter) => {
   if (!manga.value) return
-  
+
   currentChapter.value = chapter
   currentPage.value = 0
-  
+
   try {
     pages.value = await api.getPages(manga.value.id, chapter.path)
   } catch (error) {
@@ -144,7 +137,7 @@ const selectChapter = async (chapter: Chapter) => {
 
 const resumeReading = async () => {
   if (!progress.value || !manga.value) return
-  
+
   const normalizedProgressChapter = getChapterName(progress.value.lastChapterPath)
   const chapter = chapters.value.find(c => c.path === normalizedProgressChapter)
   if (chapter) {
@@ -155,7 +148,7 @@ const resumeReading = async () => {
 
 const updateProgress = async () => {
   if (!manga.value || !currentChapter.value) return
-  
+
   try {
     await api.updateProgress(manga.value.id, currentChapter.value.path, currentPage.value)
     await api.addHistory(manga.value.id, currentChapter.value.path, currentPage.value)
@@ -170,10 +163,10 @@ const scrollDownPage = () => {
   const scrollAmount = viewportHeight * 0.8 // Scroll 80% of viewport height
   const currentScrollPosition = window.scrollY + window.innerHeight
   const pageHeight = document.documentElement.scrollHeight
-  
+
   // Check if we're already at the very bottom (within 10px tolerance)
   const isAtBottom = currentScrollPosition >= pageHeight - 10
-  
+
   if (isAtBottom) {
     // If this is the last page of the chapter
     if (currentPage.value >= pages.value.length - 1) {
@@ -191,20 +184,20 @@ const scrollDownPage = () => {
     // Just scroll down
     window.scrollBy({
       top: scrollAmount,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 }
 
 const updateURL = () => {
   if (!manga.value || !currentChapter.value) return
-  
+
   router.replace({
     path: `/manga/${manga.value.id}`,
     query: {
       chapter: currentChapter.value.path,
-      page: currentPage.value.toString()
-    }
+      page: currentPage.value.toString(),
+    },
   })
 }
 
@@ -219,9 +212,9 @@ const changeChapter = async (chapterPath: string) => {
 }
 
 const nextPage = () => {
-  if(readerStore.chapterViewMode) {
+  if (readerStore.chapterViewMode) {
     changeChapter(chapters.value[currentChapterIndex.value + 1].path)
-    return;
+    return
   }
 
   if (currentPage.value < pages.value.length - 1) {
@@ -231,9 +224,9 @@ const nextPage = () => {
 }
 
 const previousPage = () => {
-  if(readerStore.chapterViewMode) {
+  if (readerStore.chapterViewMode) {
     changeChapter(chapters.value[currentChapterIndex.value - 1].path)
-    return;
+    return
   }
 
   if (currentPage.value > 0) {
@@ -253,7 +246,7 @@ const goToPage = (page: number) => {
 
 const handleBookmark = async () => {
   if (!manga.value || !currentChapter.value) return
-  
+
   const note = prompt('Add a note (optional):')
   try {
     await api.createBookmark(
@@ -293,7 +286,7 @@ const updatePageTitle = () => {
 
 onMounted(() => {
   loadMangaDetails()
-  
+
   // Listen for header actions
   window.addEventListener('reader-action', handleReaderAction as EventListener)
 })
