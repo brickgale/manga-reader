@@ -51,7 +51,7 @@ export const getPagination = (
     skip: (safePage - 1) * safePageSize,
     take: safePageSize,
     page: safePage,
-    pageSize: safePageSize
+    pageSize: safePageSize,
   }
 }
 
@@ -63,10 +63,10 @@ export const buildPaginatedResponse = <T>(
 ): PaginatedResponse<T> => {
   // Guard against invalid pageSize
   const safePageSize = Math.max(1, pageSize)
-  
+
   // Calculate totalPages, defaulting to 0 for empty datasets
   const totalPages = totalItems > 0 ? Math.ceil(totalItems / safePageSize) : 0
-  
+
   // Clamp current page to valid range
   const safePage = totalPages > 0 ? Math.max(1, Math.min(page, totalPages)) : 0
 
@@ -78,7 +78,7 @@ export const buildPaginatedResponse = <T>(
       totalPages,
       totalItems,
       hasNext: safePage < totalPages,
-      hasPrev: safePage > 1
-    }
+      hasPrev: safePage > 1,
+    },
   }
 }

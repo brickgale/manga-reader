@@ -47,10 +47,12 @@ MANGA_STORAGE_PATH=/manga
 ## API Endpoints
 
 ### Configuration
+
 - `GET /api/config` - Get server configuration
 - `GET /api/health` - Health check
 
 ### Manga
+
 - `GET /api/manga` - Get all manga
 - `POST /api/manga/scan` - Scan directory for manga
   - Body: `{ "dirPath": "/manga" }`
@@ -59,6 +61,7 @@ MANGA_STORAGE_PATH=/manga
 - `GET /api/manga/image?imagePath=<path>` - Get image file
 
 ### Reading History
+
 - `GET /api/history` - Get all reading history
 - `GET /api/history/manga/:mangaId` - Get history for specific manga
 - `POST /api/history` - Create history entry
@@ -66,6 +69,7 @@ MANGA_STORAGE_PATH=/manga
 - `DELETE /api/history/:id` - Delete history entry
 
 ### Bookmarks
+
 - `GET /api/bookmarks` - Get all bookmarks
 - `GET /api/bookmarks/manga/:mangaId` - Get bookmarks for specific manga
 - `POST /api/bookmarks` - Create bookmark
@@ -75,6 +79,7 @@ MANGA_STORAGE_PATH=/manga
 - `DELETE /api/bookmarks/:id` - Delete bookmark
 
 ### Progress Tracking
+
 - `GET /api/progress/manga/:mangaId` - Get reading progress for manga
 - `POST /api/progress` - Update reading progress
   - Body: `{ "mangaId": "uuid", "chapterPath": "path", "pageNumber": 1 }`
@@ -82,6 +87,7 @@ MANGA_STORAGE_PATH=/manga
 ## Database Schema
 
 ### Manga
+
 ```prisma
 model Manga {
   id          String   @id @default(uuid())
@@ -94,6 +100,7 @@ model Manga {
 ```
 
 ### ReadingHistory
+
 ```prisma
 model ReadingHistory {
   id          String   @id @default(uuid())
@@ -105,6 +112,7 @@ model ReadingHistory {
 ```
 
 ### Bookmark
+
 ```prisma
 model Bookmark {
   id          String   @id @default(uuid())
@@ -117,6 +125,7 @@ model Bookmark {
 ```
 
 ### ReadingProgress
+
 ```prisma
 model ReadingProgress {
   id                  String   @id @default(uuid())
@@ -132,22 +141,26 @@ model ReadingProgress {
 ## Development
 
 ### Prerequisites
+
 - Node.js 24+
 - Docker (for production)
 
 ### Local Development
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Setup database**
+
    ```bash
    npx prisma migrate dev
    ```
 
 3. **Generate Prisma Client**
+
    ```bash
    npx prisma generate
    ```
@@ -173,6 +186,7 @@ Server runs on `http://localhost:3000`
 The backend is containerized and runs as part of the Docker Compose setup.
 
 ### Container Details
+
 - Base image: `node:24-alpine`
 - Exposed port: `3000`
 - Volume mounts:
@@ -181,6 +195,7 @@ The backend is containerized and runs as part of the Docker Compose setup.
   - `/app/frontend/dist` - Frontend build
 
 ### Build
+
 ```bash
 docker compose build backend
 ```
@@ -188,11 +203,13 @@ docker compose build backend
 ## Dependencies
 
 ### Production
+
 - `express` - Web framework
 - `@prisma/client` - Database ORM
 - `cors` - Cross-origin resource sharing
 
 ### Development
+
 - `typescript` - TypeScript compiler
 - `tsx` - TypeScript execution engine
 - `prisma` - Database toolkit

@@ -1,53 +1,53 @@
-import { Router } from 'express';
-import { prisma } from '../index';
+import { Router } from 'express'
+import { prisma } from '../index'
 
-const router = Router();
+const router = Router()
 
 // Get progress for a manga
 router.get('/manga/:mangaId', async (req, res) => {
   try {
     const progress = await prisma.readingProgress.findUnique({
       where: {
-        mangaId: req.params.mangaId
-      }
-    });
-    res.json(progress);
+        mangaId: req.params.mangaId,
+      },
+    })
+    res.json(progress)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch progress' });
+    res.status(500).json({ error: 'Failed to fetch progress' })
   }
-});
+})
 
 // Update or create progress
 router.post('/', async (req, res) => {
-  const { mangaId, chapterPath, pageNumber } = req.body;
+  const { mangaId, chapterPath, pageNumber } = req.body
 
   if (!mangaId || !chapterPath || pageNumber === undefined) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: 'Missing required fields' })
   }
 
   try {
     // Get existing progress
     const existingProgress = await prisma.readingProgress.findUnique({
-      where: { mangaId }
-    });
+      where: { mangaId },
+    })
 
-    let farthestChapterPath = chapterPath;
-    let farthestPageNumber = pageNumber;
+    let farthestChapterPath = chapterPath
+    let farthestPageNumber = pageNumber
 
     // Compare and update farthest progress if current is further
     if (existingProgress) {
       // Simple comparison: if chapter path is "greater" or same chapter with higher page
-      const isFarther = 
+      const isFarther =
         chapterPath > existingProgress.farthestChapterPath ||
-        (chapterPath === existingProgress.farthestChapterPath && 
-         pageNumber > existingProgress.farthestPageNumber);
+        (chapterPath === existingProgress.farthestChapterPath &&
+          pageNumber > existingProgress.farthestPageNumber)
 
       if (isFarther) {
-        farthestChapterPath = chapterPath;
-        farthestPageNumber = pageNumber;
+        farthestChapterPath = chapterPath
+        farthestPageNumber = pageNumber
       } else {
-        farthestChapterPath = existingProgress.farthestChapterPath;
-        farthestPageNumber = existingProgress.farthestPageNumber;
+        farthestChapterPath = existingProgress.farthestChapterPath
+        farthestPageNumber = existingProgress.farthestPageNumber
       }
     }
 
@@ -57,21 +57,21 @@ router.post('/', async (req, res) => {
         lastChapterPath: chapterPath,
         lastPageNumber: pageNumber,
         farthestChapterPath,
-        farthestPageNumber
+        farthestPageNumber,
       },
       create: {
         mangaId,
         lastChapterPath: chapterPath,
         lastPageNumber: pageNumber,
         farthestChapterPath: chapterPath,
-        farthestPageNumber: pageNumber
-      }
-    });
+        farthestPageNumber: pageNumber,
+      },
+    })
 
-    res.json(progress);
+    res.json(progress)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update progress' });
+    res.status(500).json({ error: 'Failed to update progress' })
   }
-});
+})
 
-export default router;
+export default router
