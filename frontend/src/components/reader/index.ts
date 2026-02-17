@@ -1,0 +1,5 @@
+export { default as RecentReads } from './RecentReads.vue'
+export { default as MangaInfo } from './MangaInfo.vue'
+export { default as ChapterList } from './ChapterList.vue'
+export { default as ReaderHeader } from './ReaderHeader.vue'
+export { default as PageViewer } from './PageViewer.vue'

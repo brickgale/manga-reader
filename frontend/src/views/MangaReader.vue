@@ -10,55 +10,28 @@
 
     <div v-else>
       <!-- Manga Info & Chapter Selection -->
-      <div v-if="!currentChapter" class="mb-6">
-        <h2 class="text-3xl font-bold mb-4">{{ manga.title }}</h2>
+      <div v-if="!currentChapter">
+        <MangaInfo 
+          :manga="manga" 
+          :progress="progress" 
+          @resume="resumeReading" 
+        />
         
-        <div v-if="progress" class="mb-6 p-4 bg-muted rounded-lg">
-          <p class="text-sm mb-2">
-            <strong>Last Read:</strong> Chapter {{ progress.lastChapterPath.split('/').pop() }}, Page {{ progress.lastPageNumber }}
-          </p>
-          <p class="text-sm">
-            <strong>Farthest:</strong> Chapter {{ progress.farthestChapterPath.split('/').pop() }}, Page {{ progress.farthestPageNumber }}
-          </p>
-          <button
-            @click="resumeReading"
-            class="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Resume Reading
-          </button>
-        </div>
-
-        <h3 class="text-xl font-semibold mb-4">Chapters</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Button
-            v-for="chapter in chapters"
-            :key="chapter.path"
-            @click="selectChapter(chapter)"
-            variant="outline"
-            class="h-auto p-4 justify-start"
-          >
-            {{ chapter.name }}
-          </Button>
-        </div>
+        <ChapterList 
+          :chapters="chapters" 
+          @select="selectChapter" 
+        />
       </div>
 
       <!-- Reader View -->
       <div v-else>
-        <div class="mb-4 flex items-center justify-between">
-          <div>
-            <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
-            <p v-if="!readerStore.chapterViewMode" class="text-sm text-muted-foreground">
-              Page {{ currentPage + 1 }} of {{ pages.length }}
-            </p>
-          </div>
-          <Button
-            @click="readerStore.toggleChapterViewMode"
-            :variant="readerStore.chapterViewMode ? 'default' : 'outline'"
-            size="sm"
-          >
-            {{ readerStore.chapterViewMode ? 'Single Page' : 'Chapter View' }}
-          </Button>
-        </div>
+        <ReaderHeader
+          :current-chapter="currentChapter"
+          :current-page="currentPage"
+          :total-pages="pages.length"
+          :chapter-view-mode="readerStore.chapterViewMode"
+          @toggle-view-mode="readerStore.toggleChapterViewMode"
+        />
 
         <Pagination
           :current-page="currentPage"
@@ -73,24 +46,12 @@
           class="mb-4"
         />
 
-        <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4">
-          <img
-            v-if="readerStore.chapterViewMode"
-            v-for="(page, idx) in pages"
-            :key="page.path"
-            :src="api.getImageUrl(page.path)"
-            :alt="`Page ${idx + 1}`"
-            class="max-w-full h-auto cursor-pointer"
-            @click="scrollDownPage"
-          />
-          <img
-            v-else
-            :src="api.getImageUrl(pages[currentPage].path)"
-            :alt="`Page ${currentPage + 1}`"
-            class="max-w-full h-auto cursor-pointer"
-            @click="scrollDownPage"
-          />
-        </div>
+        <PageViewer
+          :pages="pages"
+          :current-page="currentPage"
+          :chapter-view-mode="readerStore.chapterViewMode"
+          @page-click="scrollDownPage"
+        />
 
         <Pagination
           :current-page="currentPage"
@@ -113,8 +74,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
-import { Button } from '@/components/ui'
 import { Pagination } from '@/components/pagination'
+import { MangaInfo, ChapterList, ReaderHeader, PageViewer } from '@/components/reader'
 import { useReaderStore } from '@/stores/reader'
 
 const route = useRoute()

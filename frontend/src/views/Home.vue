@@ -94,7 +94,7 @@ import { toast } from 'vue-sonner'
 import { api, type Manga, type PaginationInfo } from '@/api'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
-import RecentReads from '@/components/reader/RecentReads.vue'
+import { RecentReads } from '@/components/reader'
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
