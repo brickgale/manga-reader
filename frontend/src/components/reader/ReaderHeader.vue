@@ -1,6 +1,6 @@
 <template>
   <div class="mb-4 flex items-center justify-between">
-    <div class="flex flex-row justify-center items-center gap-2">
+    <div class="flex flex-row flex-wrap items-center gap-2 pr-3">
       <h3 class="text-xl font-semibold">{{ currentChapter.name }}</h3>
       <p v-if="!chapterViewMode" class="text-sm text-muted-foreground">
         Page {{ currentPage + 1 }} of {{ totalPages }}

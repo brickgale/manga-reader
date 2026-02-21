@@ -61,15 +61,18 @@ const handleChapterChange = (value: any) => {
 </script>
 
 <template>
-  <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+  <div class="flex flex-row flex-wrap justify-center items-center gap-3">
     <!-- Chapter Selector -->
-    <div v-if="chapters && chapters.length > 0" class="flex items-center gap-2 min-w-[200px]">
-      <span class="text-sm text-muted-foreground whitespace-nowrap">Chapter:</span>
+    <div
+      v-if="chapters && chapters.length > 0"
+      class="flex items-center gap-2 min-w-none sm:min-w-[200px]"
+    >
+      <span class="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline">Chapter:</span>
       <Select :model-value="currentChapterPath" @update:model-value="handleChapterChange">
-        <SelectTrigger class="w-full">
+        <SelectTrigger class="w-full max-w-[200px]">
           <SelectValue placeholder="Select chapter" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent class="w-[130px]">
           <SelectItem v-for="chapter in chapters" :key="chapter.path" :value="chapter.path">
             {{ chapter.name }}
           </SelectItem>
@@ -102,10 +105,10 @@ const handleChapterChange = (value: any) => {
           :model-value="String(currentPage)"
           @update:model-value="handlePageChange"
         >
-          <SelectTrigger class="w-[130px]">
+          <SelectTrigger class="w-full max-w-[100px]">
             <SelectValue placeholder="Select page" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent class="w-[100px]">
             <SelectItem v-for="option in pageOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </SelectItem>

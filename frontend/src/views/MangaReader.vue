@@ -36,7 +36,7 @@
           @next="nextPage"
           @change-page="goToPage"
           @change-chapter="changeChapter"
-          class="mb-4"
+          class="mb-4 sticky top-0 z-10 bg-background/80 backdrop-blur-sm p-3"
         />
 
         <PageViewer
@@ -44,18 +44,6 @@
           :current-page="currentPage"
           :chapter-view-mode="readerStore.chapterViewMode"
           @page-click="scrollDownPage"
-        />
-
-        <Pagination
-          :current-page="currentPage"
-          :total-pages="pages.length"
-          :chapters="chapters"
-          :current-chapter-path="currentChapter?.path"
-          :hide-page-selector="readerStore.chapterViewMode"
-          @prev="previousPage"
-          @next="nextPage"
-          @change-page="goToPage"
-          @change-chapter="changeChapter"
         />
       </div>
     </div>

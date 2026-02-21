@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4">
+  <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4 border-1 border-white">
     <template v-if="chapterViewMode">
       <img
         v-for="(page, idx) in pages"
