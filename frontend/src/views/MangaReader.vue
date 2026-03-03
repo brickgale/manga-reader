@@ -277,6 +277,20 @@ onMounted(() => {
 
   // Listen for header actions
   window.addEventListener('reader-action', handleReaderAction as EventListener)
+
+  // Listen for left/right arrow keys for chapter navigation
+  window.addEventListener('keydown', (event: KeyboardEvent) => {
+    // Only trigger if in reader view (currentChapter is set)
+    if (!currentChapter.value) return
+    // Ignore if focused on input/textarea/select
+    const tag = (event.target as HTMLElement)?.tagName
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+    if (event.key === 'ArrowLeft') {
+      previousPage()
+    } else if (event.key === 'ArrowRight') {
+      nextPage()
+    }
+  })
 })
 
 const handleReaderAction = (event: CustomEvent) => {
