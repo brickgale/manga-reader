@@ -196,6 +196,10 @@ const changeChapter = async (chapterPath: string) => {
     await selectChapter(chapter)
     window.scrollTo({ top: 0, behavior: 'instant' })
     updateURL()
+    // If in chapter view mode, update progress when chapter changes
+    if (readerStore.chapterViewMode) {
+      updateProgress()
+    }
   }
 }
 
