@@ -659,14 +659,15 @@ router.post('/migrate-titles', async (req, res) => {
       if (needsUpdate) {
         // Current title was from metadata - move it to altTitle, restore folder name as title
         const altTitle = manga.altTitle ?? manga.title
+        const newAltTitle = altTitle !== folderName ? altTitle : manga.altTitle
         await prisma.manga.update({
           where: { id: manga.id },
           data: {
             title: folderName,
-            altTitle: altTitle !== folderName ? altTitle : manga.altTitle,
+            altTitle: newAltTitle,
           },
         })
-        results.push({ id: manga.id, title: folderName, altTitle, changed: true })
+        results.push({ id: manga.id, title: folderName, altTitle: newAltTitle, changed: true })
       } else {
         results.push({ id: manga.id, title: manga.title, altTitle: manga.altTitle, changed: false })
       }

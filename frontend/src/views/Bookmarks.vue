@@ -82,10 +82,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
-import { api, type Bookmark, type Manga } from '@/api'
+import { api, type Bookmark } from '@/api'
+import { useMangaUtils } from '@/composables/useMangaUtils'
 
 const bookmarks = ref<Bookmark[]>([])
 const loading = ref(false)
+const { getCoverUrl, formatChapterName } = useMangaUtils()
 
 const loadBookmarks = async () => {
   loading.value = true
@@ -108,18 +110,6 @@ const handleDelete = async (id: string) => {
   } catch (error) {
     console.error('Failed to delete bookmark:', error)
   }
-}
-
-const getCoverUrl = (manga: Manga | undefined) => {
-  if (!manga?.coverImage) return null
-  if (manga.coverImage.startsWith('http') || manga.coverImage.startsWith('/api')) {
-    return manga.coverImage
-  }
-  return api.getImageUrl(manga.coverImage)
-}
-
-const formatChapterName = (chapterPath: string) => {
-  return chapterPath.split('/').pop() || chapterPath
 }
 
 onMounted(() => {

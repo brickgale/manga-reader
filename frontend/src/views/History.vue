@@ -57,10 +57,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { api, type ReadingHistory, type Manga } from '@/api'
+import { api, type ReadingHistory } from '@/api'
+import { useMangaUtils } from '@/composables/useMangaUtils'
 
 const history = ref<ReadingHistory[]>([])
 const loading = ref(false)
+const { getCoverUrl, formatChapterName } = useMangaUtils()
 
 const loadHistory = async () => {
   loading.value = true
@@ -72,18 +74,6 @@ const loadHistory = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const getCoverUrl = (manga: Manga | undefined) => {
-  if (!manga?.coverImage) return null
-  if (manga.coverImage.startsWith('http') || manga.coverImage.startsWith('/api')) {
-    return manga.coverImage
-  }
-  return api.getImageUrl(manga.coverImage)
-}
-
-const formatChapterName = (chapterPath: string) => {
-  return chapterPath.split('/').pop() || chapterPath
 }
 
 onMounted(() => {

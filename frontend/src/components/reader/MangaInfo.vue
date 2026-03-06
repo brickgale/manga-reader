@@ -46,7 +46,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { api, type Manga, type ReadingProgress } from '@/api'
+import { type Manga, type ReadingProgress } from '@/api'
+import { useMangaUtils } from '@/composables/useMangaUtils'
 
 const props = defineProps<{
   manga: Manga
@@ -57,15 +58,7 @@ defineEmits<{
   resume: []
 }>()
 
-const coverImageUrl = computed(() => {
-  if (!props.manga.coverImage) return null
-  if (props.manga.coverImage.startsWith('http') || props.manga.coverImage.startsWith('/api')) {
-    return props.manga.coverImage
-  }
-  return api.getImageUrl(props.manga.coverImage)
-})
+const { getCoverUrl, formatChapterName } = useMangaUtils()
 
-const formatChapterName = (chapterPath: string) => {
-  return chapterPath.split('/').pop() || chapterPath
-}
+const coverImageUrl = computed(() => getCoverUrl(props.manga))
 </script>
