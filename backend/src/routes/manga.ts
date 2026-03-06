@@ -7,7 +7,29 @@ import { getPagination, buildPaginatedResponse } from '../utils/pagination'
 
 const router = Router()
 
-// Get all manga from database
+/**
+ * @swagger
+ * /manga:
+ *   get:
+ *     summary: Get all manga
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of manga
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
   try {
     const pagination = getPagination(req.query, { defaultPageSize: 20 })
@@ -39,7 +61,32 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Scan a directory and add manga
+/**
+ * @swagger
+ * /manga/scan:
+ *   post:
+ *     summary: Scan directory for manga
+ *     tags: [Manga]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - dirPath
+ *             properties:
+ *               dirPath:
+ *                 type: string
+ *                 description: Directory path to scan
+ *     responses:
+ *       200:
+ *         description: List of scanned manga
+ *       400:
+ *         description: Directory path is required
+ *       500:
+ *         description: Server error
+ */
 router.post('/scan', async (req, res) => {
   const { dirPath } = req.body
 
@@ -146,7 +193,18 @@ router.post('/scan', async (req, res) => {
   }
 })
 
-// Refresh metadata for existing manga
+/**
+ * @swagger
+ * /manga/refresh-metadata:
+ *   post:
+ *     summary: Refresh metadata for existing manga
+ *     tags: [Manga]
+ *     responses:
+ *       200:
+ *         description: Metadata refreshed successfully
+ *       500:
+ *         description: Server error
+ */
 router.post('/refresh-metadata', async (req, res) => {
   try {
     const { mangaIds } = req.body // Optional: array of specific manga IDs to refresh
@@ -247,7 +305,41 @@ router.post('/refresh-metadata', async (req, res) => {
   }
 })
 
-// Manually update manga metadata using MangaDex ID or URL
+/**
+ * @swagger
+ * /manga/update-metadata/{id}:
+ *   post:
+ *     summary: Manually update manga metadata using MangaDex ID
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mangadexId
+ *             properties:
+ *               mangadexId:
+ *                 type: string
+ *                 description: MangaDex manga ID or URL
+ *     responses:
+ *       200:
+ *         description: Manga metadata updated
+ *       400:
+ *         description: MangaDex ID is required
+ *       404:
+ *         description: Manga not found
+ *       500:
+ *         description: Server error
+ */
 router.post('/update-metadata/:id', async (req, res) => {
   try {
     const { mangadexId } = req.body
@@ -319,7 +411,27 @@ router.post('/update-metadata/:id', async (req, res) => {
   }
 })
 
-// Get chapters for a manga
+/**
+ * @swagger
+ * /manga/{id}/chapters:
+ *   get:
+ *     summary: Get chapters for a manga
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *     responses:
+ *       200:
+ *         description: List of chapters
+ *       404:
+ *         description: Manga not found
+ *       500:
+ *         description: Server error
+ */
 router.get('/:id/chapters', async (req, res) => {
   try {
     const manga = await prisma.manga.findUnique({
@@ -345,7 +457,33 @@ router.get('/:id/chapters', async (req, res) => {
   }
 })
 
-// Get pages for a chapter
+/**
+ * @swagger
+ * /manga/{id}/chapters/{chapterPath}/pages:
+ *   get:
+ *     summary: Get pages for a chapter
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *       - in: path
+ *         name: chapterPath
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Chapter path (URL encoded)
+ *     responses:
+ *       200:
+ *         description: List of pages
+ *       404:
+ *         description: Manga not found
+ *       500:
+ *         description: Server error
+ */
 router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
   try {
     const manga = await prisma.manga.findUnique({
@@ -383,7 +521,32 @@ router.get('/:id/chapters/:chapterPath/pages', async (req, res) => {
   }
 })
 
-// Get image file
+/**
+ * @swagger
+ * /manga/image:
+ *   get:
+ *     summary: Get image file
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: query
+ *         name: imagePath
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Full path to the image file
+ *     responses:
+ *       200:
+ *         description: Image file
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Image path is required
+ *       500:
+ *         description: Server error
+ */
 router.get('/image', async (req, res) => {
   try {
     const { imagePath } = req.query
@@ -410,7 +573,30 @@ router.get('/image', async (req, res) => {
   }
 })
 
-// Serve cover images
+/**
+ * @swagger
+ * /manga/covers/{filename}:
+ *   get:
+ *     summary: Serve cover images
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Cover image filename
+ *     responses:
+ *       200:
+ *         description: Cover image
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Cover image not found
+ */
 router.get('/covers/:filename', async (req, res) => {
   try {
     const { filename } = req.params

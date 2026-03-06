@@ -3,7 +3,25 @@ import { prisma } from '../index'
 
 const router = Router()
 
-// Get progress for a manga
+/**
+ * @swagger
+ * /progress/manga/{mangaId}:
+ *   get:
+ *     summary: Get reading progress for a manga
+ *     tags: [Progress]
+ *     parameters:
+ *       - in: path
+ *         name: mangaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *     responses:
+ *       200:
+ *         description: Reading progress for the manga
+ *       500:
+ *         description: Server error
+ */
 router.get('/manga/:mangaId', async (req, res) => {
   try {
     const progress = await prisma.readingProgress.findUnique({
@@ -17,7 +35,37 @@ router.get('/manga/:mangaId', async (req, res) => {
   }
 })
 
-// Update or create progress
+/**
+ * @swagger
+ * /progress:
+ *   post:
+ *     summary: Update or create reading progress
+ *     tags: [Progress]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mangaId
+ *               - chapterPath
+ *               - pageNumber
+ *             properties:
+ *               mangaId:
+ *                 type: string
+ *               chapterPath:
+ *                 type: string
+ *               pageNumber:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Progress updated/created
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
 router.post('/', async (req, res) => {
   const { mangaId, chapterPath, pageNumber } = req.body
 

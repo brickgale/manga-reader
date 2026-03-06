@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
+import swaggerUi from 'swagger-ui-express'
+import swaggerJSDoc from 'swagger-jsdoc'
 import mangaRoutes from './routes/manga'
 import historyRoutes from './routes/history'
 import bookmarkRoutes from './routes/bookmark'
@@ -11,6 +13,27 @@ const app = express()
 const PORT = parseInt(process.env.PORT || '3000', 10)
 
 export const prisma = new PrismaClient()
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Manga Reader API',
+      version: '1.0.0',
+      description: 'API documentation for the Manga Reader application',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}/api`,
+        description: 'Local development server',
+      },
+    ],
+  },
+  apis: ['./src/routes/*.ts'], // Path to the API route files
+}
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions)
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Middleware
 app.use(cors())

@@ -4,7 +4,29 @@ import { getPagination, buildPaginatedResponse } from '../utils/pagination'
 
 const router = Router()
 
-// Get all bookmarks
+/**
+ * @swagger
+ * /bookmarks:
+ *   get:
+ *     summary: Get all bookmarks
+ *     tags: [Bookmarks]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of bookmarks
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
   try {
     const pagination = getPagination(req.query, { defaultPageSize: 20 })
@@ -42,7 +64,25 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Get bookmarks for a specific manga
+/**
+ * @swagger
+ * /bookmarks/manga/{mangaId}:
+ *   get:
+ *     summary: Get bookmarks for a specific manga
+ *     tags: [Bookmarks]
+ *     parameters:
+ *       - in: path
+ *         name: mangaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *     responses:
+ *       200:
+ *         description: Bookmarks for the manga
+ *       500:
+ *         description: Server error
+ */
 router.get('/manga/:mangaId', async (req, res) => {
   try {
     const bookmarks = await prisma.bookmark.findMany({
@@ -59,7 +99,39 @@ router.get('/manga/:mangaId', async (req, res) => {
   }
 })
 
-// Create bookmark
+/**
+ * @swagger
+ * /bookmarks:
+ *   post:
+ *     summary: Create a bookmark
+ *     tags: [Bookmarks]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mangaId
+ *               - chapterPath
+ *               - pageNumber
+ *             properties:
+ *               mangaId:
+ *                 type: string
+ *               chapterPath:
+ *                 type: string
+ *               pageNumber:
+ *                 type: integer
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Bookmark created
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
 router.post('/', async (req, res) => {
   const { mangaId, chapterPath, pageNumber, note } = req.body
 
@@ -82,7 +154,34 @@ router.post('/', async (req, res) => {
   }
 })
 
-// Update bookmark
+/**
+ * @swagger
+ * /bookmarks/{id}:
+ *   put:
+ *     summary: Update a bookmark
+ *     tags: [Bookmarks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Bookmark ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Bookmark updated
+ *       500:
+ *         description: Server error
+ */
 router.put('/:id', async (req, res) => {
   const { note } = req.body
 
@@ -97,7 +196,25 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-// Delete bookmark
+/**
+ * @swagger
+ * /bookmarks/{id}:
+ *   delete:
+ *     summary: Delete a bookmark
+ *     tags: [Bookmarks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Bookmark ID
+ *     responses:
+ *       200:
+ *         description: Bookmark deleted
+ *       500:
+ *         description: Server error
+ */
 router.delete('/:id', async (req, res) => {
   try {
     await prisma.bookmark.delete({
