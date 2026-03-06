@@ -167,14 +167,16 @@ router.post('/scan', async (req, res) => {
       } else {
         // Update existing manga - prefer local covers, remove external URLs
         const hasExternalUrl = manga.coverImage?.startsWith('http')
+        const coverNeedsUpdate = !!(localCoverPath || !manga.coverImage || hasExternalUrl)
         const shouldUpdate =
-          localCoverPath || !manga.coverImage || hasExternalUrl || metadata?.title
+          coverNeedsUpdate || metadata?.title || manga.title !== dir.name
 
         if (shouldUpdate) {
           manga = await prisma.manga.update({
             where: { id: manga.id },
             data: {
-              coverImage: coverToSave,
+              title: dir.name,
+              coverImage: coverNeedsUpdate ? coverToSave : manga.coverImage,
               altTitle: metadata?.title || manga.altTitle,
             },
           })
