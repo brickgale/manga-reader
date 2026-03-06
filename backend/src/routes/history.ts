@@ -4,7 +4,29 @@ import { getPagination, buildPaginatedResponse } from '../utils/pagination'
 
 const router = Router()
 
-// Get reading history
+/**
+ * @swagger
+ * /history:
+ *   get:
+ *     summary: Get reading history
+ *     tags: [History]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Paginated reading history
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
   try {
     const pagination = getPagination(req.query, { defaultPageSize: 20 })
@@ -42,7 +64,25 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Get history for a specific manga
+/**
+ * @swagger
+ * /history/manga/{mangaId}:
+ *   get:
+ *     summary: Get history for a specific manga
+ *     tags: [History]
+ *     parameters:
+ *       - in: path
+ *         name: mangaId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Manga ID
+ *     responses:
+ *       200:
+ *         description: History entries for the manga
+ *       500:
+ *         description: Server error
+ */
 router.get('/manga/:mangaId', async (req, res) => {
   try {
     const history = await prisma.readingHistory.findMany({
@@ -59,7 +99,37 @@ router.get('/manga/:mangaId', async (req, res) => {
   }
 })
 
-// Add or update history entry
+/**
+ * @swagger
+ * /history:
+ *   post:
+ *     summary: Add or update history entry
+ *     tags: [History]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mangaId
+ *               - chapterPath
+ *               - pageNumber
+ *             properties:
+ *               mangaId:
+ *                 type: string
+ *               chapterPath:
+ *                 type: string
+ *               pageNumber:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: History entry created/updated
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
 router.post('/', async (req, res) => {
   const { mangaId, chapterPath, pageNumber } = req.body
 
@@ -100,7 +170,25 @@ router.post('/', async (req, res) => {
   }
 })
 
-// Delete history entry
+/**
+ * @swagger
+ * /history/{id}:
+ *   delete:
+ *     summary: Delete history entry
+ *     tags: [History]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: History entry ID
+ *     responses:
+ *       200:
+ *         description: History entry deleted
+ *       500:
+ *         description: Server error
+ */
 router.delete('/:id', async (req, res) => {
   try {
     await prisma.readingHistory.delete({
