@@ -155,29 +155,31 @@ router.post('/scan', async (req, res) => {
         // Create new manga - only with local covers
         manga = await prisma.manga.create({
           data: {
-            title: metadata?.title || dir.name,
+            title: dir.name,
+            altTitle: metadata?.title || null,
             path: mangaPath,
             coverImage: coverToSave,
           },
         })
         console.log(
-          `Created: ${manga.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
+          `Created: ${manga.title}${manga.altTitle ? ` (alt: ${manga.altTitle})` : ''}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
         )
       } else {
         // Update existing manga - prefer local covers, remove external URLs
         const hasExternalUrl = manga.coverImage?.startsWith('http')
-        const shouldUpdate = localCoverPath || !manga.coverImage || hasExternalUrl
+        const shouldUpdate =
+          localCoverPath || !manga.coverImage || hasExternalUrl || metadata?.title
 
         if (shouldUpdate) {
           manga = await prisma.manga.update({
             where: { id: manga.id },
             data: {
               coverImage: coverToSave,
-              title: metadata?.title || manga.title,
+              altTitle: metadata?.title || manga.altTitle,
             },
           })
           console.log(
-            `Updated: ${manga.title} with ${localCoverPath ? 'local cover' : coverToSave ? 'downloaded cover' : 'no cover (removed external URL)'}`
+            `Updated: ${manga.title}${manga.altTitle ? ` (alt: ${manga.altTitle})` : ''} with ${localCoverPath ? 'local cover' : coverToSave ? 'downloaded cover' : 'no cover (removed external URL)'}`
           )
         }
       }
@@ -290,18 +292,18 @@ router.post('/refresh-metadata', async (req, res) => {
           ? metadata.coverImage
           : null)
 
-      // Update the manga with new metadata
+      // Update the manga with new metadata (altTitle from API, keep folder name as title)
       const updated = await prisma.manga.update({
         where: { id: mangaInfo.id },
         data: {
-          title: metadata?.title || dirName,
+          altTitle: metadata?.title || null,
           coverImage: coverToSave,
           updatedAt: new Date(),
         },
       })
 
       console.log(
-        `Updated: ${updated.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
+        `Updated: ${updated.title}${updated.altTitle ? ` (alt: ${updated.altTitle})` : ''}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
       )
       updatedManga.push(updated)
     }
@@ -399,18 +401,18 @@ router.post('/update-metadata/:id', async (req, res) => {
       localCoverPath ||
       (metadata.coverImage && !metadata.coverImage.startsWith('http') ? metadata.coverImage : null)
 
-    // Update the manga with new metadata
+    // Update the manga with new metadata (altTitle from API, keep folder name as title)
     const updated = await prisma.manga.update({
       where: { id: req.params.id },
       data: {
-        title: metadata.title,
+        altTitle: metadata.title,
         coverImage: coverToSave,
         updatedAt: new Date(),
       },
     })
 
     console.log(
-      `Manually updated: ${updated.title}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
+      `Manually updated: ${updated.title}${updated.altTitle ? ` (alt: ${updated.altTitle})` : ''}${localCoverPath ? ' (with local cover)' : coverToSave ? ' (with downloaded cover)' : ' (no cover)'}`
     )
 
     res.json({
@@ -630,6 +632,52 @@ router.get('/covers/:filename', async (req, res) => {
     res.send(imageBuffer)
   } catch (error) {
     res.status(404).json({ error: 'Cover image not found' })
+  }
+})
+
+/**
+ * @swagger
+ * /manga/migrate-titles:
+ *   post:
+ *     summary: One-time migration to set title=folder name and altTitle=previous metadata title
+ *     tags: [Manga]
+ *     responses:
+ *       200:
+ *         description: Migration complete
+ *       500:
+ *         description: Server error
+ */
+router.post('/migrate-titles', async (req, res) => {
+  try {
+    const mangaList = await prisma.manga.findMany()
+    const results: { id: string; title: string; altTitle: string | null; changed: boolean }[] = []
+
+    for (const manga of mangaList) {
+      const folderName = path.basename(manga.path)
+      const needsUpdate = manga.title !== folderName
+
+      if (needsUpdate) {
+        // Current title was from metadata - move it to altTitle, restore folder name as title
+        const altTitle = manga.altTitle ?? manga.title
+        await prisma.manga.update({
+          where: { id: manga.id },
+          data: {
+            title: folderName,
+            altTitle: altTitle !== folderName ? altTitle : manga.altTitle,
+          },
+        })
+        results.push({ id: manga.id, title: folderName, altTitle, changed: true })
+      } else {
+        results.push({ id: manga.id, title: manga.title, altTitle: manga.altTitle, changed: false })
+      }
+    }
+
+    const changed = results.filter(r => r.changed).length
+    console.log(`migrate-titles: updated ${changed}/${mangaList.length} manga`)
+    res.json({ message: `Updated ${changed} of ${mangaList.length} manga`, results })
+  } catch (error) {
+    console.error('migrate-titles error:', error)
+    res.status(500).json({ error: 'Failed to migrate titles' })
   }
 })
 

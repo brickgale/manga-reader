@@ -1,30 +1,54 @@
 <template>
   <div class="mb-6">
-    <h2 class="text-3xl font-bold mb-4">{{ manga.title }}</h2>
+    <div class="flex gap-6">
+      <!-- Cover Image -->
+      <div class="flex-shrink-0">
+        <img
+          v-if="coverImageUrl"
+          :src="coverImageUrl"
+          :alt="manga.title"
+          class="w-32 h-48 object-cover rounded-lg shadow-md"
+        />
+        <div v-else class="w-32 h-48 bg-muted rounded-lg flex items-center justify-center">
+          <span class="text-muted-foreground text-sm">No Cover</span>
+        </div>
+      </div>
 
-    <div v-if="progress" class="mb-6 p-4 bg-muted rounded-lg">
-      <p class="text-sm mb-2">
-        <strong>Last Read:</strong> Chapter {{ progress.lastChapterPath.split('/').pop() }}, Page
-        {{ progress.lastPageNumber + 1 }}
-      </p>
-      <p class="text-sm">
-        <strong>Farthest:</strong> Chapter {{ progress.farthestChapterPath.split('/').pop() }}, Page
-        {{ progress.farthestPageNumber + 1 }}
-      </p>
-      <button
-        @click="$emit('resume')"
-        class="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-      >
-        Resume Reading
-      </button>
+      <!-- Info -->
+      <div class="flex-1 min-w-0">
+        <h2 class="text-2xl font-bold mb-1 truncate">{{ manga.title }}</h2>
+        <p v-if="manga.altTitle" class="text-sm text-muted-foreground mb-4 truncate">
+          {{ manga.altTitle }}
+        </p>
+
+        <div v-if="progress" class="p-4 bg-muted rounded-lg">
+          <p class="text-sm mb-2">
+            <strong>Last Read:</strong> Chapter {{ formatChapterName(progress.lastChapterPath) }},
+            Page
+            {{ progress.lastPageNumber + 1 }}
+          </p>
+          <p class="text-sm">
+            <strong>Farthest:</strong> Chapter
+            {{ formatChapterName(progress.farthestChapterPath) }}, Page
+            {{ progress.farthestPageNumber + 1 }}
+          </p>
+          <button
+            @click="$emit('resume')"
+            class="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Resume Reading
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Manga, ReadingProgress } from '@/api'
+import { computed } from 'vue'
+import { api, type Manga, type ReadingProgress } from '@/api'
 
-defineProps<{
+const props = defineProps<{
   manga: Manga
   progress: ReadingProgress | null
 }>()
@@ -32,4 +56,16 @@ defineProps<{
 defineEmits<{
   resume: []
 }>()
+
+const coverImageUrl = computed(() => {
+  if (!props.manga.coverImage) return null
+  if (props.manga.coverImage.startsWith('http') || props.manga.coverImage.startsWith('/api')) {
+    return props.manga.coverImage
+  }
+  return api.getImageUrl(props.manga.coverImage)
+})
+
+const formatChapterName = (chapterPath: string) => {
+  return chapterPath.split('/').pop() || chapterPath
+}
 </script>

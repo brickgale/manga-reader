@@ -12,6 +12,7 @@ datasource db {
 model Manga {
   id          String   @id @default(uuid())
   title       String
+  altTitle    String?
   path        String   @unique
   coverImage  String?
   createdAt   DateTime @default(now())
