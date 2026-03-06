@@ -199,6 +199,18 @@ router.post('/scan', async (req, res) => {
  *   post:
  *     summary: Refresh metadata for existing manga
  *     tags: [Manga]
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mangaIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Optional array of specific manga IDs to refresh. If omitted, all manga will be refreshed.
  *     responses:
  *       200:
  *         description: Metadata refreshed successfully

@@ -24,16 +24,19 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${PORT}/api`,
+        url: '/api',
         description: 'Local development server',
       },
     ],
   },
-  apis: ['./src/routes/*.ts'], // Path to the API route files
+  apis: [path.join(__dirname, 'routes', '*.{ts,js}')], // Path to the API route files (works in src and dist)
 }
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions)
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+}
 
 // Middleware
 app.use(cors())
