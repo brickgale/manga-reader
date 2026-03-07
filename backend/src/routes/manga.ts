@@ -300,7 +300,7 @@ router.post('/refresh-metadata', async (req, res) => {
       const updated = await prisma.manga.update({
         where: { id: mangaInfo.id },
         data: {
-          altTitle: metadata?.title || null,
+          altTitle: metadata?.title || mangaInfo.altTitle,
           coverImage: coverToSave,
           updatedAt: new Date(),
         },
