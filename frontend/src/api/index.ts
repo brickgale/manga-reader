@@ -5,6 +5,7 @@ const API_URL = '/api'
 export interface Manga {
   id: string
   title: string
+  altTitle: string | null
   path: string
   coverImage: string | null
   createdAt: string

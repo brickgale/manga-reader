@@ -10,7 +10,7 @@
       <p>No reading history yet.</p>
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
       <div
         v-for="item in history"
         :key="item.id"
@@ -21,14 +21,34 @@
             path: `/manga/${item.mangaId}`,
             query: { chapter: item.chapterPath, page: item.pageNumber.toString() },
           }"
-          class="block"
+          class="flex gap-4"
         >
-          <h3 class="font-semibold text-lg mb-2">{{ item.manga?.title }}</h3>
-          <p class="text-sm text-muted-foreground mb-1">Chapter: {{ item.chapterPath }}</p>
-          <p class="text-sm text-muted-foreground mb-1">Page: {{ item.pageNumber }}</p>
-          <p class="text-xs text-muted-foreground">
-            {{ new Date(item.timestamp).toLocaleString() }}
-          </p>
+          <!-- Cover Image -->
+          <div class="flex-shrink-0">
+            <img
+              v-if="getCoverUrl(item.manga)"
+              :src="getCoverUrl(item.manga)"
+              :alt="item.manga?.title"
+              class="w-16 h-24 object-cover rounded-md"
+            />
+            <div v-else class="w-16 h-24 bg-muted rounded-md flex items-center justify-center">
+              <span class="text-muted-foreground text-xs">No Cover</span>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-lg truncate">{{ item.manga?.title }}</h3>
+            <p v-if="item.manga?.altTitle" class="text-xs text-muted-foreground truncate mb-1">
+              {{ item.manga.altTitle }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Chapter: {{ formatChapterName(item.chapterPath) }} · Page {{ item.pageNumber + 1 }}
+            </p>
+            <p class="text-xs text-muted-foreground mt-1">
+              {{ new Date(item.timestamp).toLocaleString() }}
+            </p>
+          </div>
         </router-link>
       </div>
     </div>
@@ -38,9 +58,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { api, type ReadingHistory } from '@/api'
+import { useMangaUtils } from '@/composables/useMangaUtils'
 
 const history = ref<ReadingHistory[]>([])
 const loading = ref(false)
+const { getCoverUrl, formatChapterName } = useMangaUtils()
 
 const loadHistory = async () => {
   loading.value = true
