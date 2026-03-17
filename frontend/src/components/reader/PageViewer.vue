@@ -1,12 +1,15 @@
 <template>
-  <div v-if="pages.length > 0" class="flex flex-col justify-center mb-4 border-1 border-white">
+  <div
+    v-if="pages.length > 0"
+    class="flex flex-col justify-center items-center mb-4 border-1 border-white"
+  >
     <template v-if="chapterViewMode">
       <img
         v-for="(page, idx) in pages"
         :key="page.path"
         :src="getImageUrl(page.path)"
         :alt="`Page ${idx + 1}`"
-        class="max-w-full h-auto cursor-pointer"
+        class="max-w-[980px] w-full h-auto cursor-pointer"
         @click="$emit('page-click')"
       />
     </template>
@@ -14,7 +17,7 @@
       v-else
       :src="getImageUrl(pages[currentPage].path)"
       :alt="`Page ${currentPage + 1}`"
-      class="max-w-full h-auto cursor-pointer"
+      class="max-w-[980px] w-full h-auto cursor-pointer"
       @click="$emit('page-click')"
     />
   </div>

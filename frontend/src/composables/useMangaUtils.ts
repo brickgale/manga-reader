@@ -1,8 +1,8 @@
 import { api, type Manga } from '@/api'
 
 export function useMangaUtils() {
-  const getCoverUrl = (manga: Manga | undefined): string | null => {
-    if (!manga?.coverImage) return null
+  const getCoverUrl = (manga: Manga | undefined): string | undefined => {
+    if (!manga?.coverImage) return undefined
     if (manga.coverImage.startsWith('http') || manga.coverImage.startsWith('/api')) {
       return manga.coverImage
     }
