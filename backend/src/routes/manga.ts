@@ -244,11 +244,11 @@ router.post('/refresh-metadata', async (req, res) => {
     }
 
     // Extract titles from directory names for batch processing
-    const titleMap = new Map<string, { id: string; path: string }>()
+    const titleMap = new Map<string, { id: string; path: string; altTitle: string | null }>()
 
     for (const manga of mangaList) {
       const dirName = path.basename(manga.path)
-      titleMap.set(dirName, { id: manga.id, path: manga.path })
+      titleMap.set(dirName, { id: manga.id, path: manga.path, altTitle: manga.altTitle })
     }
 
     const titles = Array.from(titleMap.keys())

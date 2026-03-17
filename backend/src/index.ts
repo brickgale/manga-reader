@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
-import swaggerUi from 'swagger-ui-express'
+import { apiReference } from '@scalar/express-api-reference'
 import swaggerJSDoc from 'swagger-jsdoc'
 import mangaRoutes from './routes/manga'
 import historyRoutes from './routes/history'
@@ -35,7 +35,14 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
 if (process.env.NODE_ENV !== 'production') {
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+  app.use(
+    '/api/docs',
+    apiReference({
+      spec: {
+        content: swaggerSpec,
+      },
+    })
+  )
 }
 
 // Middleware
