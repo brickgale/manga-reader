@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.db
 *.db-journal
+backups/
 .env
 images/covers/*
 !images/covers/.gitkeep

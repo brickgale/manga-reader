@@ -181,6 +181,37 @@ Server runs on `http://localhost:3000`
 - `npx prisma migrate dev` - Create and apply migrations
 - `npx prisma generate` - Generate Prisma Client
 
+### Database Backup & Restore
+
+The project includes a built-in database backup utility for SQLite:
+
+- `npm run db:backup` - Create a timestamped backup of the database
+- `npm run db:restore` - Restore from the most recent backup
+- `npm run db:restore backup-2026-03-28.db` - Restore from a specific backup file
+- `npm run db:list` - List all available backups with details
+- `npm run db:clean` - Keep only the 10 most recent backups (delete older ones)
+- `npm run db:clean 5` - Keep only the 5 most recent backups
+
+**How it works:**
+
+- Backups are stored in `backend/backups/` directory
+- Backup files are named with timestamps: `backup-YYYY-MM-DDTHH-MM-SS.db`
+- Before restoring, the current database is automatically backed up as `pre-restore-*.db`
+- Backups are excluded from git (see `.gitignore`)
+
+**Example workflow:**
+
+```bash
+# Create a backup before risky operations
+npm run db:backup
+
+# If something goes wrong, restore from backup
+npm run db:restore
+
+# Periodically clean old backups to save space
+npm run db:clean 10
+```
+
 ## Docker
 
 The backend is containerized and runs as part of the Docker Compose setup.

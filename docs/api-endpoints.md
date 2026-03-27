@@ -1,6 +1,109 @@
 # API Endpoints
 
-This document contains API endpoints that are available in the backend but not yet integrated into the frontend UI.
+This document contains API endpoints that are available in the backend.
+
+## Settings API
+
+Manage application-wide settings for the manga reader.
+
+### Get Settings
+
+Get the current application settings.
+
+**Endpoint:** `GET /api/settings`
+
+**Response:**
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "theme": "dark",
+  "enableChapterView": true,
+  "enableSideReader": false,
+  "showPageNumbers": true,
+  "readingDirection": "ltr",
+  "pageFitMode": "fit-width",
+  "preloadNextPages": 3,
+  "autoMarkAsRead": true,
+  "defaultPageSize": 20,
+  "createdAt": "2026-03-28T10:00:00.000Z",
+  "updatedAt": "2026-03-28T10:00:00.000Z"
+}
+```
+
+### Update Settings (Full)
+
+Replace all settings with new values.
+
+**Endpoint:** `PUT /api/settings`
+
+**Request Body:**
+
+```json
+{
+  "theme": "light",
+  "enableChapterView": false,
+  "enableSideReader": true,
+  "showPageNumbers": false,
+  "readingDirection": "rtl",
+  "pageFitMode": "fit-height",
+  "preloadNextPages": 5,
+  "autoMarkAsRead": false,
+  "defaultPageSize": 30
+}
+```
+
+### Update Settings (Partial)
+
+Update only specific settings fields.
+
+**Endpoint:** `PATCH /api/settings`
+
+**Request Body:**
+
+```json
+{
+  "theme": "auto",
+  "enableSideReader": true
+}
+```
+
+### Reset Settings
+
+Reset all settings to their default values.
+
+**Endpoint:** `POST /api/settings/reset`
+
+**Response:**
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "theme": "dark",
+  "enableChapterView": true,
+  "enableSideReader": false,
+  "showPageNumbers": true,
+  "readingDirection": "ltr",
+  "pageFitMode": "fit-width",
+  "preloadNextPages": 3,
+  "autoMarkAsRead": true,
+  "defaultPageSize": 20,
+  "createdAt": "2026-03-28T10:00:00.000Z",
+  "updatedAt": "2026-03-28T10:00:00.000Z"
+}
+```
+
+**Settings Fields:**
+
+- `theme`: Color theme - `"dark"`, `"light"`, or `"auto"` (default: `"dark"`)
+- `enableChapterView`: Show chapter view in reader (default: `true`)
+- `enableSideReader`: Open manga in drawer vs side panel (default: `false`)
+- `showPageNumbers`: Display page numbers while reading (default: `true`)
+- `readingDirection`: Reading flow - `"ltr"` (left-to-right) or `"rtl"` (right-to-left for manga) (default: `"ltr"`)
+- `pageFitMode`: How pages are displayed - `"fit-width"`, `"fit-height"`, or `"original"` (default: `"fit-width"`)
+- `preloadNextPages`: Number of pages to preload ahead (default: `3`)
+- `autoMarkAsRead`: Auto-mark chapters as read when completed (default: `true`)
+- `defaultPageSize`: Default items per page in lists (default: `20`)
 
 ## Manga APIs
 

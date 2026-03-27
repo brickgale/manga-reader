@@ -7,6 +7,7 @@ import mangaRoutes from './routes/manga'
 import historyRoutes from './routes/history'
 import bookmarkRoutes from './routes/bookmark'
 import progressRoutes from './routes/progress'
+import settingsRoutes from './routes/settings'
 import path from 'path'
 
 const app = express()
@@ -54,6 +55,7 @@ app.use('/api/manga', mangaRoutes)
 app.use('/api/history', historyRoutes)
 app.use('/api/bookmarks', bookmarkRoutes)
 app.use('/api/progress', progressRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {

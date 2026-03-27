@@ -84,11 +84,17 @@ router.post('/', async (req, res) => {
 
     // Compare and update farthest progress if current is further
     if (existingProgress) {
-      // Simple comparison: if chapter path is "greater" or same chapter with higher page
+      // Use localeCompare with numeric: true for proper numeric comparison
+      // This correctly handles "Chapter 100" > "Chapter 99", etc.
+      const chapterComparison = chapterPath.localeCompare(
+        existingProgress.farthestChapterPath,
+        undefined,
+        { numeric: true, sensitivity: 'base' }
+      )
+      
       const isFarther =
-        chapterPath > existingProgress.farthestChapterPath ||
-        (chapterPath === existingProgress.farthestChapterPath &&
-          pageNumber > existingProgress.farthestPageNumber)
+        chapterComparison > 0 ||
+        (chapterComparison === 0 && pageNumber > existingProgress.farthestPageNumber)
 
       if (isFarther) {
         farthestChapterPath = chapterPath

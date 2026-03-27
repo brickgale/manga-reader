@@ -10,7 +10,15 @@
     "format": "prettier --write .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "db:backup": "tsx scripts/db-backup.ts backup",
+    "db:restore": "tsx scripts/db-backup.ts restore",
+    "db:list": "tsx scripts/db-backup.ts list",
+    "db:clean": "tsx scripts/db-backup.ts clean"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
