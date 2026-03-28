@@ -157,6 +157,7 @@ model ReadingProgress {
 
    ```bash
    npx prisma migrate dev
+   npx prisma db seed
    ```
 
 3. **Generate Prisma Client**
@@ -179,6 +180,7 @@ Server runs on `http://localhost:3000`
 - `npm start` - Run production build
 - `npx prisma studio` - Open Prisma Studio (database GUI)
 - `npx prisma migrate dev` - Create and apply migrations
+- `npm run prisma:seed` - Seed the database with initial data (required for `/api/settings`)
 - `npx prisma generate` - Generate Prisma Client
 
 ### Database Backup & Restore
@@ -187,7 +189,7 @@ The project includes a built-in database backup utility for SQLite:
 
 - `npm run db:backup` - Create a timestamped backup of the database
 - `npm run db:restore` - Restore from the most recent backup
-- `npm run db:restore backup-2026-03-28.db` - Restore from a specific backup file
+- `npm run db:restore backup-2026-03-28T12-34-56.db` - Restore from a specific backup file
 - `npm run db:list` - List all available backups with details
 - `npm run db:clean` - Keep only the 10 most recent backups (delete older ones)
 - `npm run db:clean 5` - Keep only the 5 most recent backups

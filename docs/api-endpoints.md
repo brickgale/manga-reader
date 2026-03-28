@@ -16,7 +16,7 @@ Get the current application settings.
 
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": 1,
   "theme": "dark",
   "enableChapterView": true,
   "enableSideReader": false,
@@ -26,14 +26,13 @@ Get the current application settings.
   "preloadNextPages": 3,
   "autoMarkAsRead": true,
   "defaultPageSize": 20,
-  "createdAt": "2026-03-28T10:00:00.000Z",
   "updatedAt": "2026-03-28T10:00:00.000Z"
 }
 ```
 
 ### Update Settings (Full)
 
-Replace all settings with new values.
+Update settings with provided values. Only the fields included in the request body will be changed (same as PATCH).
 
 **Endpoint:** `PUT /api/settings`
 
@@ -78,7 +77,7 @@ Reset all settings to their default values.
 
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": 1,
   "theme": "dark",
   "enableChapterView": true,
   "enableSideReader": false,
@@ -88,7 +87,6 @@ Reset all settings to their default values.
   "preloadNextPages": 3,
   "autoMarkAsRead": true,
   "defaultPageSize": 20,
-  "createdAt": "2026-03-28T10:00:00.000Z",
   "updatedAt": "2026-03-28T10:00:00.000Z"
 }
 ```

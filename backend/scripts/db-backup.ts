@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -192,9 +192,18 @@ switch (command) {
   case 'list':
     listBackups()
     break
-  case 'clean':
-    cleanOldBackups(arg ? parseInt(arg, 10) : 10)
+  case 'clean': {
+    const keepCount = arg === undefined ? 10 : Number(arg)
+    if (!Number.isFinite(keepCount) || !Number.isInteger(keepCount) || keepCount <= 0) {
+      console.error('Invalid count for db:clean. It must be a positive integer.')
+      console.log('')
+      console.log('Usage:')
+      console.log('  npm run db:clean [count]    Keep only the N most recent backups (default: 10)')
+      process.exit(1)
+    }
+    cleanOldBackups(keepCount)
     break
+  }
   default:
     console.log('Database Backup Utility')
     console.log('')
