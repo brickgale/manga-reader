@@ -62,3 +62,23 @@ model ReadingProgress {
 
   @@unique([mangaId])
 }
+
+model AppSettings {
+  id                  Int      @id @default(1)
+  // UI Settings
+  theme               String   @default("dark") // "dark", "light", "auto"
+  enableChapterView   Boolean  @default(true)
+  enableSideReader    Boolean  @default(false)
+  showPageNumbers     Boolean  @default(true)
+  
+  // Reading Settings
+  readingDirection    String   @default("ltr") // "ltr" (left-to-right), "rtl" (right-to-left)
+  pageFitMode         String   @default("fit-width") // "fit-width", "fit-height", "original"
+  preloadNextPages    Int      @default(3)
+  autoMarkAsRead      Boolean  @default(true)
+  
+  // Pagination Settings
+  defaultPageSize     Int      @default(20)
+  
+  updatedAt           DateTime @updatedAt
+}
