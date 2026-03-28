@@ -47,6 +47,36 @@
         />
       </div>
     </div>
+
+    <!-- Bookmark Dialog -->
+    <Dialog v-model:open="bookmarkDialogOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Bookmark</DialogTitle>
+          <DialogDescription>
+            Add a bookmark for {{ manga?.title }} - Chapter
+            {{ currentChapter ? getChapterName(currentChapter.path) : '' }}, Page
+            {{ currentPage + 1 }}
+          </DialogDescription>
+        </DialogHeader>
+        <div class="grid gap-4 py-4">
+          <div class="grid gap-2">
+            <label for="note" class="text-sm font-medium">Note (optional)</label>
+            <textarea
+              id="note"
+              v-model="bookmarkNote"
+              rows="3"
+              class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              placeholder="Add a note about this page..."
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" @click="bookmarkDialogOpen = false">Cancel</Button>
+          <Button @click="saveBookmark">Save Bookmark</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
@@ -57,6 +87,15 @@ import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
 import { Pagination } from '@/components/pagination'
 import { MangaInfo, ChapterList, ReaderHeader, PageViewer } from '@/components/reader'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui'
 import { useReaderStore } from '@/stores/reader'
 
 const route = useRoute()
@@ -70,6 +109,8 @@ const currentChapterIndex = ref(0)
 const currentPage = ref(0)
 const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
+const bookmarkDialogOpen = ref(false)
+const bookmarkNote = ref('')
 
 // Helper to extract chapter name from path (handles both old full paths and new chapter names)
 const getChapterName = (chapterPath: string) => {
@@ -236,20 +277,28 @@ const goToPage = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'instant' })
 }
 
-const handleBookmark = async () => {
+const handleBookmark = () => {
+  if (!manga.value || !currentChapter.value) return
+  bookmarkNote.value = ''
+  bookmarkDialogOpen.value = true
+}
+
+const saveBookmark = async () => {
   if (!manga.value || !currentChapter.value) return
 
-  const note = prompt('Add a note (optional):')
   try {
     await api.createBookmark(
       manga.value.id,
       currentChapter.value.path,
       currentPage.value,
-      note || undefined
+      bookmarkNote.value || undefined
     )
     toast.success('Bookmark added!')
+    bookmarkDialogOpen.value = false
+    bookmarkNote.value = ''
   } catch (error) {
     console.error('Failed to create bookmark:', error)
+    toast.error('Failed to add bookmark')
   }
 }
 
