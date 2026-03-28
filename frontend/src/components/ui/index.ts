@@ -1,4 +1,5 @@
 export { default as Button } from './button/Button.vue'
 export * from './card'
+export * from './dialog'
 export * from './input'
 export * from './select'
