@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center">
+    <div v-if="loading" class="flex items-center justify-center h-[calc(100vh-280px)]">
       <LoadingIcon />
     </div>
 

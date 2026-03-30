@@ -1,5 +1,9 @@
 <template>
-  <div class="flex items-center justify-center gap-1.5 py-8 h-[calc(100vh-280px)]">
+  <div
+    role="status"
+    aria-live="polite"
+    class="flex items-center justify-center gap-1.5 py-8"
+  >
     <div class="flex gap-1">
       <div
         v-for="i in 3"
@@ -8,6 +12,7 @@
         :style="{ animationDelay: `${(i - 1) * 0.15}s` }"
       />
     </div>
+    <span class="sr-only">Loading...</span>
   </div>
 </template>
 
