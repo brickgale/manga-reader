@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-if="loading" class="text-center py-8">
-      <p>Loading...</p>
+    <div v-if="loading" class="text-center">
+      <LoadingIcon />
     </div>
 
     <div v-else-if="!manga" class="text-center py-8">
@@ -87,6 +87,7 @@ import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
 import { Pagination } from '@/components/pagination'
 import { MangaInfo, ChapterList, ReaderHeader, PageViewer } from '@/components/reader'
+import { LoadingIcon } from '@/components/loading-icon'
 import {
   Button,
   Dialog,
