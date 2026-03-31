@@ -54,8 +54,8 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { History, Bookmark, List, BookmarkPlus } from 'lucide-vue-next'
 import { Button } from '@/components/ui'
-import ThemeToggle from '@/components/ThemeToggle.vue'
-import Logo from '@/components/Logo.vue'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { Logo } from '@/components/logo'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const route = useRoute()
