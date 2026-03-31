@@ -4,18 +4,28 @@
     class="flex flex-col justify-center items-center mb-4 border-1 border-white"
   >
     <template v-if="chapterViewMode">
-      <template v-for="(page, idx) in pages" :key="page.path">
-        <LoadingIcon v-if="!loadedImages[idx]" />
+      <LoadingIcon v-if="!allImagesLoaded" class="h-[calc(100vh-280px)]" />
+      <template v-else>
         <img
-          v-show="loadedImages[idx]"
+          v-for="(page, idx) in pages"
+          :key="page.path"
           :src="getImageUrl(page.path)"
           :alt="`Page ${idx + 1}`"
           class="max-w-[980px] w-full h-auto cursor-pointer"
-          @load="handleImageLoad(idx)"
-          @error="handleImageError(idx)"
           @click="$emit('page-click')"
         />
       </template>
+      <!-- Hidden images for preloading -->
+      <div v-show="false">
+        <img
+          v-for="(page, idx) in pages"
+          :key="`preload-${page.path}`"
+          :src="getImageUrl(page.path)"
+          :alt="`Preload ${idx + 1}`"
+          @load="handleImageLoad(idx)"
+          @error="handleImageError(idx)"
+        />
+      </div>
     </template>
     <img
       v-else
@@ -28,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import type { Page } from '@/api'
 import { api } from '@/api'
@@ -48,6 +58,13 @@ const loadedImages = ref<Record<number, boolean>>({})
 const erroredImages = ref<Set<number>>(new Set())
 
 const getImageUrl = (path: string) => api.getImageUrl(path)
+
+const allImagesLoaded = computed(() => {
+  if (!props.chapterViewMode || props.pages.length === 0) return true
+
+  const totalLoaded = Object.keys(loadedImages.value).length
+  return totalLoaded === props.pages.length
+})
 
 const handleImageLoad = (index: number) => {
   loadedImages.value[index] = true

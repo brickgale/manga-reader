@@ -2,7 +2,7 @@
   <div
     role="status"
     aria-live="polite"
-    class="flex items-center justify-center gap-1.5 py-8"
+    :class="cn('flex items-center justify-center gap-1.5 py-8', $attrs.class as string)"
   >
     <div class="flex gap-1">
       <div
@@ -17,7 +17,12 @@
 </template>
 
 <script setup lang="ts">
+import { cn } from '@/lib/utils'
+
 // Animated loading icon with three bouncing dots
+defineOptions({
+  inheritAttrs: false,
+})
 </script>
 
 <style scoped>
