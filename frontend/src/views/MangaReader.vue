@@ -316,9 +316,17 @@ watch([manga, currentChapter], () => {
   }
 })
 
+watch(pages, () => {
+  updatePageTitle()
+})
+
 const updatePageTitle = () => {
-  if (manga.value && currentChapter.value && pages.value.length > 0) {
-    document.title = `${manga.value.title} - ${currentChapter.value.name} - Page ${currentPage.value + 1} | Manga Reader`
+  if (manga.value && currentChapter.value) {
+    if (pages.value.length > 0) {
+      document.title = `${manga.value.title} - ${currentChapter.value.name} - Page ${currentPage.value + 1} | Manga Reader`
+    } else {
+      document.title = `${manga.value.title} - ${currentChapter.value.name} | Manga Reader`
+    }
   } else if (manga.value) {
     document.title = `${manga.value.title} | Manga Reader`
   } else {

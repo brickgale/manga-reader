@@ -7,10 +7,7 @@
         <ChevronRight v-else class="h-5 w-5" />
       </Button>
     </div>
-    <div
-      v-if="isExpanded"
-      class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4 [&>*:last-child]:hidden xl:[&>*:last-child]:block"
-    >
+    <div v-if="isExpanded" class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4">
       <router-link
         v-for="item in recentlyRead"
         :key="item.id"
@@ -30,10 +27,10 @@
             />
             <p v-else class="text-muted-foreground text-sm">No Cover</p>
           </div>
-          <CardHeader class="p-3">
+          <CardHeader class="p-3 pb-0">
             <CardTitle class="text-sm truncate">{{ item.manga?.title || 'Unknown' }}</CardTitle>
           </CardHeader>
-          <CardContent class="p-3 pt-0">
+          <CardContent class="p-3">
             <p class="text-xs text-muted-foreground truncate">
               {{ item.chapterPath }} - Page {{ item.pageNumber + 1 }}
             </p>
@@ -63,7 +60,7 @@ const toggleExpanded = () => {
 const loadRecentlyRead = async () => {
   loading.value = true
   try {
-    const response = await api.getHistory(1, 5)
+    const response = await api.getHistory(1, 6)
     recentlyRead.value = response.data
   } catch (error) {
     console.error('Failed to load recently read:', error)
