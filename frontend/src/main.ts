@@ -19,7 +19,7 @@ const router = createRouter({
   ],
 })
 
-router.afterEach((to) => {
+router.afterEach(to => {
   document.title = (to.meta.title as string) ?? 'Manga Reader'
 })
 
