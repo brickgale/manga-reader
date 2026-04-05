@@ -155,7 +155,6 @@ const handleScan = async () => {
 }
 
 onMounted(() => {
-  document.title = 'Manga Reader'
   loadManga()
 })
 </script>

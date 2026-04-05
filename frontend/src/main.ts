@@ -12,11 +12,15 @@ import Bookmarks from './views/Bookmarks.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: Home },
+    { path: '/', component: Home, meta: { title: 'Manga Reader' } },
     { path: '/manga/:id', component: MangaReader },
-    { path: '/history', component: History },
-    { path: '/bookmarks', component: Bookmarks },
+    { path: '/history', component: History, meta: { title: 'Reading History | Manga Reader' } },
+    { path: '/bookmarks', component: Bookmarks, meta: { title: 'Bookmarks | Manga Reader' } },
   ],
+})
+
+router.afterEach((to) => {
+  document.title = (to.meta.title as string) ?? 'Manga Reader'
 })
 
 const pinia = createPinia()

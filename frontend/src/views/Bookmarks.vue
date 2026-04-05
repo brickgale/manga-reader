@@ -113,7 +113,6 @@ const handleDelete = async (id: string) => {
 }
 
 onMounted(() => {
-  document.title = 'Bookmarks | Manga Reader'
   loadBookmarks()
 })
 </script>

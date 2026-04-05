@@ -77,7 +77,6 @@ const loadHistory = async () => {
 }
 
 onMounted(() => {
-  document.title = 'Reading History | Manga Reader'
   loadHistory()
 })
 </script>
