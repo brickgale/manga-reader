@@ -20,7 +20,8 @@ const router = createRouter({
 })
 
 router.afterEach(to => {
-  document.title = (to.meta.title as string) ?? 'Manga Reader'
+  const title = to.meta.title
+  document.title = typeof title === 'string' && title.trim() !== '' ? title : 'Manga Reader'
 })
 
 const pinia = createPinia()
