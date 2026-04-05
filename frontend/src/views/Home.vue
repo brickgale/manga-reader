@@ -33,7 +33,7 @@
       <p>No manga found. Scan a directory to get started.</p>
     </div>
 
-    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
       <router-link v-for="manga in mangaList" :key="manga.id" :to="`/manga/${manga.id}`">
         <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
           <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
@@ -46,11 +46,11 @@
             />
             <p v-else class="text-muted-foreground">No Cover</p>
           </div>
-          <CardHeader>
+          <CardHeader class="p-3 pb-0">
             <CardTitle class="truncate">{{ manga.title }}</CardTitle>
           </CardHeader>
-          <CardContent class="pt-0">
-            <p class="text-sm text-muted-foreground truncate">{{ manga.path }}</p>
+          <CardContent class="p-3">
+            <p class="text-xs text-muted-foreground truncate">{{ manga.path }}</p>
           </CardContent>
         </Card>
       </router-link>
