@@ -22,8 +22,8 @@
           :current-chapter="currentChapter"
           :current-page="currentPage"
           :total-pages="pages.length"
-          :chapter-view-mode="readerStore.chapterViewMode"
-          @toggle-view-mode="readerStore.toggleChapterViewMode"
+          :webtoon-mode="readerStore.webtoonMode"
+          @toggle-view-mode="readerStore.toggleWebtoonMode"
         />
 
         <Pagination
@@ -31,7 +31,9 @@
           :total-pages="pages.length"
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
-          :hide-page-selector="readerStore.chapterViewMode"
+          :hide-page-selector="readerStore.webtoonMode"
+          :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
+          :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -42,7 +44,7 @@
         <PageViewer
           :pages="pages"
           :current-page="currentPage"
-          :chapter-view-mode="readerStore.chapterViewMode"
+          :webtoon-mode="readerStore.webtoonMode"
           @page-click="scrollDownPage"
         />
       </div>
@@ -238,16 +240,18 @@ const changeChapter = async (chapterPath: string) => {
     await selectChapter(chapter)
     window.scrollTo({ top: 0, behavior: 'instant' })
     updateURL()
-    // If in chapter view mode, update progress when chapter changes
-    if (readerStore.chapterViewMode) {
+    // If in webtoon mode, update progress when chapter changes
+    if (readerStore.webtoonMode) {
       updateProgress()
     }
   }
 }
 
 const nextPage = () => {
-  if (readerStore.chapterViewMode) {
-    changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+  if (readerStore.webtoonMode) {
+    if (currentChapterIndex.value < chapters.value.length - 1) {
+      changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+    }
     return
   }
 
@@ -258,8 +262,10 @@ const nextPage = () => {
 }
 
 const previousPage = () => {
-  if (readerStore.chapterViewMode) {
-    changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+  if (readerStore.webtoonMode) {
+    if (currentChapterIndex.value > 0) {
+      changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+    }
     return
   }
 
