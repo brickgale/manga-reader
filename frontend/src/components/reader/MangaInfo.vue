@@ -32,7 +32,7 @@
             <div class="w-full h-2 bg-secondary rounded-full overflow-hidden">
               <div
                 class="h-full bg-primary transition-all duration-300 ease-out"
-                :style="{ width: `${progress.overallProgress}%` }"
+                :style="{ width: `${progress.overallProgress ?? 0}%` }"
               />
             </div>
           </div>
@@ -40,7 +40,7 @@
       </div>
 
       <!-- Right Half: Last Read Info -->
-      <div class="p-4 bg-muted rounded-lg flex flex-col align-center justify-center">
+      <div class="p-4 bg-muted rounded-lg flex flex-col items-center justify-center">
         <p class="text-sm mb-2">
           <strong>Last Read:</strong> Chapter {{ formatChapterName(progress.lastChapterPath) }},
           Page
@@ -106,7 +106,7 @@ const coverImageUrl = computed(() => getCoverUrl(props.manga))
 
 const formattedProgress = computed(() => {
   if (!props.progress) return '0%'
-  const progress = props.progress.overallProgress
+  const progress = props.progress.overallProgress ?? 0
   return progress === 0 ? '0%' : `${progress.toFixed(1)}%`
 })
 </script>

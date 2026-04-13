@@ -32,6 +32,8 @@
           :chapters="chapters"
           :current-chapter-path="currentChapter?.path"
           :hide-page-selector="readerStore.webtoonMode"
+          :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
+          :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
           @prev="previousPage"
           @next="nextPage"
           @change-page="goToPage"
@@ -247,7 +249,9 @@ const changeChapter = async (chapterPath: string) => {
 
 const nextPage = () => {
   if (readerStore.webtoonMode) {
-    changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+    if (currentChapterIndex.value < chapters.value.length - 1) {
+      changeChapter(chapters.value[currentChapterIndex.value + 1].path)
+    }
     return
   }
 
@@ -259,7 +263,9 @@ const nextPage = () => {
 
 const previousPage = () => {
   if (readerStore.webtoonMode) {
-    changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+    if (currentChapterIndex.value > 0) {
+      changeChapter(chapters.value[currentChapterIndex.value - 1].path)
+    }
     return
   }
 

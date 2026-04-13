@@ -49,7 +49,7 @@ export interface ReadingProgress {
   farthestChapterPath: string
   farthestPageNumber: number
   updatedAt: string
-  overallProgress: number
+  overallProgress?: number
 }
 
 export interface Config {

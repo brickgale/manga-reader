@@ -5,6 +5,44 @@ import path from 'path'
 
 const router = Router()
 
+// Simple in-memory cache for chapter/page counts per manga
+interface MangaCountsCache {
+  chapters: string[]
+  pageCounts: Record<string, number>
+  cachedAt: number
+}
+const mangaCountsCache = new Map<string, MangaCountsCache>()
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+
+async function getMangaCounts(mangaId: string, mangaPath: string): Promise<MangaCountsCache> {
+  const cached = mangaCountsCache.get(mangaId)
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return cached
+  }
+
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+  const entries = await fs.readdir(mangaPath, { withFileTypes: true })
+  const chapters = entries
+    .filter(entry => entry.isDirectory())
+    .map(entry => entry.name)
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+  const pageCounts: Record<string, number> = {}
+  await Promise.all(
+    chapters.map(async ch => {
+      const chapterPath = path.join(mangaPath, ch)
+      const pageEntries = await fs.readdir(chapterPath, { withFileTypes: true })
+      pageCounts[ch] = pageEntries.filter(
+        e => e.isFile() && imageExtensions.includes(path.extname(e.name).toLowerCase())
+      ).length
+    })
+  )
+
+  const result: MangaCountsCache = { chapters, pageCounts, cachedAt: Date.now() }
+  mangaCountsCache.set(mangaId, result)
+  return result
+}
+
 /**
  * @swagger
  * /progress/manga/{mangaId}:
@@ -21,6 +59,31 @@ const router = Router()
  *     responses:
  *       200:
  *         description: Reading progress for the manga
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - type: 'null'
+ *                 - type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     mangaId:
+ *                       type: string
+ *                     lastChapterPath:
+ *                       type: string
+ *                     lastPageNumber:
+ *                       type: integer
+ *                     farthestChapterPath:
+ *                       type: string
+ *                     farthestPageNumber:
+ *                       type: integer
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                     overallProgress:
+ *                       type: number
+ *                       description: Overall reading progress as a percentage (0–100)
  *       500:
  *         description: Server error
  */
@@ -45,33 +108,17 @@ router.get('/manga/:mangaId', async (req, res) => {
       })
 
       if (manga) {
-        // Get all chapters
-        const entries = await fs.readdir(manga.path, { withFileTypes: true })
-        const chapters = entries
-          .filter(entry => entry.isDirectory())
-          .map(entry => entry.name)
-          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+        const { chapters, pageCounts } = await getMangaCounts(req.params.mangaId, manga.path)
 
         if (chapters.length > 0) {
-          // Find the index of the farthest chapter
           const farthestChapterIndex = chapters.findIndex(ch => ch === progress.farthestChapterPath)
 
           if (farthestChapterIndex !== -1) {
-            // Get pages in the farthest chapter to calculate progress within it
-            const farthestChapterPath = path.join(manga.path, progress.farthestChapterPath)
-            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
-            const pageEntries = await fs.readdir(farthestChapterPath, { withFileTypes: true })
-            const pages = pageEntries
-              .filter(
-                entry =>
-                  entry.isFile() && imageExtensions.includes(path.extname(entry.name).toLowerCase())
-              )
-              .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+            const chapterPageCount = pageCounts[progress.farthestChapterPath] ?? 0
 
-            if (pages.length > 0) {
-              // Calculate: (completed chapters + progress in current chapter) / total chapters
+            if (chapterPageCount > 0) {
               const completedChapters = farthestChapterIndex
-              const currentChapterProgress = (progress.farthestPageNumber + 1) / pages.length
+              const currentChapterProgress = (progress.farthestPageNumber + 1) / chapterPageCount
               const totalProgress = (completedChapters + currentChapterProgress) / chapters.length
               overallProgress = Math.min(Math.max(totalProgress * 100, 0), 100)
             }
