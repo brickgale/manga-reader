@@ -14,7 +14,7 @@
       <div
         v-for="item in history"
         :key="item.id"
-        class="border rounded-lg p-4 hover:shadow-md transition-shadow"
+        class="border rounded-sm p-4 hover:shadow-md transition-shadow"
       >
         <router-link
           :to="{
@@ -29,9 +29,9 @@
               v-if="getCoverUrl(item.manga)"
               :src="getCoverUrl(item.manga)"
               :alt="item.manga?.title"
-              class="w-16 h-24 object-cover rounded-md"
+              class="w-16 h-24 object-cover rounded-sm"
             />
-            <div v-else class="w-16 h-24 bg-muted rounded-md flex items-center justify-center">
+            <div v-else class="w-16 h-24 bg-muted rounded-sm flex items-center justify-center">
               <span class="text-muted-foreground text-xs">No Cover</span>
             </div>
           </div>

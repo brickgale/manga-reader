@@ -14,7 +14,7 @@
       <div
         v-for="bookmark in bookmarks"
         :key="bookmark.id"
-        class="border rounded-lg p-4 hover:shadow-md transition-shadow"
+        class="border rounded-sm p-4 hover:shadow-md transition-shadow"
       >
         <div class="flex gap-4">
           <!-- Cover Image -->
@@ -29,9 +29,9 @@
               v-if="getCoverUrl(bookmark.manga)"
               :src="getCoverUrl(bookmark.manga)"
               :alt="bookmark.manga?.title"
-              class="w-16 h-24 object-cover rounded-md"
+              class="w-16 h-24 object-cover rounded-sm"
             />
-            <div v-else class="w-16 h-24 bg-muted rounded-md flex items-center justify-center">
+            <div v-else class="w-16 h-24 bg-muted rounded-sm flex items-center justify-center">
               <span class="text-muted-foreground text-xs">No Cover</span>
             </div>
           </router-link>
@@ -68,7 +68,7 @@
           <!-- Delete Button -->
           <button
             @click="handleDelete(bookmark.id)"
-            class="flex-shrink-0 text-destructive hover:text-destructive/90 self-start p-1 rounded hover:bg-destructive/10 transition-colors"
+            class="flex-shrink-0 text-destructive hover:text-destructive/90 self-start p-1 rounded-sm hover:bg-destructive/10 transition-colors"
             title="Delete bookmark"
           >
             <Trash2 class="w-4 h-4" />
