@@ -3,7 +3,7 @@
     v-if="pages.length > 0"
     class="flex flex-col justify-center items-center mb-4 border-1 border-white"
   >
-    <template v-if="chapterViewMode">
+    <template v-if="webtoonMode">
       <LoadingIcon v-if="!allImagesLoaded" class="h-[calc(100vh-280px)]" />
       <template v-else>
         <img
@@ -47,7 +47,7 @@ import { LoadingIcon } from '@/components/loading-icon'
 const props = defineProps<{
   pages: Page[]
   currentPage: number
-  chapterViewMode: boolean
+  webtoonMode: boolean
 }>()
 
 defineEmits<{
@@ -60,7 +60,7 @@ const erroredImages = ref<Set<number>>(new Set())
 const getImageUrl = (path: string) => api.getImageUrl(path)
 
 const allImagesLoaded = computed(() => {
-  if (!props.chapterViewMode || props.pages.length === 0) return true
+  if (!props.webtoonMode || props.pages.length === 0) return true
 
   const totalLoaded = Object.keys(loadedImages.value).length
   return totalLoaded === props.pages.length
@@ -91,9 +91,9 @@ watch(
 
 // Reset loaded images when switching view modes
 watch(
-  () => props.chapterViewMode,
+  () => props.webtoonMode,
   () => {
-    if (props.chapterViewMode) {
+    if (props.webtoonMode) {
       loadedImages.value = {}
       erroredImages.value = new Set()
     }

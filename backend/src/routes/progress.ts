@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import { prisma } from '../index'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 const router = Router()
 
@@ -29,7 +31,59 @@ router.get('/manga/:mangaId', async (req, res) => {
         mangaId: req.params.mangaId,
       },
     })
-    res.json(progress)
+
+    if (!progress) {
+      return res.json(null)
+    }
+
+    // Calculate overall progress percentage
+    let overallProgress = 0
+
+    try {
+      const manga = await prisma.manga.findUnique({
+        where: { id: req.params.mangaId },
+      })
+
+      if (manga) {
+        // Get all chapters
+        const entries = await fs.readdir(manga.path, { withFileTypes: true })
+        const chapters = entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => entry.name)
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+        if (chapters.length > 0) {
+          // Find the index of the farthest chapter
+          const farthestChapterIndex = chapters.findIndex(ch => ch === progress.farthestChapterPath)
+
+          if (farthestChapterIndex !== -1) {
+            // Get pages in the farthest chapter to calculate progress within it
+            const farthestChapterPath = path.join(manga.path, progress.farthestChapterPath)
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            const pageEntries = await fs.readdir(farthestChapterPath, { withFileTypes: true })
+            const pages = pageEntries
+              .filter(
+                entry =>
+                  entry.isFile() && imageExtensions.includes(path.extname(entry.name).toLowerCase())
+              )
+              .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+
+            if (pages.length > 0) {
+              // Calculate: (completed chapters + progress in current chapter) / total chapters
+              const completedChapters = farthestChapterIndex
+              const currentChapterProgress = (progress.farthestPageNumber + 1) / pages.length
+              const totalProgress = (completedChapters + currentChapterProgress) / chapters.length
+              overallProgress = Math.min(Math.max(totalProgress * 100, 0), 100)
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to calculate overall progress:', error)
+      // If calculation fails, just set to 0 and continue
+    }
+
+    res.json({ ...progress, overallProgress })
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch progress' })
   }
@@ -91,7 +145,7 @@ router.post('/', async (req, res) => {
         undefined,
         { numeric: true, sensitivity: 'base' }
       )
-      
+
       const isFarther =
         chapterComparison > 0 ||
         (chapterComparison === 0 && pageNumber > existingProgress.farthestPageNumber)
