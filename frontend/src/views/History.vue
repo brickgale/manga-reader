@@ -1,9 +1,12 @@
 <template>
   <div>
-    <h2 class="text-2xl mb-6">Reading History</h2>
+    <h2 class="text-2xl mb-6 flex items-center gap-2">
+      <Scroll class="w-6 h-6" />
+      Reading History
+    </h2>
 
-    <div v-if="loading" class="text-center py-8">
-      <p>Loading history...</p>
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <HistoryCardSkeleton v-for="n in 6" :key="n" />
     </div>
 
     <div v-else-if="history.length === 0" class="text-center py-8 text-muted-foreground">
@@ -67,7 +70,7 @@
 
                 <div class="space-y-1">
                   <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <BookmarkIcon class="w-3.5 h-3.5" />
+                    <BookOpen class="w-3.5 h-3.5" />
                     <span class="font-medium">{{ formatChapterName(item.chapterPath) }}</span>
                   </div>
                   <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -93,10 +96,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { BookOpen, BookmarkIcon, FileText, Clock } from 'lucide-vue-next'
+import { BookOpen, FileText, Clock, Scroll } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
 import { Card } from '@/components/ui'
+import { HistoryCardSkeleton } from '@/components/ui/skeleton'
 
 const history = ref<ReadingHistory[]>([])
 const loading = ref(false)

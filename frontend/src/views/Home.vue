@@ -5,7 +5,10 @@
 
     <div class="mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl">Library</h2>
+        <h2 class="text-2xl flex items-center gap-2">
+          <Library class="w-6 h-6" />
+          Library
+        </h2>
         <Button variant="outline" @click="showScanInput = !showScanInput">
           <Folder v-if="!showScanInput" class="h-4 w-4" />
           <X v-else class="h-4 w-4" />
@@ -21,8 +24,8 @@
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-8">
-      <p>Loading manga...</p>
+    <div v-if="loading" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <MangaCardSkeleton v-for="n in pageSize" :key="n" />
     </div>
 
     <div v-else-if="mangaList.length === 0" class="text-center py-8 text-muted-foreground">
@@ -67,13 +70,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Folder, X } from 'lucide-vue-next'
+import { Folder, X, Library } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type PaginationInfo } from '@/api'
 import { Button, Input } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { RecentReads } from '@/components/reader'
-import { MangaCard } from '@/components/manga-card'
+import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)

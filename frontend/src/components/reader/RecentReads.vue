@@ -1,7 +1,10 @@
 <template>
-  <div v-if="!loading && recentlyRead.length > 0" class="mb-8">
+  <div v-if="!loading && recentlyRead.length > 0" class="mb-6">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-2xl">Continue Reading</h2>
+      <h2 class="text-2xl flex items-center gap-2">
+        <BookOpen class="w-6 h-6" />
+        Continue Reading
+      </h2>
       <Button variant="ghost" size="icon" @click="toggleExpanded">
         <ChevronDown v-if="isExpanded" class="h-5 w-5" />
         <ChevronRight v-else class="h-5 w-5" />
@@ -23,7 +26,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ChevronDown, ChevronRight } from 'lucide-vue-next'
+import { ChevronDown, ChevronRight, BookOpen } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { Button } from '@/components/ui'
 import { MangaCard } from '@/components/manga-card'
