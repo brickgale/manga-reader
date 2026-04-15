@@ -3,18 +3,19 @@
     <Toaster />
 
     <!-- Left Sidebar -->
-    <Sidebar :is-open="sidebarOpen" @close="sidebarOpen = false" />
+    <Sidebar
+      :is-open="sidebarOpen"
+      @close="sidebarOpen = false"
+      @toggle-settings="settingsOpen = !settingsOpen"
+    />
 
     <!-- Main Content Area -->
     <div class="flex flex-1 flex-col">
       <!-- Top Header -->
-      <MainHeader
-        @toggle-sidebar="sidebarOpen = !sidebarOpen"
-        @toggle-settings="settingsOpen = !settingsOpen"
-      />
+      <MainHeader @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
       <!-- Page Content -->
-      <main class="container mx-auto flex-1 px-4 py-8 overflow-visible">
+      <main class="container mx-auto flex-1 p-4 overflow-visible">
         <router-view />
       </main>
     </div>
@@ -31,11 +32,13 @@ import MainHeader from '@/components/header/MainHeader.vue'
 import { Sidebar } from '@/components/sidebar'
 import { SettingsDrawer } from '@/components/settings'
 
-const sidebarOpen = ref(false)
+// Initialize sidebar open state based on viewport width
+const sidebarOpen = ref(typeof window !== 'undefined' && window.innerWidth >= 768)
 const settingsOpen = ref(false)
 
 // Open sidebar by default on desktop
 onMounted(() => {
+  // Ensure sidebar is open on desktop in case of edge cases
   if (window.innerWidth >= 768) {
     sidebarOpen.value = true
   }

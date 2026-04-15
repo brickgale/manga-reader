@@ -11,9 +11,9 @@
 
         <!-- Center: Search Bar -->
         <div class="flex-1 max-w-md md:max-w-lg">
-          <div class="relative">
+          <div class="relative group">
             <Search
-              class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-primary group-focus-within:text-primary"
             />
             <Input
               v-model="searchQuery"
@@ -25,7 +25,7 @@
           </div>
         </div>
 
-        <!-- Right: Theme Toggle & Settings Toggle -->
+        <!-- Right: Theme Toggle -->
         <div class="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip>
@@ -33,18 +33,7 @@
                 <ThemeToggle />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Toggle Theme</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger as-child>
-                <Button variant="ghost" size="icon" @click="$emit('toggle-settings')">
-                  <Settings class="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Settings</p>
+                <p>{{ isDark ? 'Dark Mode' : 'Light Mode' }}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -56,18 +45,23 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { Menu, Search, Settings } from 'lucide-vue-next'
+import { Menu, Search } from 'lucide-vue-next'
 import { Button, Input } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useDark } from '@vueuse/core'
 
 defineEmits<{
   'toggle-sidebar': []
-  'toggle-settings': []
 }>()
 
-const router = useRouter()
+const isDark = useDark({
+  selector: 'html',
+  attribute: 'class',
+  valueDark: 'dark',
+  valueLight: '',
+})
+
 const searchQuery = ref('')
 
 const handleSearch = () => {

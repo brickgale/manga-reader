@@ -5,7 +5,7 @@
 
     <div class="mb-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-3xl font-bold">Library</h2>
+        <h2 class="text-2xl">Library</h2>
         <Button variant="outline" @click="showScanInput = !showScanInput">
           <Folder v-if="!showScanInput" class="h-4 w-4" />
           <X v-else class="h-4 w-4" />
@@ -19,10 +19,6 @@
           {{ scanning ? 'Scanning...' : 'Scan' }}
         </Button>
       </div>
-
-      <div v-if="savedDirectory" class="text-sm text-muted-foreground mb-4">
-        Current directory: <span class="font-mono">{{ savedDirectory }}</span>
-      </div>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -34,26 +30,12 @@
     </div>
 
     <div v-else class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      <router-link v-for="manga in mangaList" :key="manga.id" :to="`/manga/${manga.id}`">
-        <Card class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-          <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
-            <img
-              v-if="manga.coverImage"
-              :src="manga.coverImage"
-              :alt="manga.title"
-              class="w-full h-full object-cover"
-              @error="e => ((e.target as HTMLImageElement).style.display = 'none')"
-            />
-            <p v-else class="text-muted-foreground">No Cover</p>
-          </div>
-          <CardHeader class="p-3 pb-0">
-            <CardTitle class="truncate">{{ manga.title }}</CardTitle>
-          </CardHeader>
-          <CardContent class="p-3">
-            <p class="text-xs text-muted-foreground truncate">{{ manga.path }}</p>
-          </CardContent>
-        </Card>
-      </router-link>
+      <MangaCard
+        v-for="(manga, index) in mangaList"
+        :key="manga.id"
+        :manga="manga"
+        :index="index"
+      />
     </div>
 
     <!-- Pagination -->
@@ -88,16 +70,16 @@ import { ref, onMounted } from 'vue'
 import { Folder, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type PaginationInfo } from '@/api'
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui'
+import { Button, Input } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { RecentReads } from '@/components/reader'
+import { MangaCard } from '@/components/manga-card'
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
 const scanning = ref(false)
 const scanPath = ref('/manga')
 const showScanInput = ref(false)
-const savedDirectory = ref<string>('')
 const currentPage = ref(1)
 const pageSize = ref(12)
 const pagination = ref<PaginationInfo | null>(null)
@@ -110,15 +92,6 @@ const loadManga = async () => {
     const response = await api.getManga(currentPage.value, pageSize.value)
     mangaList.value = response.data
     pagination.value = response.pagination
-
-    // Extract the parent directory from existing manga if available
-    if (mangaList.value.length > 0) {
-      const firstMangaPath = mangaList.value[0].path
-      const parentDir = firstMangaPath.substring(0, firstMangaPath.lastIndexOf('/'))
-      if (parentDir) {
-        savedDirectory.value = parentDir
-      }
-    }
   } catch (error) {
     console.error('Failed to load manga:', error)
   } finally {
@@ -137,8 +110,6 @@ const handleScan = async () => {
   try {
     const result = await api.scanDirectory(scanPath.value)
     console.log('Scan result:', result)
-
-    savedDirectory.value = scanPath.value
 
     await loadManga()
     showScanInput.value = false

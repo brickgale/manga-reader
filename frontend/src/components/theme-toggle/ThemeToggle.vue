@@ -13,9 +13,9 @@ const toggleDark = useToggle(isDark)
 </script>
 
 <template>
-  <Button variant="ghost" size="icon" @click="toggleDark()">
-    <Sun v-if="!isDark" class="h-5 w-5" />
-    <Moon v-else class="h-5 w-5" />
+  <Button variant="ghost" size="icon" class="group" @click="toggleDark()">
+    <Sun v-if="!isDark" class="h-5 w-5 group-hover:text-primary transition-colors" />
+    <Moon v-else class="h-5 w-5 group-hover:text-primary transition-colors" />
     <span class="sr-only">Toggle theme</span>
   </Button>
 </template>

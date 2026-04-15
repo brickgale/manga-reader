@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { Home, History, Bookmark } from 'lucide-vue-next'
+import { Library, Scroll, Bookmark, Settings } from 'lucide-vue-next'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui'
 
@@ -12,13 +12,14 @@ defineProps<Props>()
 
 const emit = defineEmits<{
   close: []
+  'toggle-settings': []
 }>()
 
 const route = useRoute()
 
 const navItems = [
-  { icon: Home, label: 'Library', to: '/' },
-  { icon: History, label: 'History', to: '/history' },
+  { icon: Library, label: 'Library', to: '/' },
+  { icon: Scroll, label: 'History', to: '/history' },
   { icon: Bookmark, label: 'Bookmarks', to: '/bookmarks' },
 ]
 
@@ -66,15 +67,15 @@ const handleNavClick = () => {
     >
       <div class="flex h-full flex-col">
         <!-- Header -->
-        <div class="flex h-16 items-center border-b px-4">
+        <div class="flex h-16 items-center justify-center border-b px-4">
           <router-link to="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Logo :width="36" :height="36" />
-            <span class="text-xl font-bold">Manga Reader</span>
+            <span class="text-xl">Manga <span class="text-primary">Reader</span></span>
           </router-link>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 space-y-1 p-4">
+        <nav class="space-y-1 p-4">
           <router-link
             v-for="item in navItems"
             :key="item.to"
@@ -82,8 +83,8 @@ const handleNavClick = () => {
             :class="[
               'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isActive(item.to)
-                ? 'bg-secondary text-secondary-foreground'
-                : 'text-muted-foreground hover:bg-secondary hover:text-secondary-foreground',
+                ? 'bg-primary/10 text-primary border-r-4 border-primary'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
             ]"
             @click="handleNavClick"
           >
@@ -91,6 +92,17 @@ const handleNavClick = () => {
             {{ item.label }}
           </router-link>
         </nav>
+
+        <!-- Settings Button -->
+        <div class="p-4 pt-0 mt-auto space-y-1">
+          <button
+            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-primary/10 hover:text-primary w-full"
+            @click="emit('toggle-settings')"
+          >
+            <Settings class="h-5 w-5" />
+            Settings
+          </button>
+        </div>
       </div>
     </aside>
   </Transition>
