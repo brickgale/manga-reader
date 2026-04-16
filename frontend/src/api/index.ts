@@ -8,6 +8,7 @@ export interface Manga {
   altTitle: string | null
   path: string
   coverImage: string | null
+  chapterCount?: number
   createdAt: string
   updatedAt: string
 }

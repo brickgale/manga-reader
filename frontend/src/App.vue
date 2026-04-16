@@ -1,16 +1,72 @@
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="flex min-h-screen bg-background text-foreground">
     <Toaster />
-    <MainHeader />
-    <main class="container mx-auto px-4 py-8 overflow-visible">
-      <router-view />
-    </main>
+
+    <!-- Left Sidebar -->
+    <Sidebar
+      :is-open="sidebarOpen"
+      @close="sidebarOpen = false"
+      @toggle-settings="settingsOpen = !settingsOpen"
+    />
+
+    <!-- Main Content Area -->
+    <div class="flex flex-1 flex-col">
+      <!-- Top Header -->
+      <MainHeader v-if="!isReaderView" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+
+      <!-- Page Content -->
+      <main :class="isReaderView ? 'flex-1' : 'container mx-auto flex-1 p-4 overflow-visible'">
+        <router-view v-slot="{ Component }">
+          <component :is="Component" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+        </router-view>
+      </main>
+    </div>
+
+    <!-- Right Settings Drawer -->
+    <SettingsDrawer v-model:open="settingsOpen" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Toaster } from '@/components/ui/sonner'
-import MainHeader from '@/components/header/MainHeader.vue'
+import { MainHeader } from '@/components/header'
+import { Sidebar } from '@/components/sidebar'
+import { SettingsDrawer } from '@/components/settings'
+
+const route = useRoute()
+
+// Hide header and sidebar in reader view (only when actively reading a chapter)
+const isReaderView = computed(
+  () => route.path.startsWith('/manga/') && route.params.id && route.query.chapter
+)
+
+// Initialize sidebar open state based on viewport width
+const sidebarOpen = ref(typeof window !== 'undefined' && window.innerWidth >= 768)
+const settingsOpen = ref(false)
+
+// Open sidebar by default on desktop
+onMounted(() => {
+  // Ensure sidebar is open on desktop in case of edge cases
+  if (window.innerWidth >= 768) {
+    sidebarOpen.value = true
+  }
+
+  // Add resize listener to always show sidebar on desktop
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+const handleResize = () => {
+  // Always show sidebar on desktop
+  if (window.innerWidth >= 768) {
+    sidebarOpen.value = true
+  }
+}
 
 // Prevent layout shift when modal/select opens by preserving scrollbar space
 const observer = new MutationObserver(() => {

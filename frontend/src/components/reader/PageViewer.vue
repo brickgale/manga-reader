@@ -11,8 +11,12 @@
           :key="page.path"
           :src="getImageUrl(page.path)"
           :alt="`Page ${idx + 1}`"
-          class="max-w-[980px] w-full h-auto cursor-pointer"
+          :class="[
+            'max-w-[980px] w-full h-auto cursor-pointer transition-opacity duration-500',
+            loadedImages[idx] ? 'opacity-100' : 'opacity-0',
+          ]"
           @click="$emit('page-click')"
+          @load="handleImageLoad(idx)"
         />
       </template>
       <!-- Hidden images for preloading -->
@@ -31,8 +35,12 @@
       v-else
       :src="getImageUrl(pages[currentPage].path)"
       :alt="`Page ${currentPage + 1}`"
-      class="max-w-[980px] w-full h-auto cursor-pointer"
+      :class="[
+        'max-w-[980px] w-full h-auto cursor-pointer transition-opacity duration-500',
+        pageImageLoaded ? 'opacity-100' : 'opacity-0',
+      ]"
       @click="$emit('page-click')"
+      @load="handlePageImageLoad"
     />
   </div>
 </template>
@@ -56,6 +64,7 @@ defineEmits<{
 
 const loadedImages = ref<Record<number, boolean>>({})
 const erroredImages = ref<Set<number>>(new Set())
+const pageImageLoaded = ref(false)
 
 const getImageUrl = (path: string) => api.getImageUrl(path)
 
@@ -68,6 +77,10 @@ const allImagesLoaded = computed(() => {
 
 const handleImageLoad = (index: number) => {
   loadedImages.value[index] = true
+}
+
+const handlePageImageLoad = () => {
+  pageImageLoaded.value = true
 }
 
 const handleImageError = (index: number) => {
@@ -85,6 +98,7 @@ watch(
   () => {
     loadedImages.value = {}
     erroredImages.value = new Set()
+    pageImageLoaded.value = false
   },
   { immediate: true }
 )
@@ -96,6 +110,18 @@ watch(
     if (props.webtoonMode) {
       loadedImages.value = {}
       erroredImages.value = new Set()
+    } else {
+      pageImageLoaded.value = false
+    }
+  }
+)
+
+// Reset page image loaded state when current page changes
+watch(
+  () => props.currentPage,
+  () => {
+    if (!props.webtoonMode) {
+      pageImageLoaded.value = false
     }
   }
 )

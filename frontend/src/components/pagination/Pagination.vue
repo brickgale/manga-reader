@@ -91,7 +91,10 @@ const handleChapterChange = (value: any) => {
               variant="outline"
               size="icon"
               @click="emit('prev')"
-              :disabled="props.disablePrev || ((props.disabled || props.currentPage === 0) && !props.hidePageSelector)"
+              :disabled="
+                props.disablePrev ||
+                ((props.disabled || props.currentPage === 0) && !props.hidePageSelector)
+              "
             >
               <ChevronLeft class="h-5 w-5" />
             </Button>
@@ -123,7 +126,9 @@ const handleChapterChange = (value: any) => {
               variant="outline"
               size="icon"
               @click="emit('next')"
-              :disabled="props.disableNext || props.disabled || props.currentPage === props.totalPages - 1"
+              :disabled="
+                props.disableNext || props.disabled || props.currentPage === props.totalPages - 1
+              "
             >
               <ChevronRight class="h-5 w-5" />
             </Button>

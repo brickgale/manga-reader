@@ -39,9 +39,23 @@ router.get('/', async (req, res) => {
       const manga = await prisma.manga.findMany({
         orderBy: { updatedAt: 'desc' },
       })
+
+      // Add chapter count to each manga
+      const mangaWithChapters = await Promise.all(
+        manga.map(async m => {
+          try {
+            const entries = await fs.readdir(m.path, { withFileTypes: true })
+            const chapterCount = entries.filter(entry => entry.isDirectory()).length
+            return { ...m, chapterCount }
+          } catch {
+            return { ...m, chapterCount: 0 }
+          }
+        })
+      )
+
       const totalItems = manga.length
       const pageSize = totalItems === 0 ? 1 : manga.length
-      const response = buildPaginatedResponse(manga, totalItems, 1, pageSize)
+      const response = buildPaginatedResponse(mangaWithChapters, totalItems, 1, pageSize)
       return res.json(response)
     }
 
@@ -54,7 +68,25 @@ router.get('/', async (req, res) => {
       prisma.manga.count(),
     ])
 
-    const response = buildPaginatedResponse(manga, totalItems, pagination.page, pagination.pageSize)
+    // Add chapter count to each manga
+    const mangaWithChapters = await Promise.all(
+      manga.map(async m => {
+        try {
+          const entries = await fs.readdir(m.path, { withFileTypes: true })
+          const chapterCount = entries.filter(entry => entry.isDirectory()).length
+          return { ...m, chapterCount }
+        } catch {
+          return { ...m, chapterCount: 0 }
+        }
+      })
+    )
+
+    const response = buildPaginatedResponse(
+      mangaWithChapters,
+      totalItems,
+      pagination.page,
+      pagination.pageSize
+    )
     res.json(response)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch manga' })
