@@ -14,93 +14,33 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <router-link
+      <div
         v-for="(item, index) in history"
         :key="item.id"
-        :to="{
-          path: `/manga/${item.mangaId}`,
-          query: { chapter: item.chapterPath, page: item.pageNumber.toString() },
-        }"
         class="group animate-fade-in-up"
         :class="`stagger-${(index % 6) + 1}`"
       >
-        <Card class="overflow-hidden transition-all duration-300 hover:shadow-lg">
-          <div class="flex gap-0 min-h-[160px]">
-            <!-- Cover Image -->
-            <div class="relative flex-shrink-0 w-24 sm:w-28 self-stretch overflow-hidden">
-              <!-- Blurred background -->
-              <img
-                v-if="getCoverUrl(item.manga)"
-                :src="getCoverUrl(item.manga)"
-                alt=""
-                class="absolute inset-0 w-full h-full object-cover blur-2xl scale-150 opacity-60"
-              />
-              <!-- Gradient overlay -->
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-transparent to-background/20 z-10"
-              />
-              <!-- Main cover image -->
-              <img
-                v-if="getCoverUrl(item.manga)"
-                :src="getCoverUrl(item.manga)"
-                :alt="item.manga?.title"
-                class="absolute inset-0 w-full h-full object-contain z-20 transition-transform duration-300 group-hover:rotate-2 group-hover:scale-105"
-              />
-              <div v-else class="absolute inset-0 bg-muted flex items-center justify-center z-20">
-                <BookOpen class="w-8 h-8 text-muted-foreground" />
-              </div>
-            </div>
-
-            <!-- Info -->
-            <div class="flex-1 min-w-0 p-4 flex flex-col justify-between">
-              <div class="space-y-2">
-                <div>
-                  <h3
-                    class="font-semibold text-base leading-tight truncate group-hover:text-primary transition-colors"
-                    :title="item.manga?.title || 'Unknown'"
-                  >
-                    {{ item.manga?.title || 'Unknown' }}
-                  </h3>
-                  <p
-                    v-if="item.manga?.altTitle"
-                    class="text-xs text-muted-foreground truncate mt-0.5"
-                  >
-                    {{ item.manga.altTitle }}
-                  </p>
-                </div>
-
-                <div class="space-y-1">
-                  <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <BookOpen class="w-3.5 h-3.5" />
-                    <span class="font-medium">{{ formatChapterName(item.chapterPath) }}</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <FileText class="w-3.5 h-3.5" />
-                    <span>Page {{ item.pageNumber + 1 }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                class="flex items-center gap-1.5 text-xs text-muted-foreground mt-3 pt-3 border-t"
-              >
-                <Clock class="w-3.5 h-3.5" />
-                <span>{{ formatRelativeTime(item.timestamp) }}</span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </router-link>
+        <ReadingCard
+          :manga-id="item.mangaId"
+          :chapter-path="item.chapterPath"
+          :page-number="item.pageNumber"
+          :title="item.manga?.title || 'Unknown'"
+          :alt-title="item.manga?.altTitle || undefined"
+          :cover-url="getCoverUrl(item.manga)"
+          :chapter-name="formatChapterName(item.chapterPath)"
+          :formatted-time="formatRelativeTime(item.timestamp)"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { BookOpen, FileText, Clock, Scroll } from 'lucide-vue-next'
+import { Scroll } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
-import { Card } from '@/components/ui'
+import { ReadingCard } from '@/components/reader'
 import { HistoryCardSkeleton } from '@/components/ui/skeleton'
 
 const history = ref<ReadingHistory[]>([])

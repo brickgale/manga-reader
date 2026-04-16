@@ -40,7 +40,7 @@ const displaySubtitle = computed(() => {
       index % 2 === 0 ? 'hover:rotate-2' : 'hover:-rotate-2',
     ]"
   >
-    <Card class="overflow-hidden transition-shadow duration-300 group-hover:shadow-xl">
+    <Card class="overflow-hidden transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 dark:group-hover:shadow-primary/30">
       <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
         <img
           v-if="manga.coverImage"

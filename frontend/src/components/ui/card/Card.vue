@@ -14,7 +14,7 @@ const props = defineProps<{
       cn(
         'rounded-sm border bg-card text-card-foreground shadow',
         props.hasHoverEffect &&
-          'hover:border-primary hover:shadow-lg transition-all cursor-pointer',
+          'hover:border-primary hover:shadow-lg hover:shadow-primary/20 dark:hover:shadow-primary/30 transition-all cursor-pointer',
         props.class
       )
     "
