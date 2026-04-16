@@ -15,13 +15,14 @@
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <router-link
-        v-for="item in history"
+        v-for="(item, index) in history"
         :key="item.id"
         :to="{
           path: `/manga/${item.mangaId}`,
           query: { chapter: item.chapterPath, page: item.pageNumber.toString() },
         }"
-        class="group"
+        class="group animate-fade-in-up"
+        :class="`stagger-${(index % 6) + 1}`"
       >
         <Card class="overflow-hidden transition-all duration-300 hover:shadow-lg">
           <div class="flex gap-0 min-h-[160px]">

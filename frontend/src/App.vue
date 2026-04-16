@@ -12,11 +12,13 @@
     <!-- Main Content Area -->
     <div class="flex flex-1 flex-col">
       <!-- Top Header -->
-      <MainHeader @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+      <MainHeader v-if="!isReaderView" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
       <!-- Page Content -->
-      <main class="container mx-auto flex-1 p-4 overflow-visible">
-        <router-view />
+      <main :class="isReaderView ? 'flex-1' : 'container mx-auto flex-1 p-4 overflow-visible'">
+        <router-view v-slot="{ Component }">
+          <component :is="Component" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+        </router-view>
       </main>
     </div>
 
@@ -26,11 +28,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Toaster } from '@/components/ui/sonner'
-import MainHeader from '@/components/header/MainHeader.vue'
+import { MainHeader } from '@/components/header'
 import { Sidebar } from '@/components/sidebar'
 import { SettingsDrawer } from '@/components/settings'
+
+const route = useRoute()
+
+// Hide header and sidebar in reader view (only when actively reading a chapter)
+const isReaderView = computed(
+  () => route.path.startsWith('/manga/') && route.params.id && route.query.chapter
+)
 
 // Initialize sidebar open state based on viewport width
 const sidebarOpen = ref(typeof window !== 'undefined' && window.innerWidth >= 768)

@@ -1,16 +1,19 @@
 <template>
   <div>
-    <div v-if="loading" class="flex items-center justify-center h-[calc(100vh-280px)]">
+    <div
+      v-if="loading"
+      class="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-280px)]"
+    >
       <LoadingIcon />
     </div>
 
-    <div v-else-if="!manga" class="text-center py-8">
+    <div v-else-if="!manga" class="container mx-auto p-4 text-center py-8">
       <p>Manga not found</p>
     </div>
 
     <div v-else>
       <!-- Manga Info & Chapter Selection -->
-      <div v-if="!currentChapter">
+      <div v-if="!currentChapter" class="container mx-auto p-4">
         <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
 
         <ChapterList :chapters="chapters" @select="selectChapter" />
@@ -19,27 +22,29 @@
       <!-- Reader View -->
       <div v-else>
         <ReaderHeader
-          :current-chapter="currentChapter"
+          :chapter-name="currentChapter.name"
           :current-page="currentPage"
           :total-pages="pages.length"
           :webtoon-mode="readerStore.webtoonMode"
+          @toggle-sidebar="emit('toggle-sidebar')"
           @toggle-view-mode="readerStore.toggleWebtoonMode"
-        />
-
-        <Pagination
-          :current-page="currentPage"
-          :total-pages="pages.length"
-          :chapters="chapters"
-          :current-chapter-path="currentChapter?.path"
-          :hide-page-selector="readerStore.webtoonMode"
-          :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
-          :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
-          @prev="previousPage"
-          @next="nextPage"
-          @change-page="goToPage"
-          @change-chapter="changeChapter"
-          class="mb-4 sticky top-0 z-10 bg-background/80 backdrop-blur-sm p-3"
-        />
+        >
+          <template #pagination>
+            <Pagination
+              :current-page="currentPage"
+              :total-pages="pages.length"
+              :chapters="chapters"
+              :current-chapter-path="currentChapter?.path"
+              :hide-page-selector="readerStore.webtoonMode"
+              :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
+              :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
+              @prev="previousPage"
+              @next="nextPage"
+              @change-page="goToPage"
+              @change-chapter="changeChapter"
+            />
+          </template>
+        </ReaderHeader>
 
         <PageViewer
           :pages="pages"
@@ -88,7 +93,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
 import { Pagination } from '@/components/pagination'
-import { MangaInfo, ChapterList, ReaderHeader, PageViewer } from '@/components/reader'
+import { MangaInfo, ChapterList, PageViewer } from '@/components/reader'
+import { ReaderHeader } from '@/components/header'
 import { LoadingIcon } from '@/components/loading-icon'
 import {
   Button,
@@ -100,6 +106,10 @@ import {
   DialogTitle,
 } from '@/components/ui'
 import { useReaderStore } from '@/stores/reader'
+
+const emit = defineEmits<{
+  'toggle-sidebar': []
+}>()
 
 const route = useRoute()
 const router = useRouter()

@@ -4,7 +4,7 @@
     <RecentReads />
 
     <div class="mb-6">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-start justify-between mb-4">
         <h2 class="text-2xl flex items-center gap-2">
           <Library class="w-6 h-6" />
           Library
@@ -38,6 +38,7 @@
         :key="manga.id"
         :manga="manga"
         :index="index"
+        :class="`animate-fade-in-up stagger-${(index % 12) + 1}`"
       />
     </div>
 

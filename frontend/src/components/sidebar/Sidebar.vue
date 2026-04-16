@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { Library, Scroll, Bookmark, Settings } from 'lucide-vue-next'
 import { Logo } from '@/components/logo'
-import { Button } from '@/components/ui'
 
 interface Props {
   isOpen: boolean
@@ -15,23 +13,22 @@ const emit = defineEmits<{
   'toggle-settings': []
 }>()
 
-const route = useRoute()
-
 const navItems = [
   { icon: Library, label: 'Library', to: '/' },
   { icon: Scroll, label: 'History', to: '/history' },
   { icon: Bookmark, label: 'Bookmarks', to: '/bookmarks' },
 ]
 
-const isActive = (path: string) => {
-  return route.path === path
-}
-
 const handleNavClick = () => {
   // Only close sidebar on mobile (< 768px)
   if (window.innerWidth < 768) {
     emit('close')
   }
+}
+
+const handleNavigate = (navigateFn: () => void) => {
+  navigateFn()
+  handleNavClick()
 }
 </script>
 
@@ -67,10 +64,10 @@ const handleNavClick = () => {
     >
       <div class="flex h-full flex-col">
         <!-- Header -->
-        <div class="flex h-16 items-center justify-center border-b px-4">
-          <router-link to="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Logo :width="36" :height="36" />
-            <span class="text-xl">Manga <span class="text-primary">Reader</span></span>
+        <div class="flex h-14 items-center justify-center border-b px-4">
+          <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Logo :width="32" :height="32" />
+            <span class="text-lg">Manga <span class="text-primary">Reader</span></span>
           </router-link>
         </div>
 
@@ -80,16 +77,21 @@ const handleNavClick = () => {
             v-for="item in navItems"
             :key="item.to"
             :to="item.to"
-            :class="[
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              isActive(item.to)
-                ? 'bg-primary/10 text-primary border-r-4 border-primary'
-                : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
-            ]"
-            @click="handleNavClick"
+            custom
+            v-slot="{ navigate, isExactActive }"
           >
-            <component :is="item.icon" class="h-5 w-5" />
-            {{ item.label }}
+            <a
+              :class="[
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+                isExactActive
+                  ? 'bg-primary/10 text-primary border-r-4 border-primary'
+                  : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
+              ]"
+              @click="handleNavigate(navigate)"
+            >
+              <component :is="item.icon" class="h-5 w-5" />
+              {{ item.label }}
+            </a>
           </router-link>
         </nav>
 

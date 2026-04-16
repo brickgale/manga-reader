@@ -15,19 +15,11 @@
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <Card
-        v-for="bookmark in bookmarks"
+        v-for="(bookmark, index) in bookmarks"
         :key="bookmark.id"
-        class="group relative overflow-hidden transition-all duration-300 hover:shadow-lg"
+        class="group relative overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in-up"
+        :class="`stagger-${(index % 6) + 1}`"
       >
-        <!-- Delete Button -->
-        <button
-          @click="handleDelete(bookmark.id)"
-          class="absolute top-2 right-2 z-20 text-destructive hover:text-destructive/90 p-1.5 rounded-sm hover:bg-destructive/10 bg-background/80 backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100"
-          title="Delete bookmark"
-        >
-          <Trash2 class="w-4 h-4" />
-        </button>
-
         <!-- Note Overlay -->
         <div
           v-if="expandedNoteId === bookmark.id"
@@ -83,7 +75,8 @@
             >
               <div>
                 <h3
-                  class="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors"
+                  class="font-semibold text-base leading-tight truncate group-hover:text-primary transition-colors"
+                  :title="bookmark.manga?.title || 'Unknown'"
                 >
                   {{ bookmark.manga?.title || 'Unknown' }}
                 </h3>
@@ -108,18 +101,27 @@
             </router-link>
 
             <div class="flex items-center justify-between gap-2 mt-3 pt-3 border-t">
-              <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Clock class="w-3.5 h-3.5" />
-                <span>{{ formatRelativeTime(bookmark.createdAt) }}</span>
+              <div class="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
+                <Clock class="w-3.5 h-3.5 flex-shrink-0" />
+                <span class="truncate">{{ formatRelativeTime(bookmark.createdAt) }}</span>
               </div>
-              <button
-                v-if="bookmark.note"
-                @click.stop="expandedNoteId = bookmark.id"
-                class="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
-                title="View note"
-              >
-                <MessageSquare class="w-3.5 h-3.5" />
-              </button>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button
+                  v-if="bookmark.note"
+                  @click.stop="expandedNoteId = bookmark.id"
+                  class="text-xs text-primary hover:text-primary/80 transition-colors"
+                  title="View note"
+                >
+                  <MessageSquare class="w-3.5 h-3.5" />
+                </button>
+                <button
+                  @click="handleDelete(bookmark.id)"
+                  class="text-xs text-destructive hover:text-destructive/90 transition-colors"
+                  title="Delete bookmark"
+                >
+                  <Trash2 class="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -130,7 +132,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Trash2, BookOpen, FileText, Clock, MessageSquare, Bookmark as BookmarkIcon } from 'lucide-vue-next'
+import {
+  Trash2,
+  BookOpen,
+  FileText,
+  Clock,
+  MessageSquare,
+  Bookmark as BookmarkIcon,
+} from 'lucide-vue-next'
 import { api, type Bookmark } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
 import { Card } from '@/components/ui'
