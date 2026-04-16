@@ -1,5 +1,7 @@
 <template>
-  <Card class="overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 dark:hover:shadow-primary/30">
+  <Card
+    class="overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group-hover:ring-1 group-hover:ring-primary/50 dark:hover:shadow-primary/30"
+  >
     <div class="flex gap-0 min-h-[160px]">
       <!-- Cover Image -->
       <router-link

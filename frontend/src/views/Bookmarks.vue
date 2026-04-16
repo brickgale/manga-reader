@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import {
-  Trash2,
-  MessageSquare,
-  Bookmark as BookmarkIcon,
-} from 'lucide-vue-next'
+import { Trash2, MessageSquare, Bookmark as BookmarkIcon } from 'lucide-vue-next'
 import { api, type Bookmark } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
 import {

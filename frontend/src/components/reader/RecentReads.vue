@@ -19,7 +19,6 @@
         :chapter="item.chapterPath"
         :page="item.pageNumber"
         :subtitle="`${formatChapterName(item.chapterPath)} - Page ${item.pageNumber + 1}`"
-        :class="`animate-fade-in-up stagger-${index + 1}`"
       />
     </div>
   </div>

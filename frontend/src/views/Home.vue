@@ -38,7 +38,6 @@
         :key="manga.id"
         :manga="manga"
         :index="index"
-        :class="`animate-fade-in-up stagger-${(index % 12) + 1}`"
       />
     </div>
 

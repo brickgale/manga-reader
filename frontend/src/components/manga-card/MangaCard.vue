@@ -36,11 +36,14 @@ const displaySubtitle = computed(() => {
   <router-link
     :to="linkTo"
     :class="[
-      'group block transition-all duration-300 ease-out hover:scale-105 hover:z-10',
-      index % 2 === 0 ? 'hover:rotate-2' : 'hover:-rotate-2',
+      'group block transition-all duration-300 ease-out hover:z-10',
+      index % 2 === 0 ? 'hover:rotate-1' : 'hover:-rotate-1',
     ]"
   >
-    <Card class="overflow-hidden transition-shadow duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 dark:group-hover:shadow-primary/30">
+    <Card
+      class="overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 dark:group-hover:shadow-primary/30 group-hover:ring-2 group-hover:ring-primary/50 animate-fade-in-up"
+      :class="`stagger-${(index % 12) + 1}`"
+    >
       <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
         <img
           v-if="manga.coverImage"
