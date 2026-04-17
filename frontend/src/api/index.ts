@@ -98,6 +98,26 @@ export const api = {
     }
   },
 
+  async searchManga(query: string, page?: number, pageSize?: number): Promise<PaginatedResponse<Manga>> {
+    const params = new URLSearchParams()
+    params.append('q', query)
+    if (page !== undefined) params.append('page', String(page))
+    if (pageSize !== undefined) params.append('pageSize', String(pageSize))
+
+    const { data } = await axios.get(`${API_URL}/manga/search?${params.toString()}`)
+
+    // Convert cover image paths to full URLs
+    return {
+      ...data,
+      data: data.data.map((manga: Manga) => ({
+        ...manga,
+        coverImage: manga.coverImage?.startsWith('/covers/')
+          ? `${API_URL}/manga${manga.coverImage}`
+          : manga.coverImage,
+      })),
+    }
+  },
+
   async scanDirectory(dirPath: string): Promise<Manga[]> {
     const { data } = await axios.post(`${API_URL}/manga/scan`, { dirPath })
     return data

@@ -95,6 +95,123 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
+ * /manga/search:
+ *   get:
+ *     summary: Search manga by title
+ *     tags: [Manga]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Search query
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of matching manga
+ *       400:
+ *         description: Search query is required
+ *       500:
+ *         description: Server error
+ */
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query
+
+    if (!q || typeof q !== 'string') {
+      return res.status(400).json({ error: 'Search query is required' })
+    }
+
+    const searchQuery = q.trim()
+    if (searchQuery.length === 0) {
+      return res.status(400).json({ error: 'Search query cannot be empty' })
+    }
+
+    const pagination = getPagination(req.query, { defaultPageSize: 20 })
+
+    // Search in both title and altTitle fields
+    // Note: SQLite's contains is case-insensitive by default for ASCII characters
+    const whereClause = {
+      OR: [
+        { title: { contains: searchQuery } },
+        { altTitle: { contains: searchQuery } },
+      ],
+    }
+
+    if (!pagination) {
+      // No pagination params, return all results
+      const manga = await prisma.manga.findMany({
+        where: whereClause,
+        orderBy: { updatedAt: 'desc' },
+      })
+
+      // Add chapter count to each manga
+      const mangaWithChapters = await Promise.all(
+        manga.map(async m => {
+          try {
+            const entries = await fs.readdir(m.path, { withFileTypes: true })
+            const chapterCount = entries.filter(entry => entry.isDirectory()).length
+            return { ...m, chapterCount }
+          } catch {
+            return { ...m, chapterCount: 0 }
+          }
+        })
+      )
+
+      const totalItems = manga.length
+      const pageSize = totalItems === 0 ? 1 : manga.length
+      const response = buildPaginatedResponse(mangaWithChapters, totalItems, 1, pageSize)
+      return res.json(response)
+    }
+
+    const [manga, totalItems] = await Promise.all([
+      prisma.manga.findMany({
+        where: whereClause,
+        orderBy: { updatedAt: 'desc' },
+        skip: pagination.skip,
+        take: pagination.take,
+      }),
+      prisma.manga.count({ where: whereClause }),
+    ])
+
+    // Add chapter count to each manga
+    const mangaWithChapters = await Promise.all(
+      manga.map(async m => {
+        try {
+          const entries = await fs.readdir(m.path, { withFileTypes: true })
+          const chapterCount = entries.filter(entry => entry.isDirectory()).length
+          return { ...m, chapterCount }
+        } catch {
+          return { ...m, chapterCount: 0 }
+        }
+      })
+    )
+
+    const response = buildPaginatedResponse(
+      mangaWithChapters,
+      totalItems,
+      pagination.page,
+      pagination.pageSize
+    )
+    res.json(response)
+  } catch (error) {
+    console.error('Search error:', error)
+    res.status(500).json({ error: 'Failed to search manga' })
+  }
+})
+
+/**
+ * @swagger
  * /manga/scan:
  *   post:
  *     summary: Scan directory for manga
