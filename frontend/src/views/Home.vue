@@ -52,15 +52,18 @@
         :has-prev="pagination.hasPrev"
         @update-page="
           page => {
-            currentPage = page
-            loadManga()
+            router.push({ query: { page: page > 1 ? String(page) : undefined } })
           }
         "
         @update-page-size="
           size => {
             pageSize = size
             currentPage = 1
-            loadManga()
+            const shouldReload = route.query.page === undefined
+            router.push({ query: { page: undefined } })
+            if (shouldReload) {
+              loadManga()
+            }
           }
         "
       />
@@ -69,7 +72,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Folder, X, Library } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type PaginationInfo } from '@/api'
@@ -77,6 +81,9 @@ import { Button, Input } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { RecentReads } from '@/components/reader'
 import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
+
+const route = useRoute()
+const router = useRouter()
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
@@ -86,6 +93,11 @@ const showScanInput = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(12)
 const pagination = ref<PaginationInfo | null>(null)
+
+// Initialize from URL params
+if (route.query.page) {
+  currentPage.value = parseInt(String(route.query.page), 10)
+}
 
 console.log(scanPath.value, '--- initial scan path ---')
 
@@ -97,10 +109,23 @@ const loadManga = async () => {
     pagination.value = response.pagination
   } catch (error) {
     console.error('Failed to load manga:', error)
+    toast.error('Failed to load manga')
   } finally {
     loading.value = false
   }
 }
+
+// Watch for route query changes (page changes)
+watch(
+  () => route.query.page,
+  newPage => {
+    const page = newPage ? parseInt(String(newPage), 10) : 1
+    if (currentPage.value !== page) {
+      currentPage.value = page
+      loadManga()
+    }
+  }
+)
 
 const handleScan = async () => {
   if (!scanPath.value.trim()) {

@@ -44,7 +44,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { watchDebounced } from '@vueuse/core'
 import { Menu, Search } from 'lucide-vue-next'
 import { Button, Input } from '@/components/ui'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -55,6 +57,9 @@ defineEmits<{
   'toggle-sidebar': []
 }>()
 
+const router = useRouter()
+const route = useRoute()
+
 const isDark = useDark({
   selector: 'html',
   attribute: 'class',
@@ -64,10 +69,46 @@ const isDark = useDark({
 
 const searchQuery = ref('')
 
+// Initialize search query from URL params (for /search page)
+if (route.path === '/search' && route.query.q) {
+  searchQuery.value = String(route.query.q)
+}
+
+// Watch for route changes to update search query
+watch(
+  () => [route.path, route.query.q] as const,
+  ([path, queryQ]) => {
+    if (path === '/search' && queryQ) {
+      searchQuery.value = String(queryQ)
+    } else {
+      searchQuery.value = ''
+    }
+  }
+)
+
+// Debounced search - navigates to search page after 300ms of no typing
+watchDebounced(
+  searchQuery,
+  newQuery => {
+    const trimmedQuery = newQuery.trim()
+    
+    if (trimmedQuery) {
+      // Navigate to search page with query
+      router.push({ path: '/search', query: { q: trimmedQuery } })
+    } else if (route.path === '/search') {
+      // If on search page and query is empty, go back home
+      router.push('/')
+    }
+  },
+  { debounce: 300 }
+)
+
 const handleSearch = () => {
-  if (searchQuery.value.trim()) {
-    // TODO: Implement search functionality
-    console.log('Searching for:', searchQuery.value)
+  const trimmedQuery = searchQuery.value.trim()
+  
+  // Navigate to search page with query on Enter key
+  if (trimmedQuery) {
+    router.push({ path: '/search', query: { q: trimmedQuery } })
   }
 }
 </script>
