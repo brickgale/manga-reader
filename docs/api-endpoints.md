@@ -180,3 +180,88 @@ console.log(data)
 - External cover URLs are not saved to prevent database pollution
 
 **Status:** Not integrated in frontend UI
+
+## Search API
+
+### Search Manga
+
+Search for manga by title or alternative title.
+
+**Endpoint:** `GET /api/manga/search`
+
+**Parameters:**
+
+- `q` (query, required) - Search query string
+- `page` (query, optional) - Page number (default: 1)
+- `pageSize` (query, optional) - Items per page (default: 20)
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "f3df3ead-67e1-4cbb-a1db-b9a363d0bddf",
+      "title": "One Piece",
+      "altTitle": "ワンピース",
+      "path": "/manga/One Piece",
+      "coverImage": "/covers/abc123.jpg",
+      "chapterCount": 1095,
+      "createdAt": "2026-01-08T08:24:10.000Z",
+      "updatedAt": "2026-02-18T12:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "pageSize": 20,
+    "totalPages": 1,
+    "totalItems": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+**Error Response:**
+
+```json
+{
+  "error": "Search query is required"
+}
+```
+
+**Example Usage:**
+
+```bash
+curl "http://localhost:3001/api/manga/search?q=one+piece&page=1&pageSize=12"
+```
+
+**Notes:**
+
+- Search is case-insensitive by default (SQLite LIKE behavior)
+- Searches both `title` and `altTitle` fields
+- Returns paginated results with chapter counts
+
+**Status:** ✅ Integrated in frontend at `/search` route
+
+## System API
+
+### Get Version
+
+Get the current application version.
+
+**Endpoint:** `GET /api/version`
+
+**Response:**
+
+```json
+{
+  "version": "1.0.0"
+}
+```
+
+**Example Usage:**
+
+```bash
+curl http://localhost:3001/api/version
+```

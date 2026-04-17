@@ -91,7 +91,7 @@ watchDebounced(
   searchQuery,
   newQuery => {
     const trimmedQuery = newQuery.trim()
-    
+
     if (trimmedQuery) {
       // Navigate to search page with query
       router.push({ path: '/search', query: { q: trimmedQuery } })
@@ -105,7 +105,7 @@ watchDebounced(
 
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim()
-  
+
   // Navigate to search page with query on Enter key
   if (trimmedQuery) {
     router.push({ path: '/search', query: { q: trimmedQuery } })

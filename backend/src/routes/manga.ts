@@ -148,10 +148,7 @@ router.get('/search', async (req, res) => {
     // Search in both title and altTitle fields
     // Note: SQLite's contains is case-insensitive by default for ASCII characters
     const whereClause = {
-      OR: [
-        { title: { contains: searchQuery } },
-        { altTitle: { contains: searchQuery } },
-      ],
+      OR: [{ title: { contains: searchQuery } }, { altTitle: { contains: searchQuery } }],
     }
 
     const [manga, totalItems] = await Promise.all([
