@@ -222,11 +222,17 @@ Search for manga by title or alternative title.
 }
 ```
 
-**Error Response:**
+**Error Responses:**
 
 ```json
 {
   "error": "Search query is required"
+}
+```
+
+```json
+{
+  "error": "Search query cannot be empty"
 }
 ```
 
@@ -256,7 +262,7 @@ Get the current application version.
 
 ```json
 {
-  "version": "1.0.0"
+  "version": "x.y.z"
 }
 ```
 

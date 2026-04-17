@@ -52,7 +52,7 @@ function writePackageJson(filePath, data) {
 
 // Validate semantic version format
 function isValidVersion(version) {
-  return /^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$/.test(version)
+  return /^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?(\+[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/.test(version)
 }
 
 // Main function

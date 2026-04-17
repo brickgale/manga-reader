@@ -24,7 +24,7 @@ const fetchVersion = async () => {
     appVersion.value = version
   } catch (error) {
     console.error('Failed to fetch version:', error)
-    appVersion.value = '1.0.0'
+    appVersion.value = '...'
   }
 }
 

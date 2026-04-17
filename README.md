@@ -7,7 +7,7 @@ A simple manga/manhwa reader application with reading history, bookmarks, and pr
 ## Features
 
 - 📁 Browse and scan local manga directories
-- � Search manga by title with debounced search
+- 🔍 Search manga by title with debounced search
 - 📖 Read manga with page navigation
 - 📚 Reading history tracking
 - 🔖 Page bookmarks
@@ -90,8 +90,8 @@ node sync-version.js 1.2.0
 2. Update `frontend/package.json` version (must match)
 3. Rebuild and restart the backend:
    ```bash
-   docker-compose build backend
-   docker-compose up -d backend
+   docker compose build backend
+   docker compose up -d backend
    ```
 
 **Version validation:**
