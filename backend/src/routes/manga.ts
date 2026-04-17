@@ -97,7 +97,7 @@ router.get('/', async (req, res) => {
  * @swagger
  * /manga/search:
  *   get:
- *     summary: Search manga by title
+ *     summary: Search manga by title or alt title
  *     tags: [Manga]
  *     parameters:
  *       - in: query
@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
  *         schema:
  *           type: string
  *         required: true
- *         description: Search query
+ *         description: Search query (matches title or alt title)
  *       - in: query
  *         name: page
  *         schema:
@@ -137,7 +137,13 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: 'Search query cannot be empty' })
     }
 
-    const pagination = getPagination(req.query, { defaultPageSize: 20 })
+    const SEARCH_DEFAULT_PAGE_SIZE = 20
+    const pagination = getPagination(req.query, { defaultPageSize: SEARCH_DEFAULT_PAGE_SIZE }) ?? {
+      skip: 0,
+      take: SEARCH_DEFAULT_PAGE_SIZE,
+      page: 1,
+      pageSize: SEARCH_DEFAULT_PAGE_SIZE,
+    }
 
     // Search in both title and altTitle fields
     // Note: SQLite's contains is case-insensitive by default for ASCII characters
@@ -146,32 +152,6 @@ router.get('/search', async (req, res) => {
         { title: { contains: searchQuery } },
         { altTitle: { contains: searchQuery } },
       ],
-    }
-
-    if (!pagination) {
-      // No pagination params, return all results
-      const manga = await prisma.manga.findMany({
-        where: whereClause,
-        orderBy: { updatedAt: 'desc' },
-      })
-
-      // Add chapter count to each manga
-      const mangaWithChapters = await Promise.all(
-        manga.map(async m => {
-          try {
-            const entries = await fs.readdir(m.path, { withFileTypes: true })
-            const chapterCount = entries.filter(entry => entry.isDirectory()).length
-            return { ...m, chapterCount }
-          } catch {
-            return { ...m, chapterCount: 0 }
-          }
-        })
-      )
-
-      const totalItems = manga.length
-      const pageSize = totalItems === 0 ? 1 : manga.length
-      const response = buildPaginatedResponse(mangaWithChapters, totalItems, 1, pageSize)
-      return res.json(response)
     }
 
     const [manga, totalItems] = await Promise.all([

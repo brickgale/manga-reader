@@ -59,7 +59,11 @@
           size => {
             pageSize = size
             currentPage = 1
+            const shouldReload = route.query.page === undefined
             router.push({ query: { ...route.query, page: undefined } })
+            if (shouldReload) {
+              loadSearchResults()
+            }
           }
         "
       />

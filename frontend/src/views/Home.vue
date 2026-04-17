@@ -52,7 +52,6 @@
         :has-prev="pagination.hasPrev"
         @update-page="
           page => {
-            currentPage = page
             router.push({ query: { page: page > 1 ? String(page) : undefined } })
           }
         "
@@ -60,7 +59,11 @@
           size => {
             pageSize = size
             currentPage = 1
+            const shouldReload = route.query.page === undefined
             router.push({ query: { page: undefined } })
+            if (shouldReload) {
+              loadManga()
+            }
           }
         "
       />

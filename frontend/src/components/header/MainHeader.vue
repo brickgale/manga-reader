@@ -76,15 +76,14 @@ if (route.path === '/search' && route.query.q) {
 
 // Watch for route changes to update search query
 watch(
-  () => route,
-  newRoute => {
-    if (newRoute.path === '/search' && newRoute.query.q) {
-      searchQuery.value = String(newRoute.query.q)
-    } else if (newRoute.path !== '/search') {
+  () => [route.path, route.query.q] as const,
+  ([path, queryQ]) => {
+    if (path === '/search' && queryQ) {
+      searchQuery.value = String(queryQ)
+    } else {
       searchQuery.value = ''
     }
-  },
-  { deep: true }
+  }
 )
 
 // Debounced search - navigates to search page after 300ms of no typing
