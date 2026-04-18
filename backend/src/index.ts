@@ -9,9 +9,33 @@ import bookmarkRoutes from './routes/bookmark'
 import progressRoutes from './routes/progress'
 import settingsRoutes from './routes/settings'
 import path from 'path'
+import { readFileSync } from 'fs'
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3000', 10)
+
+// Read version from package.json files
+const backendPackageJson = JSON.parse(
+  readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
+)
+const VERSION = backendPackageJson.version || '1.0.0'
+
+// Validate frontend/backend version sync
+try {
+  const frontendPackageJson = JSON.parse(
+    readFileSync(path.join(__dirname, '..', '..', 'frontend', 'package.json'), 'utf-8')
+  )
+  const frontendVersion = frontendPackageJson.version || '1.0.0'
+
+  if (VERSION !== frontendVersion) {
+    console.warn('⚠️  VERSION MISMATCH DETECTED!')
+    console.warn(`   Backend:  v${VERSION}`)
+    console.warn(`   Frontend: v${frontendVersion}`)
+    console.warn('   Please sync versions in both package.json files')
+  }
+} catch (error) {
+  console.warn('⚠️  Could not validate frontend version')
+}
 
 export const prisma = new PrismaClient()
 
@@ -20,7 +44,7 @@ const swaggerOptions = {
     openapi: '3.0.0',
     info: {
       title: 'Manga Reader API',
-      version: '1.0.0',
+      version: VERSION,
       description: 'API documentation for the Manga Reader application',
     },
     servers: [
@@ -60,6 +84,11 @@ app.use('/api/settings', settingsRoutes)
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
+})
+
+// Version endpoint
+app.get('/api/version', (req, res) => {
+  res.json({ version: VERSION })
 })
 
 // Config endpoint

@@ -72,6 +72,12 @@ export interface PaginatedResponse<T> {
 }
 
 export const api = {
+  // System endpoints
+  async getVersion(): Promise<{ version: string }> {
+    const { data } = await axios.get(`${API_URL}/version`)
+    return data
+  },
+
   // Config endpoints
   async getConfig(): Promise<Config> {
     const { data } = await axios.get(`${API_URL}/config`)
@@ -98,7 +104,11 @@ export const api = {
     }
   },
 
-  async searchManga(query: string, page?: number, pageSize?: number): Promise<PaginatedResponse<Manga>> {
+  async searchManga(
+    query: string,
+    page?: number,
+    pageSize?: number
+  ): Promise<PaginatedResponse<Manga>> {
     const params = new URLSearchParams()
     params.append('q', query)
     if (page !== undefined) params.append('page', String(page))

@@ -16,6 +16,17 @@ const emit = defineEmits<{
 }>()
 
 const libraryDirectory = ref<string>('')
+const appVersion = ref<string>('...')
+
+const fetchVersion = async () => {
+  try {
+    const { version } = await api.getVersion()
+    appVersion.value = version
+  } catch (error) {
+    console.error('Failed to fetch version:', error)
+    appVersion.value = '...'
+  }
+}
 
 const fetchLibraryDirectory = async () => {
   try {
@@ -35,8 +46,13 @@ const fetchLibraryDirectory = async () => {
 watch(
   () => props.open,
   isOpen => {
-    if (isOpen && !libraryDirectory.value) {
-      fetchLibraryDirectory()
+    if (isOpen) {
+      if (!libraryDirectory.value) {
+        fetchLibraryDirectory()
+      }
+      if (appVersion.value === '...') {
+        fetchVersion()
+      }
     }
   }
 )
@@ -100,7 +116,7 @@ watch(
             <!-- About -->
             <div class="space-y-3">
               <h3 class="text-sm font-semibold">About</h3>
-              <p class="text-sm text-muted-foreground">Manga Reader v1.0.0</p>
+              <p class="text-sm text-muted-foreground">Manga Reader v{{ appVersion }}</p>
             </div>
           </div>
         </div>
