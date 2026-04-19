@@ -63,13 +63,12 @@ const handleChapterChange = (value: any) => {
 </script>
 
 <template>
-  <div class="flex flex-row flex-wrap justify-center items-center gap-3">
+  <div class="flex flex-row flex-wrap justify-center items-center gap-2">
     <!-- Chapter Selector -->
     <div
       v-if="chapters && chapters.length > 0"
-      class="flex items-center gap-2 min-w-none sm:min-w-[200px]"
+      class="flex items-center gap-2 min-w-none sm:min-w-[180px]"
     >
-      <span class="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline">Chapter:</span>
       <Select :model-value="currentChapterPath" @update:model-value="handleChapterChange">
         <SelectTrigger class="w-full max-w-[200px]">
           <SelectValue placeholder="Select chapter" />

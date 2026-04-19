@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading && recentlyRead.length > 0" class="mb-6">
+  <div v-if="loading || recentlyRead.length > 0" class="mb-6">
     <div class="flex items-start justify-between mb-4">
       <h2 class="text-2xl flex items-center gap-2">
         <FastForward class="w-6 h-6" />
@@ -10,7 +10,14 @@
         <ChevronRight v-else class="h-5 w-5" />
       </Button>
     </div>
-    <div v-if="isExpanded" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
+    <!-- Loading State (only when expanded) -->
+    <div v-if="loading && isExpanded" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <MangaCardSkeleton v-for="n in 6" :key="n" />
+    </div>
+
+    <!-- Loaded State -->
+    <div v-else-if="!loading && isExpanded" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
       <MangaCard
         v-for="(item, index) in recentlyRead"
         :key="item.id"
@@ -29,7 +36,8 @@ import { ref, onMounted } from 'vue'
 import { ChevronDown, ChevronRight, FastForward } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { Button } from '@/components/ui'
-import { MangaCard } from '@/components/manga-card'
+import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
+import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
 
 const formatChapterName = (path: string) => {
   const parts = path.split('/')
@@ -47,8 +55,9 @@ const toggleExpanded = () => {
 
 const loadRecentlyRead = async () => {
   loading.value = true
+
   try {
-    const response = await api.getHistory(1, 6)
+    const response = await withMinimumLoadingTime(() => api.getHistory(1, 6))
     recentlyRead.value = response.data
   } catch (error) {
     console.error('Failed to load recently read:', error)

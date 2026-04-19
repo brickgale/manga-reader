@@ -81,6 +81,7 @@ import { Button, Input } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { RecentReads } from '@/components/reader'
 import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
+import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
 
 const route = useRoute()
 const router = useRouter()
@@ -93,6 +94,7 @@ const showScanInput = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(12)
 const pagination = ref<PaginationInfo | null>(null)
+let requestId = 0
 
 // Initialize from URL params
 if (route.query.page) {
@@ -103,15 +105,25 @@ console.log(scanPath.value, '--- initial scan path ---')
 
 const loadManga = async () => {
   loading.value = true
+  const currentId = ++requestId
+
   try {
-    const response = await api.getManga(currentPage.value, pageSize.value)
+    const response = await withMinimumLoadingTime(() =>
+      api.getManga(currentPage.value, pageSize.value),
+    )
+
+    if (currentId !== requestId) return
+
     mangaList.value = response.data
     pagination.value = response.pagination
   } catch (error) {
+    if (currentId !== requestId) return
     console.error('Failed to load manga:', error)
     toast.error('Failed to load manga')
   } finally {
-    loading.value = false
+    if (currentId === requestId) {
+      loading.value = false
+    }
   }
 }
 

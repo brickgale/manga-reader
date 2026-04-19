@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { Trash2, MessageSquare, Bookmark as BookmarkIcon } from 'lucide-vue-next'
 import { api, type Bookmark } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
+import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
 import {
   Button,
   Dialog,
@@ -37,8 +38,9 @@ const formatRelativeTime = (timestamp: string) => {
 
 const loadBookmarks = async () => {
   loading.value = true
+
   try {
-    const response = await api.getBookmarks()
+    const response = await withMinimumLoadingTime(() => api.getBookmarks())
     bookmarks.value = response.data
   } catch (error) {
     console.error('Failed to load bookmarks:', error)

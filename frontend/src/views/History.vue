@@ -40,6 +40,7 @@ import { ref, onMounted } from 'vue'
 import { Scroll } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
+import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
 import { ReadingCard } from '@/components/reader'
 import { HistoryCardSkeleton } from '@/components/ui/skeleton'
 
@@ -62,8 +63,9 @@ const formatRelativeTime = (timestamp: string) => {
 
 const loadHistory = async () => {
   loading.value = true
+
   try {
-    const response = await api.getHistory()
+    const response = await withMinimumLoadingTime(() => api.getHistory())
     history.value = response.data
   } catch (error) {
     console.error('Failed to load history:', error)

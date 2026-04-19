@@ -1,9 +1,9 @@
 <template>
   <header
-    class="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    class="sticky top-0 z-40 h-14 flex items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
   >
     <!-- Top Row: Chapter Info + View Mode Toggle -->
-    <div class="h-14 px-4 flex items-center justify-between gap-4 border-b">
+    <div class="container mx-auto px-4 flex items-center justify-between gap-2">
       <!-- Left: Sidebar Toggle (Mobile) + Chapter Info -->
       <div class="flex items-center gap-3 min-w-0 flex-1">
         <Button
