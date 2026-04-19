@@ -80,6 +80,7 @@ import { api, type Manga, type PaginationInfo } from '@/api'
 import { Button } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
+import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
 
 const route = useRoute()
 const router = useRouter()
@@ -90,6 +91,7 @@ const currentPage = ref(1)
 const pageSize = ref(12)
 const pagination = ref<PaginationInfo | null>(null)
 const searchQuery = ref('')
+let requestId = 0
 
 // Initialize from URL params
 if (route.query.q) {
@@ -107,25 +109,25 @@ const loadSearchResults = async () => {
   }
 
   loading.value = true
-  const startTime = Date.now()
-  
+  const currentId = ++requestId
+
   try {
-    const response = await api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
+    const response = await withMinimumLoadingTime(() =>
+      api.searchManga(searchQuery.value, currentPage.value, pageSize.value),
+    )
+
+    if (currentId !== requestId) return
+
     mangaList.value = response.data
     pagination.value = response.pagination
   } catch (error) {
+    if (currentId !== requestId) return
     console.error('Failed to search manga:', error)
     toast.error('Failed to search manga')
   } finally {
-    // Ensure minimum 1 second loading time for skeleton visibility
-    const elapsed = Date.now() - startTime
-    const remainingTime = Math.max(0, 1000 - elapsed)
-    
-    if (remainingTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, remainingTime))
+    if (currentId === requestId) {
+      loading.value = false
     }
-    
-    loading.value = false
   }
 }
 
