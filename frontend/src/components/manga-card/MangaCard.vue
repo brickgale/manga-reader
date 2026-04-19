@@ -41,7 +41,7 @@ const displaySubtitle = computed(() => {
     ]"
   >
     <Card
-      class="overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 dark:group-hover:shadow-primary/30 group-hover:ring-2 group-hover:ring-primary/50 animate-fade-in-up"
+      class="overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20 dark:group-hover:shadow-primary/30 group-hover:ring-2 group-hover:ring-primary/50"
       :class="`stagger-${(index % 12) + 1}`"
     >
       <div class="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">

@@ -107,6 +107,8 @@ const loadSearchResults = async () => {
   }
 
   loading.value = true
+  const startTime = Date.now()
+  
   try {
     const response = await api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
     mangaList.value = response.data
@@ -115,6 +117,14 @@ const loadSearchResults = async () => {
     console.error('Failed to search manga:', error)
     toast.error('Failed to search manga')
   } finally {
+    // Ensure minimum 1 second loading time for skeleton visibility
+    const elapsed = Date.now() - startTime
+    const remainingTime = Math.max(0, 1000 - elapsed)
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime))
+    }
+    
     loading.value = false
   }
 }

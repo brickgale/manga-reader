@@ -37,12 +37,22 @@ const formatRelativeTime = (timestamp: string) => {
 
 const loadBookmarks = async () => {
   loading.value = true
+  const startTime = Date.now()
+  
   try {
     const response = await api.getBookmarks()
     bookmarks.value = response.data
   } catch (error) {
     console.error('Failed to load bookmarks:', error)
   } finally {
+    // Ensure minimum 1 second loading time for skeleton visibility
+    const elapsed = Date.now() - startTime
+    const remainingTime = Math.max(0, 1000 - elapsed)
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime))
+    }
+    
     loading.value = false
   }
 }
