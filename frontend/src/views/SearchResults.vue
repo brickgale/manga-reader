@@ -113,7 +113,7 @@ const loadSearchResults = async () => {
 
   try {
     const response = await withMinimumLoadingTime(() =>
-      api.searchManga(searchQuery.value, currentPage.value, pageSize.value),
+      api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
     )
 
     if (currentId !== requestId) return

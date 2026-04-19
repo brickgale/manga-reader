@@ -109,7 +109,7 @@ const loadManga = async () => {
 
   try {
     const response = await withMinimumLoadingTime(() =>
-      api.getManga(currentPage.value, pageSize.value),
+      api.getManga(currentPage.value, pageSize.value)
     )
 
     if (currentId !== requestId) return

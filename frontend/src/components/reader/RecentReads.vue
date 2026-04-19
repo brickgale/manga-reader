@@ -17,7 +17,10 @@
     </div>
 
     <!-- Loaded State -->
-    <div v-else-if="!loading && isExpanded" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div
+      v-else-if="!loading && isExpanded"
+      class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+    >
       <MangaCard
         v-for="(item, index) in recentlyRead"
         :key="item.id"
