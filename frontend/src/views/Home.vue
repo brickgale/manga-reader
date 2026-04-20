@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div v-if="loading" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div v-if="loading" class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       <MangaCardSkeleton v-for="n in pageSize" :key="n" />
     </div>
 

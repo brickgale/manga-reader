@@ -56,6 +56,8 @@ const handleNavigate = (navigateFn: () => void) => {
       'lg:sticky lg:top-0 lg:translate-x-0 lg:h-screen',
       isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
+    :inert="!isOpen ? true : undefined"
+    :aria-hidden="!isOpen ? 'true' : 'false'"
   >
     <div class="flex h-full flex-col">
       <!-- Header -->
@@ -73,16 +75,17 @@ const handleNavigate = (navigateFn: () => void) => {
           :key="item.to"
           :to="item.to"
           custom
-          v-slot="{ navigate, isExactActive }"
+          v-slot="{ navigate, href, isExactActive }"
         >
           <a
+            :href="href"
             :class="[
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
               isExactActive
                 ? 'bg-primary/10 text-primary border-r-4 border-primary'
                 : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
             ]"
-            @click="handleNavigate(navigate)"
+            @click.prevent="handleNavigate(navigate)"
           >
             <component :is="item.icon" class="h-5 w-5" />
             {{ item.label }}
