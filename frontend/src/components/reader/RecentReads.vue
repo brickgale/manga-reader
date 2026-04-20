@@ -13,6 +13,7 @@
           size="sm"
           class="h-7 w-7 p-0 sm:h-10 sm:w-10"
           :disabled="currentPage === 0"
+          aria-label="Previous page"
           @click="goToPrevPage"
         >
           <ChevronLeft class="h-4 w-4 sm:h-5 sm:w-5" />
@@ -23,12 +24,19 @@
           size="sm"
           class="h-7 w-7 p-0 sm:h-10 sm:w-10"
           :disabled="currentPage >= totalPages - 1"
+          aria-label="Next page"
           @click="goToNextPage"
         >
           <ChevronRight class="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         <!-- Collapse Button -->
-        <Button variant="ghost" size="sm" class="h-7 w-7 p-0 sm:h-10 sm:w-10" @click="toggleExpanded">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-7 w-7 p-0 sm:h-10 sm:w-10"
+          :aria-label="isExpanded ? 'Collapse recently read' : 'Expand recently read'"
+          @click="toggleExpanded"
+        >
           <ChevronDown v-if="isExpanded" class="h-4 w-4 sm:h-5 sm:w-5" />
           <ChevronRight v-else class="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>

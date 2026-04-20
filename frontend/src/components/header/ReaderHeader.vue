@@ -34,7 +34,7 @@
               :variant="webtoonMode ? 'default' : 'outline'"
               size="icon"
             >
-              <GalleryVerticalEnd v-if="webtoonMode" class="h-5 w-5 dark:text-black" />
+              <GalleryVerticalEnd v-if="webtoonMode" class="h-5 w-5" />
               <BookOpen v-else class="h-5 w-5" />
             </Button>
           </TooltipTrigger>

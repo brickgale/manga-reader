@@ -23,7 +23,7 @@
 
       <div v-if="showScanInput" class="flex gap-4 mb-6 p-2.5 sm:p-4 border rounded-lg bg-muted/50">
         <Input v-model="scanPath" type="text" placeholder="/manga" class="flex-1" />
-        <Button @click="handleScan" :disabled="scanning" class="dark:text-black">
+        <Button @click="handleScan" :disabled="scanning">
           {{ scanning ? 'Scanning...' : 'Scan' }}
         </Button>
       </div>

@@ -85,7 +85,7 @@ const handleNavigate = (navigateFn: () => void) => {
                 ? 'bg-primary/10 text-primary border-r-4 border-primary'
                 : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
             ]"
-            @click.prevent="handleNavigate(navigate)"
+            @click="(e) => handleNavigate(() => navigate(e))"
           >
             <component :is="item.icon" class="h-5 w-5" />
             {{ item.label }}
