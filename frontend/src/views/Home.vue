@@ -13,6 +13,7 @@
           variant="outline"
           size="sm"
           class="h-7 sm:h-10"
+          :aria-label="showScanInput ? 'Close scan directory' : 'Scan Directory'"
           @click="showScanInput = !showScanInput"
         >
           <Folder v-if="!showScanInput" class="h-3.5 w-3.5 sm:h-4 sm:w-4" />

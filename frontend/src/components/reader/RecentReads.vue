@@ -48,7 +48,7 @@
       v-if="loading && isExpanded"
       class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
     >
-      <MangaCardSkeleton v-for="n in 6" :key="n" />
+      <MangaCardSkeleton v-for="n in itemsPerPage" :key="n" />
     </div>
 
     <!-- Paginated Container -->
