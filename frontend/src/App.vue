@@ -43,13 +43,13 @@ const isReaderView = computed(
 )
 
 // Initialize sidebar open state based on viewport width
-const sidebarOpen = ref(typeof window !== 'undefined' && window.innerWidth >= 768)
+const sidebarOpen = ref(typeof window !== 'undefined' && window.innerWidth >= 1024)
 const settingsOpen = ref(false)
 
 // Open sidebar by default on desktop
 onMounted(() => {
   // Ensure sidebar is open on desktop in case of edge cases
-  if (window.innerWidth >= 768) {
+  if (window.innerWidth >= 1024) {
     sidebarOpen.value = true
   }
 
@@ -63,7 +63,7 @@ onUnmounted(() => {
 
 const handleResize = () => {
   // Always show sidebar on desktop
-  if (window.innerWidth >= 768) {
+  if (window.innerWidth >= 1024) {
     sidebarOpen.value = true
   }
 }
