@@ -9,7 +9,7 @@
         <Button
           variant="ghost"
           size="icon"
-          class="md:hidden flex-shrink-0"
+          class="lg:hidden flex-shrink-0"
           @click="$emit('toggle-sidebar')"
         >
           <Menu class="h-5 w-5" />

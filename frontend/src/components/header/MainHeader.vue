@@ -5,7 +5,7 @@
     <div class="container mx-auto px-4 h-full flex items-center">
       <div class="flex w-full items-center justify-between gap-4">
         <!-- Left: Sidebar Toggle (Mobile Only) -->
-        <Button variant="ghost" size="icon" class="md:hidden" @click="$emit('toggle-sidebar')">
+        <Button variant="ghost" size="icon" class="lg:hidden" @click="$emit('toggle-sidebar')">
           <Menu class="h-5 w-5" />
         </Button>
 
