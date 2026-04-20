@@ -32,7 +32,7 @@
       <p>No manga found. Scan a directory to get started.</p>
     </div>
 
-    <div v-else class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div v-else class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       <MangaCard
         v-for="(manga, index) in mangaList"
         :key="manga.id"
