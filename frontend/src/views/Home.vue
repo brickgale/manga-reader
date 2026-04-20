@@ -5,20 +5,25 @@
 
     <div class="mb-6">
       <div class="flex items-start justify-between mb-4">
-        <h2 class="text-2xl flex items-center gap-2">
-          <Library class="w-6 h-6" />
+        <h2 class="text-lg sm:text-2xl flex items-center gap-2">
+          <Library class="w-5 h-5 sm:w-6 sm:h-6" />
           Library
         </h2>
-        <Button variant="outline" @click="showScanInput = !showScanInput">
-          <Folder v-if="!showScanInput" class="h-4 w-4" />
-          <X v-else class="h-4 w-4" />
-          <span>Scan Directory</span>
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-7 sm:h-10"
+          @click="showScanInput = !showScanInput"
+        >
+          <Folder v-if="!showScanInput" class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <X v-else class="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span class="hidden sm:inline">Scan Directory</span>
         </Button>
       </div>
 
-      <div v-if="showScanInput" class="flex gap-4 mb-6 p-4 border rounded-lg bg-muted/50">
+      <div v-if="showScanInput" class="flex gap-4 mb-6 p-2.5 sm:p-4 border rounded-lg bg-muted/50">
         <Input v-model="scanPath" type="text" placeholder="/manga" class="flex-1" />
-        <Button @click="handleScan" :disabled="scanning">
+        <Button @click="handleScan" :disabled="scanning" class="dark:text-black">
           {{ scanning ? 'Scanning...' : 'Scan' }}
         </Button>
       </div>

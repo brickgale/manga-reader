@@ -1,34 +1,36 @@
 <template>
   <div v-if="loading || recentlyRead.length > 0" class="mb-6">
     <div class="flex items-start justify-between mb-4">
-      <h2 class="text-2xl flex items-center gap-2">
-        <FastForward class="w-6 h-6" />
+      <h2 class="text-lg sm:text-2xl flex items-center gap-2">
+        <FastForward class="w-5 h-5 sm:w-6 sm:h-6" />
         Recently Read
       </h2>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-0.5 sm:gap-2">
         <!-- Navigation Buttons -->
         <Button
           v-if="!loading && isExpanded"
           variant="ghost"
-          size="icon"
+          size="sm"
+          class="h-7 w-7 p-0 sm:h-10 sm:w-10"
           :disabled="currentPage === 0"
           @click="goToPrevPage"
         >
-          <ChevronLeft class="h-5 w-5" />
+          <ChevronLeft class="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         <Button
           v-if="!loading && isExpanded"
           variant="ghost"
-          size="icon"
+          size="sm"
+          class="h-7 w-7 p-0 sm:h-10 sm:w-10"
           :disabled="currentPage >= totalPages - 1"
           @click="goToNextPage"
         >
-          <ChevronRight class="h-5 w-5" />
+          <ChevronRight class="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
         <!-- Collapse Button -->
-        <Button variant="ghost" size="icon" @click="toggleExpanded">
-          <ChevronDown v-if="isExpanded" class="h-5 w-5" />
-          <ChevronRight v-else class="h-5 w-5" />
+        <Button variant="ghost" size="sm" class="h-7 w-7 p-0 sm:h-10 sm:w-10" @click="toggleExpanded">
+          <ChevronDown v-if="isExpanded" class="h-4 w-4 sm:h-5 sm:w-5" />
+          <ChevronRight v-else class="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </div>
     </div>

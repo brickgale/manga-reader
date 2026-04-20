@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2 class="text-2xl mb-6 flex items-center gap-2">
-      <Scroll class="w-6 h-6" />
+    <h2 class="text-lg sm:text-2xl mb-6 flex items-center gap-2">
+      <Scroll class="w-5 h-5 sm:w-6 sm:h-6" />
       Reading History
     </h2>
 

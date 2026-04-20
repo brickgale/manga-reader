@@ -2,8 +2,8 @@
   <div>
     <div class="mb-6">
       <div class="flex items-start justify-between mb-4">
-        <h2 class="text-2xl flex items-center gap-2">
-          <Search class="w-6 h-6" />
+        <h2 class="text-lg sm:text-2xl flex items-center gap-2">
+          <Search class="w-5 h-5 sm:w-6 sm:h-6" />
           Search Results for "{{ searchQuery }}"
         </h2>
       </div>
