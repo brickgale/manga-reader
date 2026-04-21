@@ -13,16 +13,16 @@
 
     <div v-else>
       <!-- Manga Info & Chapter Selection -->
-      <div v-if="!currentChapter" class="container mx-auto p-4">
+      <div v-if="!currentChapter" class="container mx-auto">
         <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
-
         <ChapterList :chapters="chapters" @select="selectChapter" />
       </div>
 
       <!-- Reader View -->
       <div v-else>
         <ReaderHeader
-          :chapter-name="currentChapter.name"
+          :manga-title="manga.title"
+          :manga-id="manga.id"
           :current-page="currentPage"
           :total-pages="pages.length"
           :webtoon-mode="readerStore.webtoonMode"
@@ -335,6 +335,33 @@ watch([manga, currentChapter], () => {
 watch(pages, () => {
   updatePageTitle()
 })
+
+// Watch route changes to handle back navigation or link clicks
+watch(
+  () => route.query,
+  async (newQuery, oldQuery) => {
+    // If chapter query param is removed, reset to manga info view
+    if (!newQuery.chapter && currentChapter.value) {
+      currentChapter.value = null
+      pages.value = []
+      currentPage.value = 0
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+    // If chapter query param is added/changed (e.g., back button), load that chapter
+    else if (newQuery.chapter && newQuery.chapter !== oldQuery?.chapter && chapters.value.length > 0) {
+      const normalizedQueryChapter = getChapterName(newQuery.chapter as string)
+      const chapterIndex = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
+      if (chapterIndex !== -1) {
+        const chapter = chapters.value[chapterIndex]
+        currentChapterIndex.value = chapterIndex
+        await selectChapter(chapter)
+        if (newQuery.page) {
+          currentPage.value = parseInt(newQuery.page as string)
+        }
+      }
+    }
+  }
+)
 
 const updatePageTitle = () => {
   if (manga.value && currentChapter.value) {

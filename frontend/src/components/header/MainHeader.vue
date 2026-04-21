@@ -2,7 +2,7 @@
   <header
     class="sticky top-0 z-40 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
   >
-    <div class="container mx-auto px-4 h-full flex items-center">
+    <div class="w-full px-4 lg:container lg:mx-auto h-full flex items-center">
       <div class="flex w-full items-center justify-between gap-4">
         <!-- Left: Sidebar Toggle (Mobile Only) -->
         <Button variant="ghost" size="icon" class="lg:hidden" @click="$emit('toggle-sidebar')">
@@ -19,7 +19,7 @@
               v-model="searchQuery"
               type="search"
               placeholder="Search manga..."
-              class="pl-9 pr-4"
+              class="pl-9 pr-4 bg-muted/50"
               @keyup.enter="handleSearch"
             />
           </div>

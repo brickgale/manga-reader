@@ -9,9 +9,9 @@
             v-if="coverImageUrl"
             :src="coverImageUrl"
             :alt="manga.title"
-            class="w-32 h-48 object-cover rounded-lg shadow-md"
+            class="w-32 h-48 object-cover rounded-sm shadow-md"
           />
-          <div v-else class="w-32 h-48 bg-muted rounded-lg flex items-center justify-center">
+          <div v-else class="w-32 h-48 bg-muted rounded-sm flex items-center justify-center">
             <span class="text-muted-foreground text-sm">No Cover</span>
           </div>
         </div>
@@ -40,7 +40,7 @@
       </div>
 
       <!-- Right Half: Last Read Info -->
-      <div class="p-4 bg-muted rounded-lg flex flex-col items-center justify-center">
+      <div class="p-4 bg-muted rounded-sm flex flex-col items-center justify-center">
         <p class="text-sm mb-2">
           <strong>Last Read:</strong> Chapter {{ formatChapterName(progress.lastChapterPath) }},
           Page

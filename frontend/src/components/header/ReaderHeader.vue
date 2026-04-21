@@ -3,11 +3,11 @@
     class="sticky top-0 z-40 h-14 flex items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
   >
     <!-- Top Row: Chapter Info + View Mode Toggle -->
-    <div class="container mx-auto px-4 flex items-center justify-between gap-2">
+    <div class="w-full px-4 lg:container lg:mx-auto flex items-center justify-between gap-2">
       <!-- Left: Sidebar Toggle (Mobile) + Chapter Info -->
       <div class="flex items-center gap-3 min-w-0 flex-1">
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           class="lg:hidden flex-shrink-0"
           @click="$emit('toggle-sidebar')"
@@ -16,10 +16,12 @@
         </Button>
 
         <div class="flex items-center gap-2 min-w-0">
-          <h3 class="text-base font-semibold truncate">{{ chapterName }}</h3>
-          <p v-if="!webtoonMode" class="text-sm text-muted-foreground whitespace-nowrap">
-            Page {{ currentPage + 1 }}/{{ totalPages }}
-          </p>
+          <router-link
+            :to="`/manga/${mangaId}`"
+            class="items-center text-sm truncate border rounded-full px-4 py-1.5 bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            {{ mangaTitle }}
+          </router-link>
         </div>
       </div>
 
@@ -53,7 +55,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Menu, GalleryVerticalEnd, BookOpen } from 'lucide-vue-next'
 
 defineProps<{
-  chapterName: string
+  mangaTitle: string
+  mangaId: string
   currentPage: number
   totalPages: number
   webtoonMode: boolean
