@@ -118,7 +118,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const mangaRoute = computed(() => ({
-  path: `/manga/${props.mangaId}`,
-  query: { chapter: props.chapterPath, page: props.pageNumber.toString() },
+  path: `/v/${props.mangaId}/chapter/${encodeURIComponent(props.chapterPath)}`,
+  query: { page: props.pageNumber.toString() },
 }))
 </script>

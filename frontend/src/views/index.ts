@@ -1,0 +1,6 @@
+export { default as Home } from './Home.vue'
+export { default as SearchResults } from './SearchResults.vue'
+export { default as MangaInfo } from './MangaInfo.vue'
+export { default as ChapterReader } from './ChapterReader.vue'
+export { default as History } from './History.vue'
+export { default as Bookmarks } from './Bookmarks.vue'

@@ -16,11 +16,11 @@ const props = defineProps<Props>()
 const linkTo = computed(() => {
   if (props.chapter !== undefined && props.page !== undefined) {
     return {
-      path: `/manga/${props.manga.id}`,
-      query: { chapter: props.chapter, page: props.page.toString() },
+      path: `/v/${props.manga.id}/chapter/${encodeURIComponent(props.chapter)}`,
+      query: { page: props.page.toString() },
     }
   }
-  return `/manga/${props.manga.id}`
+  return `/v/${props.manga.id}`
 })
 
 const displaySubtitle = computed(() => {

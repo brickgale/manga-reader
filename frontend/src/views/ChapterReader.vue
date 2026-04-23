@@ -7,52 +7,43 @@
       <LoadingIcon />
     </div>
 
-    <div v-else-if="!manga" class="container mx-auto p-4 text-center py-8">
-      <p>Manga not found</p>
+    <div v-else-if="!manga || !currentChapter" class="container mx-auto p-4 text-center py-8">
+      <p>Chapter not found</p>
     </div>
 
     <div v-else>
-      <!-- Manga Info & Chapter Selection -->
-      <div v-if="!currentChapter" class="container mx-auto">
-        <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
-        <ChapterList :chapters="chapters" @select="selectChapter" />
-      </div>
+      <ReaderHeader
+        :manga-title="manga.title"
+        :manga-id="manga.id"
+        :current-page="currentPage"
+        :total-pages="pages.length"
+        :webtoon-mode="readerStore.webtoonMode"
+        @toggle-sidebar="emit('toggle-sidebar')"
+        @toggle-view-mode="readerStore.toggleWebtoonMode"
+      >
+        <template #pagination>
+          <Pagination
+            :current-page="currentPage"
+            :total-pages="pages.length"
+            :chapters="chapters"
+            :current-chapter-path="currentChapter?.path"
+            :hide-page-selector="readerStore.webtoonMode"
+            :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
+            :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
+            @prev="previousPage"
+            @next="nextPage"
+            @change-page="goToPage"
+            @change-chapter="changeChapter"
+          />
+        </template>
+      </ReaderHeader>
 
-      <!-- Reader View -->
-      <div v-else>
-        <ReaderHeader
-          :manga-title="manga.title"
-          :manga-id="manga.id"
-          :current-page="currentPage"
-          :total-pages="pages.length"
-          :webtoon-mode="readerStore.webtoonMode"
-          @toggle-sidebar="emit('toggle-sidebar')"
-          @toggle-view-mode="readerStore.toggleWebtoonMode"
-        >
-          <template #pagination>
-            <Pagination
-              :current-page="currentPage"
-              :total-pages="pages.length"
-              :chapters="chapters"
-              :current-chapter-path="currentChapter?.path"
-              :hide-page-selector="readerStore.webtoonMode"
-              :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
-              :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
-              @prev="previousPage"
-              @next="nextPage"
-              @change-page="goToPage"
-              @change-chapter="changeChapter"
-            />
-          </template>
-        </ReaderHeader>
-
-        <PageViewer
-          :pages="pages"
-          :current-page="currentPage"
-          :webtoon-mode="readerStore.webtoonMode"
-          @page-click="scrollDownPage"
-        />
-      </div>
+      <PageViewer
+        :pages="pages"
+        :current-page="currentPage"
+        :webtoon-mode="readerStore.webtoonMode"
+        @page-click="scrollDownPage"
+      />
     </div>
 
     <!-- Bookmark Dialog -->
@@ -91,9 +82,9 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { api, type Manga, type Chapter, type Page, type ReadingProgress } from '@/api'
+import { api, type Manga, type Chapter, type Page } from '@/api'
 import { Pagination } from '@/components/pagination'
-import { MangaInfo, ChapterList, PageViewer } from '@/components/reader'
+import { PageViewer } from '@/components/reader'
 import { ReaderHeader } from '@/components/header'
 import { LoadingIcon } from '@/components/loading-icon'
 import {
@@ -120,71 +111,49 @@ const currentChapter = ref<Chapter | null>(null)
 const pages = ref<Page[]>([])
 const currentChapterIndex = ref(0)
 const currentPage = ref(0)
-const progress = ref<ReadingProgress | null>(null)
 const loading = ref(false)
 const bookmarkDialogOpen = ref(false)
 const bookmarkNote = ref('')
 
-// Helper to extract chapter name from path (handles both old full paths and new chapter names)
+// Helper to extract chapter name from path
 const getChapterName = (chapterPath: string) => {
   return chapterPath.split('/').pop() || chapterPath
 }
 
-const loadMangaDetails = async () => {
+const loadChapterData = async () => {
   loading.value = true
   try {
     const mangaId = route.params.id as string
+    const chapterId = decodeURIComponent(route.params.chapterId as string)
+    const pageNum = route.query.page as string
+
+    // Load manga and chapters
     const response = await api.getManga()
     manga.value = response.data.find(m => m.id === mangaId) || null
 
     if (manga.value) {
       chapters.value = await api.getChapters(manga.value.id)
-      progress.value = await api.getProgress(manga.value.id)
 
-      // Auto-load chapter and page from query parameters
-      const chapterPath = route.query.chapter as string
-      const pageNum = route.query.page as string
+      // Find the chapter
+      currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterId)
+      if (currentChapterIndex.value !== -1) {
+        currentChapter.value = chapters.value[currentChapterIndex.value]
 
-      if (chapterPath && chapters.value.length > 0) {
-        const normalizedQueryChapter = getChapterName(chapterPath)
-        currentChapterIndex.value = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
-        if (currentChapterIndex.value !== -1) {
-          const chapter = chapters.value[currentChapterIndex.value]
-          await selectChapter(chapter)
-          if (pageNum) {
-            currentPage.value = parseInt(pageNum)
-          }
+        // Load pages
+        pages.value = await api.getPages(manga.value.id, currentChapter.value.path)
+
+        // Set page number
+        if (pageNum) {
+          currentPage.value = parseInt(pageNum)
         }
+
+        updatePageTitle()
       }
     }
   } catch (error) {
-    console.error('Failed to load manga:', error)
+    console.error('Failed to load chapter:', error)
   } finally {
     loading.value = false
-  }
-}
-
-const selectChapter = async (chapter: Chapter) => {
-  if (!manga.value) return
-
-  currentChapter.value = chapter
-  currentPage.value = 0
-
-  try {
-    pages.value = await api.getPages(manga.value.id, chapter.path)
-  } catch (error) {
-    console.error('Failed to load pages:', error)
-  }
-}
-
-const resumeReading = async () => {
-  if (!progress.value || !manga.value) return
-
-  const normalizedProgressChapter = getChapterName(progress.value.lastChapterPath)
-  const chapter = chapters.value.find(c => c.path === normalizedProgressChapter)
-  if (chapter) {
-    await selectChapter(chapter)
-    currentPage.value = progress.value.lastPageNumber
   }
 }
 
@@ -194,7 +163,6 @@ const updateProgress = async () => {
   try {
     await api.updateProgress(manga.value.id, currentChapter.value.path, currentPage.value)
     await api.addHistory(manga.value.id, currentChapter.value.path, currentPage.value)
-    progress.value = await api.getProgress(manga.value.id)
   } catch (error) {
     console.error('Failed to update progress:', error)
   }
@@ -202,28 +170,23 @@ const updateProgress = async () => {
 
 const scrollDownPage = () => {
   const viewportHeight = window.innerHeight
-  const scrollAmount = viewportHeight * 0.8 // Scroll 80% of viewport height
+  const scrollAmount = viewportHeight * 0.8
   const currentScrollPosition = window.scrollY + window.innerHeight
   const pageHeight = document.documentElement.scrollHeight
 
-  // Check if we're already at the very bottom (within 10px tolerance)
   const isAtBottom = currentScrollPosition >= pageHeight - 10
 
   if (isAtBottom) {
-    // If this is the last page of the chapter
     if (currentPage.value >= pages.value.length - 1) {
-      // Find and go to next chapter
       const currentIndex = chapters.value.findIndex(c => c.path === currentChapter.value?.path)
       if (currentIndex >= 0 && currentIndex < chapters.value.length - 1) {
         const nextChapter = chapters.value[currentIndex + 1]
         changeChapter(nextChapter.path)
       }
     } else {
-      // Go to next page in current chapter
       nextPage()
     }
   } else {
-    // Just scroll down
     window.scrollBy({
       top: scrollAmount,
       behavior: 'smooth',
@@ -235,26 +198,20 @@ const updateURL = () => {
   if (!manga.value || !currentChapter.value) return
 
   router.replace({
-    path: `/manga/${manga.value.id}`,
+    path: `/v/${manga.value.id}/chapter/${encodeURIComponent(currentChapter.value.path)}`,
     query: {
-      chapter: currentChapter.value.path,
       page: currentPage.value.toString(),
     },
   })
 }
 
 const changeChapter = async (chapterPath: string) => {
-  const chapter = chapters.value.find(c => c.path === chapterPath)
-  currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterPath)
-  if (chapter) {
-    await selectChapter(chapter)
-    window.scrollTo({ top: 0, behavior: 'instant' })
-    updateURL()
-    // If in webtoon mode, update progress when chapter changes
-    if (readerStore.webtoonMode) {
-      updateProgress()
-    }
-  }
+  if (!manga.value) return
+
+  router.push({
+    path: `/v/${manga.value.id}/chapter/${encodeURIComponent(chapterPath)}`,
+    query: { page: '0' },
+  })
 }
 
 const nextPage = () => {
@@ -281,8 +238,6 @@ const previousPage = () => {
 
   if (currentPage.value > 0) {
     currentPage.value--
-    // Only change page if at the top, otherwise just scroll
-    console.log('Previous page clicked, current scrollY:', window.scrollY)
     if (window.scrollY > 10) {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
     }
@@ -325,44 +280,16 @@ watch(currentPage, () => {
   updateURL()
 })
 
-watch([manga, currentChapter], () => {
-  updatePageTitle()
-  if (currentChapter.value) {
-    updateURL()
-  }
-})
-
-watch(pages, () => {
-  updatePageTitle()
-})
-
-// Watch route changes to handle back navigation or link clicks
 watch(
-  () => route.query,
-  async (newQuery, oldQuery) => {
-    // If chapter query param is removed, reset to manga info view
-    if (!newQuery.chapter && currentChapter.value) {
-      currentChapter.value = null
-      pages.value = []
-      currentPage.value = 0
-      window.scrollTo({ top: 0, behavior: 'instant' })
+  () => [route.params.chapterId, route.query.page],
+  async ([newChapterId, newPage], [oldChapterId, oldPage]) => {
+    // If chapter changed, reload chapter data
+    if (newChapterId !== oldChapterId) {
+      await loadChapterData()
     }
-    // If chapter query param is added/changed (e.g., back button), load that chapter
-    else if (
-      newQuery.chapter &&
-      newQuery.chapter !== oldQuery?.chapter &&
-      chapters.value.length > 0
-    ) {
-      const normalizedQueryChapter = getChapterName(newQuery.chapter as string)
-      const chapterIndex = chapters.value.findIndex(c => c.path === normalizedQueryChapter)
-      if (chapterIndex !== -1) {
-        const chapter = chapters.value[chapterIndex]
-        currentChapterIndex.value = chapterIndex
-        await selectChapter(chapter)
-        if (newQuery.page) {
-          currentPage.value = parseInt(newQuery.page as string)
-        }
-      }
+    // If only page changed, update current page
+    else if (newPage !== oldPage && newPage) {
+      currentPage.value = parseInt(newPage as string)
     }
   }
 )
@@ -374,24 +301,27 @@ const updatePageTitle = () => {
     } else {
       document.title = `${manga.value.title} - ${currentChapter.value.name} | Manga Reader`
     }
-  } else if (manga.value) {
-    document.title = `${manga.value.title} | Manga Reader`
-  } else {
-    document.title = 'Manga Reader'
+  }
+}
+
+const handleReaderAction = (event: CustomEvent) => {
+  if (event.detail === 'chapters') {
+    // Navigate back to manga info
+    if (manga.value) {
+      router.push(`/v/${manga.value.id}`)
+    }
+  } else if (event.detail === 'bookmark') {
+    handleBookmark()
   }
 }
 
 onMounted(() => {
-  loadMangaDetails()
+  loadChapterData()
 
-  // Listen for header actions
   window.addEventListener('reader-action', handleReaderAction as EventListener)
 
-  // Listen for left/right arrow keys for chapter navigation
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    // Only trigger if in reader view (currentChapter is set)
     if (!currentChapter.value) return
-    // Ignore if focused on input/textarea/select
     const tag = (event.target as HTMLElement)?.tagName
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
     if (event.key === 'ArrowLeft') {
@@ -401,12 +331,4 @@ onMounted(() => {
     }
   })
 })
-
-const handleReaderAction = (event: CustomEvent) => {
-  if (event.detail === 'chapters') {
-    currentChapter.value = null
-  } else if (event.detail === 'bookmark') {
-    handleBookmark()
-  }
-}
 </script>
