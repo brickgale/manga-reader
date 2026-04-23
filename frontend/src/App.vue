@@ -39,7 +39,7 @@ const route = useRoute()
 
 // Hide header and sidebar in reader view (only when actively reading a chapter)
 const isReaderView = computed(
-  () => route.path.startsWith('/manga/') && route.params.id && route.query.chapter
+  () => route.path.startsWith('/v/') && route.params.id && route.params.chapterId
 )
 
 // Initialize sidebar open state based on viewport width

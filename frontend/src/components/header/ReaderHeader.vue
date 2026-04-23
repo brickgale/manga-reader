@@ -17,7 +17,7 @@
 
         <div class="flex items-center gap-2 min-w-0">
           <router-link
-            :to="`/manga/${mangaId}`"
+            :to="`/v/${mangaId}`"
             class="items-center text-sm truncate border rounded-full px-4 py-1.5 bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             {{ mangaTitle }}
