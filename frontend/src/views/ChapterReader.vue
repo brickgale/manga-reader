@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { api, type Manga, type Chapter, type Page } from '@/api'
@@ -120,11 +120,21 @@ const getChapterName = (chapterPath: string) => {
   return chapterPath.split('/').pop() || chapterPath
 }
 
+const parsePage = (pageNum: string | undefined, maxPage: number): number => {
+  const parsed = parseInt(pageNum ?? '')
+  if (!Number.isFinite(parsed) || parsed < 0) return 0
+  return Math.min(parsed, maxPage)
+}
+
 const loadChapterData = async () => {
   loading.value = true
+  currentChapter.value = null
+  pages.value = []
+  currentPage.value = 0
+  currentChapterIndex.value = -1
   try {
     const mangaId = route.params.id as string
-    const chapterId = decodeURIComponent(route.params.chapterId as string)
+    const chapterId = route.params.chapterId as string
     const pageNum = route.query.page as string
 
     // Load manga and chapters
@@ -143,9 +153,7 @@ const loadChapterData = async () => {
         pages.value = await api.getPages(manga.value.id, currentChapter.value.path)
 
         // Set page number
-        if (pageNum) {
-          currentPage.value = parseInt(pageNum)
-        }
+        currentPage.value = parsePage(pageNum, pages.value.length - 1)
 
         updatePageTitle()
       }
@@ -281,15 +289,15 @@ watch(currentPage, () => {
 })
 
 watch(
-  () => [route.params.chapterId, route.query.page],
-  async ([newChapterId, newPage], [oldChapterId, oldPage]) => {
-    // If chapter changed, reload chapter data
-    if (newChapterId !== oldChapterId) {
+  () => [route.params.id, route.params.chapterId, route.query.page],
+  async ([newMangaId, newChapterId, newPage], [oldMangaId, oldChapterId]) => {
+    // If manga or chapter changed, reload chapter data
+    if (newMangaId !== oldMangaId || newChapterId !== oldChapterId) {
       await loadChapterData()
     }
     // If only page changed, update current page
-    else if (newPage !== oldPage && newPage) {
-      currentPage.value = parseInt(newPage as string)
+    else if (newPage) {
+      currentPage.value = parsePage(newPage as string, pages.value.length - 1)
     }
   }
 )
@@ -315,20 +323,26 @@ const handleReaderAction = (event: CustomEvent) => {
   }
 }
 
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!currentChapter.value) return
+  const tag = (event.target as HTMLElement)?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+  if (event.key === 'ArrowLeft') {
+    previousPage()
+  } else if (event.key === 'ArrowRight') {
+    nextPage()
+  }
+}
+
 onMounted(() => {
   loadChapterData()
 
   window.addEventListener('reader-action', handleReaderAction as EventListener)
+  window.addEventListener('keydown', handleKeydown)
+})
 
-  window.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (!currentChapter.value) return
-    const tag = (event.target as HTMLElement)?.tagName
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-    if (event.key === 'ArrowLeft') {
-      previousPage()
-    } else if (event.key === 'ArrowRight') {
-      nextPage()
-    }
-  })
+onUnmounted(() => {
+  window.removeEventListener('reader-action', handleReaderAction as EventListener)
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>

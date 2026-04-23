@@ -12,17 +12,17 @@
     </div>
 
     <div v-else class="container mx-auto">
-      <MangaInfo :manga="manga" :progress="progress" @resume="resumeReading" />
+      <MangaInfoCard :manga="manga" :progress="progress" @resume="resumeReading" />
       <ChapterList :chapters="chapters" @select="selectChapter" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, type Manga, type Chapter, type ReadingProgress } from '@/api'
-import { MangaInfo, ChapterList } from '@/components/reader'
+import { MangaInfo as MangaInfoCard, ChapterList } from '@/components/reader'
 import { LoadingIcon } from '@/components/loading-icon'
 
 const route = useRoute()
@@ -84,4 +84,14 @@ const resumeReading = () => {
 onMounted(() => {
   loadMangaDetails()
 })
+
+watch(
+  () => route.params.id,
+  () => {
+    manga.value = null
+    chapters.value = []
+    progress.value = null
+    loadMangaDetails()
+  }
+)
 </script>

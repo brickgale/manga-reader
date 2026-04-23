@@ -11,6 +11,16 @@ const router = createRouter({
   routes: [
     { path: '/', component: Home, meta: { title: 'Manga Reader' } },
     { path: '/search', component: SearchResults, meta: { title: 'Search | Manga Reader' } },
+    {
+      path: '/manga/:id',
+      redirect: (to) => {
+        const chapterId = typeof to.query.chapter === 'string' ? to.query.chapter : undefined
+        const page = typeof to.query.page === 'string' ? to.query.page : undefined
+        return chapterId
+          ? { path: `/v/${to.params.id}/chapter/${chapterId}`, query: page ? { page } : {} }
+          : { path: `/v/${to.params.id}` }
+      },
+    },
     { path: '/v/:id', component: MangaInfo },
     { path: '/v/:id/chapter/:chapterId', component: ChapterReader },
     { path: '/history', component: History, meta: { title: 'Reading History | Manga Reader' } },
