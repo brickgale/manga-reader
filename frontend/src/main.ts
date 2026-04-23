@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import './style.css'
 import 'vue-sonner/style.css'
 import App from './App.vue'
-import { Home, SearchResults, MangaInfo, ChapterReader, History, Bookmarks } from './views'
+import { Home, SearchResults, MangaInfo, Reader, History, Bookmarks } from './views'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -22,7 +22,7 @@ const router = createRouter({
       },
     },
     { path: '/v/:id', component: MangaInfo },
-    { path: '/v/:id/chapter/:chapterId', component: ChapterReader },
+    { path: '/v/:id/chapter/:chapterId', component: Reader },
     { path: '/history', component: History, meta: { title: 'Reading History | Manga Reader' } },
     { path: '/bookmarks', component: Bookmarks, meta: { title: 'Bookmarks | Manga Reader' } },
   ],
