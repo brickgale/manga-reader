@@ -13,7 +13,7 @@ const router = createRouter({
     { path: '/search', component: SearchResults, meta: { title: 'Search | Manga Reader' } },
     {
       path: '/manga/:id',
-      redirect: (to) => {
+      redirect: to => {
         const chapterId = typeof to.query.chapter === 'string' ? to.query.chapter : undefined
         const page = typeof to.query.page === 'string' ? to.query.page : undefined
         return chapterId
