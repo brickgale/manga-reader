@@ -1,5 +1,7 @@
 <template>
   <div>
+    <ScrollProgressBar :show="readerStore.webtoonMode && !loading" />
+    
     <div
       v-if="loading"
       class="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-280px)]"
@@ -88,6 +90,7 @@ import { Pagination } from '@/components/pagination'
 import { PageViewer } from '@/components/reader'
 import { ReaderHeader } from '@/components/header'
 import { LoadingIcon } from '@/components/loading-icon'
+import { ScrollProgressBar } from '@/components/progress-bar'
 import {
   Button,
   Dialog,
@@ -98,6 +101,7 @@ import {
   DialogTitle,
 } from '@/components/ui'
 import { useReaderStore } from '@/stores/reader'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const emit = defineEmits<{
   'toggle-sidebar': []
@@ -106,6 +110,7 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const readerStore = useReaderStore()
+const { trackPromise } = usePageLoading()
 const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const currentChapter = ref<Chapter | null>(null)
@@ -144,40 +149,45 @@ const loadChapterData = async () => {
   currentChapterIndex.value = -1
   farthestPageReached.value = 0
   shouldAutoScroll.value = false
-  try {
-    const mangaId = route.params.id as string
-    const chapterId = route.params.chapterId as string
-    const pageNum = route.query.page as string
+  
+  await trackPromise(
+    (async () => {
+      try {
+        const mangaId = route.params.id as string
+        const chapterId = route.params.chapterId as string
+        const pageNum = route.query.page as string
 
-    // Load manga and chapters
-    const response = await api.getManga()
-    manga.value = response.data.find(m => m.id === mangaId) || null
+        // Load manga and chapters
+        const response = await api.getManga()
+        manga.value = response.data.find(m => m.id === mangaId) || null
 
-    if (manga.value) {
-      chapters.value = await api.getChapters(manga.value.id)
+        if (manga.value) {
+          chapters.value = await api.getChapters(manga.value.id)
 
-      // Find the chapter
-      currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterId)
-      if (currentChapterIndex.value !== -1) {
-        currentChapter.value = chapters.value[currentChapterIndex.value]
+          // Find the chapter
+          currentChapterIndex.value = chapters.value.findIndex(c => c.path === chapterId)
+          if (currentChapterIndex.value !== -1) {
+            currentChapter.value = chapters.value[currentChapterIndex.value]
 
-        // Load pages
-        pages.value = await api.getPages(manga.value.id, currentChapter.value.path)
+            // Load pages
+            pages.value = await api.getPages(manga.value.id, currentChapter.value.path)
 
-        // Set page number
-        currentPage.value = parsePage(pageNum, pages.value.length - 1)
-        farthestPageReached.value = currentPage.value
-        // Enable auto-scroll if in webtoon mode and not on first page
-        shouldAutoScroll.value = readerStore.webtoonMode && currentPage.value > 0
+            // Set page number
+            currentPage.value = parsePage(pageNum, pages.value.length - 1)
+            farthestPageReached.value = currentPage.value
+            // Enable auto-scroll if in webtoon mode and not on first page
+            shouldAutoScroll.value = readerStore.webtoonMode && currentPage.value > 0
 
-        updatePageTitle()
+            updatePageTitle()
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load chapter:', error)
+      } finally {
+        loading.value = false
       }
-    }
-  } catch (error) {
-    console.error('Failed to load chapter:', error)
-  } finally {
-    loading.value = false
-  }
+    })()
+  )
 }
 
 const updateProgress = async () => {

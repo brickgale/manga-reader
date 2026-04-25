@@ -41,11 +41,13 @@ import { Scroll } from 'lucide-vue-next'
 import { api, type ReadingHistory } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
 import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
+import { usePageLoading } from '@/composables/usePageLoading'
 import { ReadingCard } from '@/components/reader'
 import { HistoryCardSkeleton } from '@/components/ui/skeleton'
 
 const history = ref<ReadingHistory[]>([])
 const loading = ref(false)
+const { trackPromise } = usePageLoading()
 const { getCoverUrl, formatChapterName } = useMangaUtils()
 
 const formatRelativeTime = (timestamp: string) => {
@@ -64,14 +66,18 @@ const formatRelativeTime = (timestamp: string) => {
 const loadHistory = async () => {
   loading.value = true
 
-  try {
-    const response = await withMinimumLoadingTime(() => api.getHistory())
-    history.value = response.data
-  } catch (error) {
-    console.error('Failed to load history:', error)
-  } finally {
-    loading.value = false
-  }
+  await trackPromise(
+    (async () => {
+      try {
+        const response = await withMinimumLoadingTime(() => api.getHistory())
+        history.value = response.data
+      } catch (error) {
+        console.error('Failed to load history:', error)
+      } finally {
+        loading.value = false
+      }
+    })()
+  )
 }
 
 onMounted(() => {

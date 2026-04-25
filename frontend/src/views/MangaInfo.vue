@@ -24,9 +24,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { api, type Manga, type Chapter, type ReadingProgress } from '@/api'
 import { MangaInfo as MangaInfoCard, ChapterList } from '@/components/reader'
 import { LoadingIcon } from '@/components/loading-icon'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const router = useRouter()
+const { trackPromise } = usePageLoading()
 const manga = ref<Manga | null>(null)
 const chapters = ref<Chapter[]>([])
 const progress = ref<ReadingProgress | null>(null)
@@ -39,23 +41,28 @@ const getChapterName = (chapterPath: string) => {
 
 const loadMangaDetails = async () => {
   loading.value = true
-  try {
-    const mangaId = route.params.id as string
-    const response = await api.getManga()
-    manga.value = response.data.find(m => m.id === mangaId) || null
+  
+  await trackPromise(
+    (async () => {
+      try {
+        const mangaId = route.params.id as string
+        const response = await api.getManga()
+        manga.value = response.data.find(m => m.id === mangaId) || null
 
-    if (manga.value) {
-      chapters.value = await api.getChapters(manga.value.id)
-      progress.value = await api.getProgress(manga.value.id)
+        if (manga.value) {
+          chapters.value = await api.getChapters(manga.value.id)
+          progress.value = await api.getProgress(manga.value.id)
 
-      // Update page title
-      document.title = `${manga.value.title} | Manga Reader`
-    }
-  } catch (error) {
-    console.error('Failed to load manga:', error)
-  } finally {
-    loading.value = false
-  }
+          // Update page title
+          document.title = `${manga.value.title} | Manga Reader`
+        }
+      } catch (error) {
+        console.error('Failed to load manga:', error)
+      } finally {
+        loading.value = false
+      }
+    })()
+  )
 }
 
 const selectChapter = (chapter: Chapter) => {

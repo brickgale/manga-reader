@@ -1,6 +1,7 @@
 <template>
   <div class="flex min-h-screen bg-background text-foreground">
     <Toaster />
+    <RouteProgressBar />
 
     <!-- Left Sidebar -->
     <Sidebar
@@ -34,6 +35,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { MainHeader } from '@/components/header'
 import { Sidebar } from '@/components/sidebar'
 import { SettingsDrawer } from '@/components/settings'
+import { RouteProgressBar } from '@/components/progress-bar'
 
 const route = useRoute()
 
