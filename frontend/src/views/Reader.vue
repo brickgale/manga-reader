@@ -295,8 +295,9 @@ const scrollToPage = (pageIndex: number) => {
   setTimeout(() => {
     const targetImage = document.querySelector<HTMLElement>(`[data-page-index="${pageIndex}"]`)
     if (targetImage) {
-      const headerElement = document.querySelector('header, [role="banner"], .sticky.top-0') as HTMLElement | null
+      const headerElement = document.querySelector('[data-reader-header]') as HTMLElement | null
       const headerHeight = headerElement?.getBoundingClientRect().height ?? 0
+      // Clamp to 0: if the target is at the very top (offsetTop < headerHeight), scrolling to 0 shows the page start
       const offset = Math.max(targetImage.offsetTop - headerHeight, 0)
 
       window.scrollTo({

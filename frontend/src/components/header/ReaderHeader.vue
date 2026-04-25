@@ -1,5 +1,6 @@
 <template>
   <header
+    data-reader-header
     class="sticky top-0 z-40 h-14 flex items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
   >
     <!-- Top Row: Chapter Info + View Mode Toggle -->
