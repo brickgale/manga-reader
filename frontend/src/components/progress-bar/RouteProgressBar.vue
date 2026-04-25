@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePageLoading } from '@/composables/usePageLoading'
 
@@ -55,6 +55,13 @@ const completeProgress = () => {
   }, 300)
 }
 
+// Handle initial page load - check if already loading when component mounts
+onMounted(() => {
+  if (isPageLoading.value) {
+    startProgress()
+  }
+})
+
 // Listen to route changes
 const unregisterBeforeEach = router.beforeEach((to, from, next) => {
   if (to.path !== from.path) {
@@ -74,8 +81,13 @@ const unregisterAfterEach = router.afterEach(async () => {
   // Otherwise, the isPageLoading watcher handles completion when loading finishes
 })
 
-// Watch for page loading to complete
-watch(isPageLoading, (loading) => {
+// Watch for page loading to start and complete
+watch(isPageLoading, (loading, wasLoading) => {
+  // Start progress bar when loading begins
+  if (loading && !wasLoading && !isLoading.value) {
+    startProgress()
+  }
+  // Complete when loading finishes
   if (!loading && waitingForPageLoad && isLoading.value) {
     completeProgress()
   }
