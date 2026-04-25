@@ -34,19 +34,23 @@ const updateScrollProgress = () => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', updateScrollProgress, { passive: true })
-  updateScrollProgress()
+  if (props.show) {
+    window.addEventListener('scroll', updateScrollProgress, { passive: true })
+    updateScrollProgress()
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', updateScrollProgress)
 })
 
-// Update immediately when show prop changes
+// Add/remove scroll listener based on show prop
 watch(() => props.show, (newShow) => {
   if (newShow) {
+    window.addEventListener('scroll', updateScrollProgress, { passive: true })
     updateScrollProgress()
   } else {
+    window.removeEventListener('scroll', updateScrollProgress)
     scrollProgress.value = 0
   }
 })

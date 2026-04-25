@@ -114,7 +114,7 @@ const loadSearchResults = async () => {
   const currentId = ++requestId
 
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const response = await withMinimumLoadingTime(() =>
           api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
@@ -133,7 +133,7 @@ const loadSearchResults = async () => {
           loading.value = false
         }
       }
-    })()
+    }
   )
 }
 

@@ -42,7 +42,7 @@ const loadBookmarks = async () => {
   loading.value = true
 
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const response = await withMinimumLoadingTime(() => api.getBookmarks())
         bookmarks.value = response.data
@@ -51,7 +51,7 @@ const loadBookmarks = async () => {
       } finally {
         loading.value = false
       }
-    })()
+    }
   )
 }
 

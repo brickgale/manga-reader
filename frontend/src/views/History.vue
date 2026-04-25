@@ -67,7 +67,7 @@ const loadHistory = async () => {
   loading.value = true
 
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const response = await withMinimumLoadingTime(() => api.getHistory())
         history.value = response.data
@@ -76,7 +76,7 @@ const loadHistory = async () => {
       } finally {
         loading.value = false
       }
-    })()
+    }
   )
 }
 

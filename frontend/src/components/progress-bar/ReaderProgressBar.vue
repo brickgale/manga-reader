@@ -49,7 +49,7 @@ const updateScrollProgress = () => {
 }
 
 onMounted(() => {
-  if (props.mode === 'scroll') {
+  if (props.show && props.mode === 'scroll') {
     window.addEventListener('scroll', updateScrollProgress, { passive: true })
     updateScrollProgress()
   }
@@ -66,10 +66,10 @@ watch(() => [props.show, props.mode], ([newShow, newMode]) => {
   if (newShow && newMode === 'scroll') {
     window.addEventListener('scroll', updateScrollProgress, { passive: true })
     updateScrollProgress()
-  } else if (newMode === 'page') {
+  } else {
     window.removeEventListener('scroll', updateScrollProgress)
   }
-  
+
   if (!newShow) {
     scrollProgress.value = 0
   }

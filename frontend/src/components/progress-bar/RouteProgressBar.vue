@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePageLoading } from '@/composables/usePageLoading'
 
@@ -56,21 +56,22 @@ const completeProgress = () => {
 }
 
 // Listen to route changes
-router.beforeEach((to, from, next) => {
+const unregisterBeforeEach = router.beforeEach((to, from, next) => {
   if (to.path !== from.path) {
     startProgress()
   }
   next()
 })
 
-router.afterEach(() => {
-  // Don't complete immediately, wait for page loading to finish
-  // Set a timeout to check page loading state
-  setTimeout(() => {
-    if (!isPageLoading.value) {
-      completeProgress()
-    }
-  }, 100)
+const unregisterAfterEach = router.afterEach(async () => {
+  // Wait for the next tick to allow component onMounted hooks to run and
+  // potentially set isPageLoading to true before we decide to complete
+  await nextTick()
+
+  if (!isPageLoading.value) {
+    completeProgress()
+  }
+  // Otherwise, the isPageLoading watcher handles completion when loading finishes
 })
 
 // Watch for page loading to complete
@@ -81,7 +82,17 @@ watch(isPageLoading, (loading) => {
 })
 
 // Watch for errors to complete progress
-router.onError(() => {
+const unregisterOnError = router.onError(() => {
   completeProgress()
+})
+
+onUnmounted(() => {
+  unregisterBeforeEach()
+  unregisterAfterEach()
+  unregisterOnError()
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
 })
 </script>

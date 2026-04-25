@@ -116,7 +116,7 @@ const loadManga = async () => {
   const currentId = ++requestId
 
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const response = await withMinimumLoadingTime(() =>
           api.getManga(currentPage.value, pageSize.value)
@@ -135,7 +135,7 @@ const loadManga = async () => {
           loading.value = false
         }
       }
-    })()
+    }
   )
 }
 

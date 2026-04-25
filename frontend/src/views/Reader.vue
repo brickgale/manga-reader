@@ -156,7 +156,7 @@ const loadChapterData = async () => {
   shouldAutoScroll.value = false
   
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const mangaId = route.params.id as string
         const chapterId = route.params.chapterId as string
@@ -191,7 +191,7 @@ const loadChapterData = async () => {
       } finally {
         loading.value = false
       }
-    })()
+    }
   )
 }
 

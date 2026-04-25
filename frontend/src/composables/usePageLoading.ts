@@ -10,11 +10,14 @@ export function usePageLoading() {
   }
 
   const finishLoading = () => {
-    isPageLoading.value = false
+    if (loadingPromises.size === 0) {
+      isPageLoading.value = false
+    }
   }
 
-  const trackPromise = async <T>(promise: Promise<T>): Promise<T> => {
+  const trackPromise = async <T>(promiseFactory: () => Promise<T>): Promise<T> => {
     isPageLoading.value = true
+    const promise = promiseFactory()
     loadingPromises.add(promise)
 
     try {
@@ -22,7 +25,7 @@ export function usePageLoading() {
       return result
     } finally {
       loadingPromises.delete(promise)
-      
+
       // Only finish loading when all promises are done
       if (loadingPromises.size === 0) {
         isPageLoading.value = false

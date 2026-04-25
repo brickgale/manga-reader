@@ -43,7 +43,7 @@ const loadMangaDetails = async () => {
   loading.value = true
   
   await trackPromise(
-    (async () => {
+    async () => {
       try {
         const mangaId = route.params.id as string
         const response = await api.getManga()
@@ -61,7 +61,7 @@ const loadMangaDetails = async () => {
       } finally {
         loading.value = false
       }
-    })()
+    }
   )
 }
 
