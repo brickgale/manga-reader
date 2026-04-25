@@ -1,6 +1,11 @@
 <template>
   <div>
-    <ScrollProgressBar :show="readerStore.webtoonMode && !loading" />
+    <ReaderProgressBar
+      :show="!loading && pages.length > 0"
+      :mode="readerStore.webtoonMode ? 'scroll' : 'page'"
+      :current-page="currentPage"
+      :total-pages="pages.length"
+    />
     
     <div
       v-if="loading"
@@ -90,7 +95,7 @@ import { Pagination } from '@/components/pagination'
 import { PageViewer } from '@/components/reader'
 import { ReaderHeader } from '@/components/header'
 import { LoadingIcon } from '@/components/loading-icon'
-import { ScrollProgressBar } from '@/components/progress-bar'
+import { ReaderProgressBar } from '@/components/progress-bar'
 import {
   Button,
   Dialog,
