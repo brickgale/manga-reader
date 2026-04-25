@@ -4,6 +4,7 @@ import { Trash2, MessageSquare, Bookmark as BookmarkIcon } from 'lucide-vue-next
 import { api, type Bookmark } from '@/api'
 import { useMangaUtils } from '@/composables/useMangaUtils'
 import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
+import { usePageLoading } from '@/composables/usePageLoading'
 import {
   Button,
   Dialog,
@@ -21,6 +22,7 @@ const loading = ref(false)
 const expandedNoteId = ref<string | null>(null)
 const deleteDialogOpen = ref(false)
 const bookmarkToDelete = ref<string | null>(null)
+const { trackPromise } = usePageLoading()
 const { getCoverUrl, formatChapterName } = useMangaUtils()
 
 const formatRelativeTime = (timestamp: string) => {
@@ -39,14 +41,18 @@ const formatRelativeTime = (timestamp: string) => {
 const loadBookmarks = async () => {
   loading.value = true
 
-  try {
-    const response = await withMinimumLoadingTime(() => api.getBookmarks())
-    bookmarks.value = response.data
-  } catch (error) {
-    console.error('Failed to load bookmarks:', error)
-  } finally {
-    loading.value = false
-  }
+  await trackPromise(
+    async () => {
+      try {
+        const response = await withMinimumLoadingTime(() => api.getBookmarks())
+        bookmarks.value = response.data
+      } catch (error) {
+        console.error('Failed to load bookmarks:', error)
+      } finally {
+        loading.value = false
+      }
+    }
+  )
 }
 
 const openDeleteDialog = (id: string) => {

@@ -81,9 +81,11 @@ import { Button } from '@/components/ui'
 import { ListPagination } from '@/components/pagination'
 import { MangaCard, MangaCardSkeleton } from '@/components/manga-card'
 import { withMinimumLoadingTime } from '@/composables/useLoadingHelper'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const router = useRouter()
+const { trackPromise } = usePageLoading()
 
 const mangaList = ref<Manga[]>([])
 const loading = ref(false)
@@ -111,24 +113,28 @@ const loadSearchResults = async () => {
   loading.value = true
   const currentId = ++requestId
 
-  try {
-    const response = await withMinimumLoadingTime(() =>
-      api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
-    )
+  await trackPromise(
+    async () => {
+      try {
+        const response = await withMinimumLoadingTime(() =>
+          api.searchManga(searchQuery.value, currentPage.value, pageSize.value)
+        )
 
-    if (currentId !== requestId) return
+        if (currentId !== requestId) return
 
-    mangaList.value = response.data
-    pagination.value = response.pagination
-  } catch (error) {
-    if (currentId !== requestId) return
-    console.error('Failed to search manga:', error)
-    toast.error('Failed to search manga')
-  } finally {
-    if (currentId === requestId) {
-      loading.value = false
+        mangaList.value = response.data
+        pagination.value = response.pagination
+      } catch (error) {
+        if (currentId !== requestId) return
+        console.error('Failed to search manga:', error)
+        toast.error('Failed to search manga')
+      } finally {
+        if (currentId === requestId) {
+          loading.value = false
+        }
+      }
     }
-  }
+  )
 }
 
 // Watch for route query changes
