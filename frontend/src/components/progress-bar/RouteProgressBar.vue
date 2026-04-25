@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="isLoading"
-    class="fixed top-0 left-0 right-0 z-[100] h-1 bg-primary/20"
-  >
+  <div v-if="isLoading" class="fixed top-0 left-0 right-0 z-[100] h-1 bg-primary/20">
     <div
       class="h-full bg-primary transition-all duration-300 ease-out"
       :style="{ width: `${progress}%` }"
@@ -30,7 +27,7 @@ const startProgress = () => {
 
   // Simulate progress
   if (progressInterval) clearInterval(progressInterval)
-  
+
   progressInterval = setInterval(() => {
     if (progress.value < 90) {
       // Slow down as we approach 90%
@@ -45,9 +42,9 @@ const completeProgress = () => {
     clearInterval(progressInterval)
     progressInterval = null
   }
-  
+
   progress.value = 100
-  
+
   setTimeout(() => {
     isLoading.value = false
     progress.value = 0
