@@ -58,8 +58,9 @@ const props = defineProps<{
   webtoonMode: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'page-click': []
+  'images-loaded': []
 }>()
 
 const loadedImages = ref<Record<number, boolean>>({})
@@ -122,6 +123,16 @@ watch(
   () => {
     if (!props.webtoonMode) {
       pageImageLoaded.value = false
+    }
+  }
+)
+
+// Emit when all images are loaded in webtoon mode
+watch(
+  () => allImagesLoaded.value,
+  (loaded) => {
+    if (loaded && props.webtoonMode && props.pages.length > 0) {
+      emit('images-loaded')
     }
   }
 )

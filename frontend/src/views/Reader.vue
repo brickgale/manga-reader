@@ -43,6 +43,7 @@
         :current-page="currentPage"
         :webtoon-mode="readerStore.webtoonMode"
         @page-click="scrollDownPage"
+        @images-loaded="handleImagesLoaded"
       />
     </div>
 
@@ -114,6 +115,9 @@ const currentPage = ref(0)
 const loading = ref(false)
 const bookmarkDialogOpen = ref(false)
 const bookmarkNote = ref('')
+const farthestPageReached = ref(0)
+let scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null
+const shouldAutoScroll = ref(false)
 
 // Helper to extract chapter name from path
 const getChapterName = (chapterPath: string) => {
@@ -132,6 +136,8 @@ const loadChapterData = async () => {
   pages.value = []
   currentPage.value = 0
   currentChapterIndex.value = -1
+  farthestPageReached.value = 0
+  shouldAutoScroll.value = false
   try {
     const mangaId = route.params.id as string
     const chapterId = route.params.chapterId as string
@@ -154,6 +160,9 @@ const loadChapterData = async () => {
 
         // Set page number
         currentPage.value = parsePage(pageNum, pages.value.length - 1)
+        farthestPageReached.value = currentPage.value
+        // Enable auto-scroll if in webtoon mode and not on first page
+        shouldAutoScroll.value = readerStore.webtoonMode && currentPage.value > 0
 
         updatePageTitle()
       }
@@ -173,6 +182,88 @@ const updateProgress = async () => {
     await api.addHistory(manga.value.id, currentChapter.value.path, currentPage.value)
   } catch (error) {
     console.error('Failed to update progress:', error)
+  }
+}
+
+// Calculate which page is currently visible in webtoon mode
+const getCurrentVisiblePage = (): number => {
+  if (!readerStore.webtoonMode || pages.value.length === 0) return currentPage.value
+
+  // Get all page images
+  const pageImages = document.querySelectorAll('img[alt^="Page"]')
+  if (pageImages.length === 0) return currentPage.value
+
+  const scrollPosition = window.scrollY
+  const viewportMiddle = scrollPosition + window.innerHeight / 2
+
+  // Find which page is closest to the middle of the viewport
+  let closestPage = 0
+  let closestDistance = Infinity
+
+  pageImages.forEach((img, index) => {
+    const rect = img.getBoundingClientRect()
+    const imgMiddle = rect.top + rect.height / 2 + scrollPosition
+    const distance = Math.abs(imgMiddle - viewportMiddle)
+
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestPage = index
+    }
+  })
+
+  return closestPage
+}
+
+// Handle scroll events in webtoon mode
+const handleWebtoonScroll = () => {
+  if (!readerStore.webtoonMode) return
+
+  // Clear existing timer
+  if (scrollDebounceTimer) {
+    clearTimeout(scrollDebounceTimer)
+  }
+
+  // Get the current visible page
+  const visiblePage = getCurrentVisiblePage()
+
+  // Update farthest page reached (only move forward, never backward)
+  if (visiblePage > farthestPageReached.value) {
+    farthestPageReached.value = visiblePage
+    currentPage.value = farthestPageReached.value
+  }
+
+  // Debounce the progress save (wait 1 second after scrolling stops)
+  scrollDebounceTimer = setTimeout(() => {
+    updateProgress()
+    updateURL()
+  }, 1000)
+}
+
+// Scroll to the current page position in webtoon mode
+const scrollToPage = (pageIndex: number) => {
+  if (!readerStore.webtoonMode || pages.value.length === 0) return
+
+  // Wait for next tick to ensure images are rendered
+  setTimeout(() => {
+    const pageImages = document.querySelectorAll('img[alt^="Page"]')
+    if (pageImages.length > pageIndex) {
+      const targetImage = pageImages[pageIndex] as HTMLElement
+      const headerHeight = 64 // Approximate header height
+      const offset = targetImage.offsetTop - headerHeight
+      
+      window.scrollTo({
+        top: offset,
+        behavior: 'smooth',
+      })
+    }
+  }, 100)
+}
+
+// Handle when all images are loaded in webtoon mode
+const handleImagesLoaded = () => {
+  if (shouldAutoScroll.value && currentPage.value > 0) {
+    scrollToPage(currentPage.value)
+    shouldAutoScroll.value = false
   }
 }
 
@@ -283,10 +374,45 @@ const saveBookmark = async () => {
 }
 
 watch(currentPage, () => {
+  // In webtoon mode, progress is handled by scroll events
+  if (readerStore.webtoonMode) {
+    updatePageTitle()
+    return
+  }
+  
   updateProgress()
   updatePageTitle()
   updateURL()
 })
+
+watch(
+  () => readerStore.webtoonMode,
+  (newMode) => {
+    if (newMode) {
+      // Switching to webtoon mode
+      farthestPageReached.value = currentPage.value
+      window.addEventListener('scroll', handleWebtoonScroll, { passive: true })
+      // Auto-scroll to current page if not on first page
+      if (currentPage.value > 0 && pages.value.length > 0) {
+        shouldAutoScroll.value = true
+        // Trigger scroll after images are loaded
+        setTimeout(() => {
+          if (shouldAutoScroll.value) {
+            scrollToPage(currentPage.value)
+            shouldAutoScroll.value = false
+          }
+        }, 500)
+      }
+    } else {
+      // Switching to page mode
+      window.removeEventListener('scroll', handleWebtoonScroll)
+      if (scrollDebounceTimer) {
+        clearTimeout(scrollDebounceTimer)
+        scrollDebounceTimer = null
+      }
+    }
+  }
+)
 
 watch(
   () => [route.params.id, route.params.chapterId, route.query.page],
@@ -297,7 +423,12 @@ watch(
     }
     // If only page changed, update current page
     else if (newPage) {
-      currentPage.value = parsePage(newPage as string, pages.value.length - 1)
+      const parsedPage = parsePage(newPage as string, pages.value.length - 1)
+      currentPage.value = parsedPage
+      // Update farthest page if this is a forward navigation
+      if (parsedPage > farthestPageReached.value) {
+        farthestPageReached.value = parsedPage
+      }
     }
   }
 )
@@ -339,10 +470,22 @@ onMounted(() => {
 
   window.addEventListener('reader-action', handleReaderAction as EventListener)
   window.addEventListener('keydown', handleKeydown)
+  
+  // Add scroll listener if in webtoon mode
+  if (readerStore.webtoonMode) {
+    window.addEventListener('scroll', handleWebtoonScroll, { passive: true })
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('reader-action', handleReaderAction as EventListener)
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('scroll', handleWebtoonScroll)
+  
+  // Clear any pending debounce timer
+  if (scrollDebounceTimer) {
+    clearTimeout(scrollDebounceTimer)
+    scrollDebounceTimer = null
+  }
 })
 </script>
