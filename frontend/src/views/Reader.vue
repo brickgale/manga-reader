@@ -119,6 +119,12 @@ const farthestPageReached = ref(0)
 let scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null
 const shouldAutoScroll = ref(false)
 
+// IntersectionObserver state for tracking the visible page in webtoon mode
+let visiblePageObserver: IntersectionObserver | null = null
+let observedPageCount = 0
+let observedVisiblePage = 0
+const visiblePageDistances = new Map<number, number>()
+
 // Helper to extract chapter name from path
 const getChapterName = (chapterPath: string) => {
   return chapterPath.split('/').pop() || chapterPath
@@ -185,33 +191,75 @@ const updateProgress = async () => {
   }
 }
 
+// Set up an IntersectionObserver to track the visible page without O(N) per-scroll work
+const initializeVisiblePageObserver = () => {
+  if (!readerStore.webtoonMode || pages.value.length === 0) return
+
+  const pageImages = document.querySelectorAll<HTMLImageElement>('[data-page-index]')
+  if (visiblePageObserver && observedPageCount === pageImages.length && pageImages.length > 0) return
+
+  visiblePageObserver?.disconnect()
+  visiblePageDistances.clear()
+  observedPageCount = pageImages.length
+
+  if (observedPageCount === 0) {
+    visiblePageObserver = null
+    return
+  }
+
+  visiblePageObserver = new IntersectionObserver(
+    (entries) => {
+      const viewportMiddle = window.innerHeight / 2
+
+      entries.forEach((entry) => {
+        const index = Number((entry.target as HTMLImageElement).dataset.pageIndex)
+        if (!Number.isFinite(index)) return
+
+        if (entry.isIntersecting) {
+          const rect = entry.boundingClientRect
+          const imgMiddle = rect.top + rect.height / 2
+          visiblePageDistances.set(index, Math.abs(imgMiddle - viewportMiddle))
+        } else {
+          visiblePageDistances.delete(index)
+        }
+      })
+
+      if (visiblePageDistances.size === 0) return
+
+      let closestPage = observedVisiblePage
+      let closestDistance = Infinity
+
+      visiblePageDistances.forEach((distance, index) => {
+        if (distance < closestDistance) {
+          closestDistance = distance
+          closestPage = index
+        }
+      })
+
+      observedVisiblePage = closestPage
+    },
+    { threshold: [0, 0.25, 0.5, 0.75, 1] }
+  )
+
+  pageImages.forEach((img) => {
+    visiblePageObserver?.observe(img)
+  })
+}
+
+const disconnectVisiblePageObserver = () => {
+  visiblePageObserver?.disconnect()
+  visiblePageObserver = null
+  observedPageCount = 0
+  visiblePageDistances.clear()
+}
+
 // Calculate which page is currently visible in webtoon mode
 const getCurrentVisiblePage = (): number => {
   if (!readerStore.webtoonMode || pages.value.length === 0) return currentPage.value
 
-  // Get all page images
-  const pageImages = document.querySelectorAll('img[alt^="Page"]')
-  if (pageImages.length === 0) return currentPage.value
+  initializeVisiblePageObserver()
 
-  const scrollPosition = window.scrollY
-  const viewportMiddle = scrollPosition + window.innerHeight / 2
-
-  // Find which page is closest to the middle of the viewport
-  let closestPage = 0
-  let closestDistance = Infinity
-
-  pageImages.forEach((img, index) => {
-    const rect = img.getBoundingClientRect()
-    const imgMiddle = rect.top + rect.height / 2 + scrollPosition
-    const distance = Math.abs(imgMiddle - viewportMiddle)
-
-    if (distance < closestDistance) {
-      closestDistance = distance
-      closestPage = index
-    }
-  })
-
-  return closestPage
+  return visiblePageDistances.size > 0 ? observedVisiblePage : currentPage.value
 }
 
 // Handle scroll events in webtoon mode
@@ -245,12 +293,12 @@ const scrollToPage = (pageIndex: number) => {
 
   // Wait for next tick to ensure images are rendered
   setTimeout(() => {
-    const pageImages = document.querySelectorAll('img[alt^="Page"]')
-    if (pageImages.length > pageIndex) {
-      const targetImage = pageImages[pageIndex] as HTMLElement
-      const headerHeight = 64 // Approximate header height
-      const offset = targetImage.offsetTop - headerHeight
-      
+    const targetImage = document.querySelector<HTMLElement>(`[data-page-index="${pageIndex}"]`)
+    if (targetImage) {
+      const headerElement = document.querySelector('header, [role="banner"], .sticky.top-0') as HTMLElement | null
+      const headerHeight = headerElement?.getBoundingClientRect().height ?? 0
+      const offset = Math.max(targetImage.offsetTop - headerHeight, 0)
+
       window.scrollTo({
         top: offset,
         behavior: 'smooth',
@@ -261,6 +309,7 @@ const scrollToPage = (pageIndex: number) => {
 
 // Handle when all images are loaded in webtoon mode
 const handleImagesLoaded = () => {
+  initializeVisiblePageObserver()
   if (shouldAutoScroll.value && currentPage.value > 0) {
     scrollToPage(currentPage.value)
     shouldAutoScroll.value = false
@@ -395,17 +444,21 @@ watch(
       // Auto-scroll to current page if not on first page
       if (currentPage.value > 0 && pages.value.length > 0) {
         shouldAutoScroll.value = true
-        // Trigger scroll after images are loaded
+        // Fallback attempt once page images are actually rendered
         setTimeout(() => {
           if (shouldAutoScroll.value) {
-            scrollToPage(currentPage.value)
-            shouldAutoScroll.value = false
+            const pageImages = document.querySelectorAll('[data-page-index]')
+            if (pageImages.length > 0) {
+              scrollToPage(currentPage.value)
+              shouldAutoScroll.value = false
+            }
           }
         }, 500)
       }
     } else {
       // Switching to page mode
       window.removeEventListener('scroll', handleWebtoonScroll)
+      disconnectVisiblePageObserver()
       if (scrollDebounceTimer) {
         clearTimeout(scrollDebounceTimer)
         scrollDebounceTimer = null
@@ -481,6 +534,7 @@ onUnmounted(() => {
   window.removeEventListener('reader-action', handleReaderAction as EventListener)
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('scroll', handleWebtoonScroll)
+  disconnectVisiblePageObserver()
   
   // Clear any pending debounce timer
   if (scrollDebounceTimer) {

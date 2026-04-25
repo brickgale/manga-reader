@@ -11,6 +11,7 @@
           :key="page.path"
           :src="getImageUrl(page.path)"
           :alt="`Page ${idx + 1}`"
+          :data-page-index="idx"
           :class="[
             'max-w-[980px] w-full h-auto cursor-pointer transition-opacity duration-500',
             loadedImages[idx] ? 'opacity-100' : 'opacity-0',
@@ -46,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { toast } from 'vue-sonner'
 import type { Page } from '@/api'
 import { api } from '@/api'
@@ -130,10 +131,12 @@ watch(
 // Emit when all images are loaded in webtoon mode
 watch(
   () => allImagesLoaded.value,
-  (loaded) => {
+  async (loaded) => {
     if (loaded && props.webtoonMode && props.pages.length > 0) {
+      await nextTick()
       emit('images-loaded')
     }
-  }
+  },
+  { flush: 'post' }
 )
 </script>
