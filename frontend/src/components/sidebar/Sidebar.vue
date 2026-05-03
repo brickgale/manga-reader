@@ -53,7 +53,7 @@ const handleNavigate = (navigateFn: () => void) => {
   <!-- Sidebar -->
   <aside
     :class="[
-      'fixed left-0 top-0 z-50 h-screen w-64 border-r bg-background transition-transform duration-300 overflow-y-auto',
+      'fixed left-0 top-0 z-50 h-screen w-64 border-r bg-background transition-transform duration-300',
       isOpen ? 'translate-x-0' : '-translate-x-full',
       readerView ? '' : 'lg:translate-x-0',
     ]"
@@ -70,7 +70,7 @@ const handleNavigate = (navigateFn: () => void) => {
       </div>
 
       <!-- Navigation -->
-      <nav class="space-y-1 p-4 flex-1 overflow-y-auto scrollbar-thin">
+      <nav class="space-y-1 p-4 flex-1 overflow-y-auto">
         <router-link
           v-for="item in navItems"
           :key="item.to"

@@ -8,7 +8,7 @@
       class="w-full px-2 sm:px-4 lg:container lg:mx-auto flex items-center justify-between gap-2"
     >
       <!-- Left: Sidebar Toggle (Mobile) + Chapter Info -->
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink overflow-hidden">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 shrink overflow-hidden">
         <Button
           variant="outline"
           size="icon"

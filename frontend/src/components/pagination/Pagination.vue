@@ -115,8 +115,7 @@ const handleChapterChange = (value: any) => {
               class="h-9 w-9"
               @click="emit('prev')"
               :disabled="
-                props.disablePrev ||
-                ((props.disabled || props.currentPage === 0) && !props.hidePageSelector)
+                props.disablePrev || props.disabled || (!props.hidePageSelector && props.currentPage === 0)
               "
             >
               <ChevronLeft class="h-4 w-4" />
@@ -151,7 +150,7 @@ const handleChapterChange = (value: any) => {
               class="h-9 w-9"
               @click="emit('next')"
               :disabled="
-                props.disableNext || props.disabled || props.currentPage === props.totalPages - 1
+                props.disableNext || props.disabled || props.totalPages <= 0 || props.currentPage === props.totalPages - 1
               "
             >
               <ChevronRight class="h-4 w-4" />
