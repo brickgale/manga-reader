@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ArrowDownUp } from 'lucide-vue-next'
 
 interface Chapter {
   name: string
@@ -63,14 +63,14 @@ const handleChapterChange = (value: any) => {
 </script>
 
 <template>
-  <div class="flex flex-row flex-wrap justify-center items-center gap-2">
-    <!-- Chapter Selector -->
+  <div class="flex flex-row flex-wrap justify-center items-center gap-1 sm:gap-2">
+    <!-- Chapter Selector - Desktop -->
     <div
       v-if="chapters && chapters.length > 0"
-      class="flex items-center gap-2 min-w-none sm:min-w-[180px]"
+      class="hidden sm:flex items-center gap-2 min-w-[140px] sm:min-w-[180px]"
     >
       <Select :model-value="currentChapterPath" @update:model-value="handleChapterChange">
-        <SelectTrigger class="w-full max-w-[200px]">
+        <SelectTrigger class="w-full max-w-[180px] h-9">
           <SelectValue placeholder="Select chapter" />
         </SelectTrigger>
         <SelectContent class="w-[130px]">
@@ -83,19 +83,43 @@ const handleChapterChange = (value: any) => {
 
     <!-- Page Navigation -->
     <TooltipProvider>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <!-- Chapter Selector Button - Mobile Only -->
+        <Tooltip v-if="chapters && chapters.length > 0">
+          <TooltipTrigger as-child>
+            <div class="sm:hidden">
+              <Select :model-value="currentChapterPath" @update:model-value="handleChapterChange">
+                <SelectTrigger
+                  class="h-9 w-9 p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground [&>span:first-child]:hidden [&>svg:last-child]:hidden flex items-center justify-center"
+                >
+                  <ArrowDownUp class="h-4 w-4" />
+                </SelectTrigger>
+                <SelectContent class="w-[130px]">
+                  <SelectItem v-for="chapter in chapters" :key="chapter.path" :value="chapter.path">
+                    {{ chapter.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Select Chapter</p>
+          </TooltipContent>
+        </Tooltip>
+
         <Tooltip>
           <TooltipTrigger as-child>
             <Button
               variant="outline"
               size="icon"
+              class="h-9 w-9"
               @click="emit('prev')"
               :disabled="
                 props.disablePrev ||
                 ((props.disabled || props.currentPage === 0) && !props.hidePageSelector)
               "
             >
-              <ChevronLeft class="h-5 w-5" />
+              <ChevronLeft class="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -109,7 +133,7 @@ const handleChapterChange = (value: any) => {
           :model-value="String(currentPage)"
           @update:model-value="handlePageChange"
         >
-          <SelectTrigger class="w-full max-w-[100px]">
+          <SelectTrigger class="w-full max-w-[90px] h-9 text-xs sm:text-sm">
             <SelectValue placeholder="Select page" />
           </SelectTrigger>
           <SelectContent class="w-[100px]">
@@ -124,12 +148,13 @@ const handleChapterChange = (value: any) => {
             <Button
               variant="outline"
               size="icon"
+              class="h-9 w-9"
               @click="emit('next')"
               :disabled="
                 props.disableNext || props.disabled || props.currentPage === props.totalPages - 1
               "
             >
-              <ChevronRight class="h-5 w-5" />
+              <ChevronRight class="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -65,9 +65,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
   }
   html {
     scrollbar-gutter: stable;
+    overflow-x: hidden;
   }
 }
 

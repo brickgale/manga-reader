@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="pages.length > 0"
-    class="flex flex-col justify-center items-center mb-4 border-1 border-white"
-  >
+  <div v-if="pages.length > 0" class="flex flex-col justify-center items-center mb-4">
     <template v-if="webtoonMode">
       <LoadingIcon v-if="!allImagesLoaded" class="h-[calc(100vh-280px)]" />
       <template v-else>
@@ -37,7 +34,7 @@
       :src="getImageUrl(pages[currentPage].path)"
       :alt="`Page ${currentPage + 1}`"
       :class="[
-        'max-w-[980px] w-full h-auto cursor-pointer transition-opacity duration-500',
+        'max-w-full w-full h-auto cursor-pointer transition-opacity duration-500',
         pageImageLoaded ? 'opacity-100' : 'opacity-0',
       ]"
       @click="$emit('page-click')"
@@ -131,7 +128,7 @@ watch(
 // Emit when all images are loaded in webtoon mode
 watch(
   () => allImagesLoaded.value,
-  async (loaded) => {
+  async loaded => {
     if (loaded && props.webtoonMode && props.pages.length > 0) {
       await nextTick()
       emit('images-loaded')

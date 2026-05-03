@@ -2,24 +2,30 @@
   <div class="mt-2 mb-6">
     <div v-if="progress" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left Half: Cover, Titles, Progress Bar -->
-      <div class="flex gap-4">
+      <div class="flex gap-3 sm:gap-4">
         <!-- Cover Image -->
         <div class="flex-shrink-0">
           <img
             v-if="coverImageUrl"
             :src="coverImageUrl"
             :alt="manga.title"
-            class="w-32 h-48 object-cover rounded-sm shadow-md"
+            class="w-24 h-36 sm:w-32 sm:h-48 object-cover rounded-sm shadow-md"
           />
-          <div v-else class="w-32 h-48 bg-muted rounded-sm flex items-center justify-center">
-            <span class="text-muted-foreground text-sm">No Cover</span>
+          <div
+            v-else
+            class="w-24 h-36 sm:w-32 sm:h-48 bg-muted rounded-sm flex items-center justify-center"
+          >
+            <span class="text-muted-foreground text-xs sm:text-sm">No Cover</span>
           </div>
         </div>
 
         <!-- Titles and Progress -->
         <div class="flex-1 min-w-0 flex flex-col">
-          <h2 class="text-2xl font-bold mb-1 truncate">{{ manga.title }}</h2>
-          <p v-if="manga.altTitle" class="text-sm text-muted-foreground mb-4 truncate">
+          <h2 class="text-xl sm:text-2xl font-bold mb-1 truncate">{{ manga.title }}</h2>
+          <p
+            v-if="manga.altTitle"
+            class="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 truncate"
+          >
             {{ manga.altTitle }}
           </p>
 
@@ -40,20 +46,20 @@
       </div>
 
       <!-- Right Half: Last Read Info -->
-      <div class="p-4 bg-muted rounded-sm flex flex-col items-center justify-center">
-        <p class="text-sm mb-2">
+      <div class="p-3 sm:p-4 bg-muted rounded-sm flex flex-col items-center justify-center">
+        <p class="text-xs sm:text-sm mb-2 text-center">
           <strong>Last Read:</strong> Chapter {{ formatChapterName(progress.lastChapterPath) }},
           Page
           {{ progress.lastPageNumber + 1 }}
         </p>
-        <p class="text-sm">
+        <p class="text-xs sm:text-sm text-center">
           <strong>Farthest:</strong> Chapter {{ formatChapterName(progress.farthestChapterPath) }},
           Page
           {{ progress.farthestPageNumber + 1 }}
         </p>
         <button
           @click="$emit('resume')"
-          class="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          class="mt-3 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
         >
           Resume Reading
         </button>
@@ -61,24 +67,30 @@
     </div>
 
     <!-- Fallback when no progress -->
-    <div v-else class="flex gap-6">
+    <div v-else class="flex gap-3 sm:gap-6">
       <!-- Cover Image -->
       <div class="flex-shrink-0">
         <img
           v-if="coverImageUrl"
           :src="coverImageUrl"
           :alt="manga.title"
-          class="w-32 h-48 object-cover rounded-lg shadow-md"
+          class="w-24 h-36 sm:w-32 sm:h-48 object-cover rounded-lg shadow-md"
         />
-        <div v-else class="w-32 h-48 bg-muted rounded-lg flex items-center justify-center">
-          <span class="text-muted-foreground text-sm">No Cover</span>
+        <div
+          v-else
+          class="w-24 h-36 sm:w-32 sm:h-48 bg-muted rounded-lg flex items-center justify-center"
+        >
+          <span class="text-muted-foreground text-xs sm:text-sm">No Cover</span>
         </div>
       </div>
 
       <!-- Info -->
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold mb-1 truncate">{{ manga.title }}</h2>
-        <p v-if="manga.altTitle" class="text-sm text-muted-foreground mb-4 truncate">
+        <h2 class="text-xl sm:text-2xl font-bold mb-1 truncate">{{ manga.title }}</h2>
+        <p
+          v-if="manga.altTitle"
+          class="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 truncate"
+        >
           {{ manga.altTitle }}
         </p>
       </div>
