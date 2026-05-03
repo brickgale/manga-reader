@@ -6,20 +6,21 @@
     <!-- Left Sidebar -->
     <Sidebar
       :is-open="sidebarOpen"
+      :reader-view="isReaderView"
       @close="sidebarOpen = false"
       @toggle-settings="settingsOpen = !settingsOpen"
     />
 
     <!-- Main Content Area -->
-    <div class="flex flex-1 flex-col">
+    <div class="flex flex-1 flex-col lg:ml-64">
       <!-- Top Header -->
       <MainHeader v-if="!isReaderView" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
       <!-- Page Content -->
       <main
-        :class="
-          isReaderView ? 'flex-1' : 'w-full lg:container mx-auto flex-1 px-6 py-4 overflow-visible'
-        "
+        :class="[
+          isReaderView ? 'flex-1 pt-14' : 'w-full lg:container mx-auto flex-1 px-6 py-4 pt-20',
+        ]"
       >
         <router-view v-slot="{ Component }">
           <component :is="Component" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
@@ -45,7 +46,7 @@ const route = useRoute()
 
 // Hide header and sidebar in reader view (only when actively reading a chapter)
 const isReaderView = computed(
-  () => route.path.startsWith('/v/') && route.params.id && route.params.chapterId
+  (): boolean => !!(route.path.startsWith('/v/') && route.params.id && route.params.chapterId)
 )
 
 // Initialize sidebar open state based on viewport width

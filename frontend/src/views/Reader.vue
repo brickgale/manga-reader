@@ -7,6 +7,36 @@
       :total-pages="pages.length"
     />
 
+    <!-- Reader Header - Always visible -->
+    <ReaderHeader
+      v-if="manga"
+      :manga-title="manga.title"
+      :manga-id="manga.id"
+      :current-page="currentPage"
+      :total-pages="pages.length"
+      :webtoon-mode="readerStore.webtoonMode"
+      @toggle-sidebar="emit('toggle-sidebar')"
+      @toggle-view-mode="readerStore.toggleWebtoonMode"
+    >
+      <template #pagination>
+        <Pagination
+          :current-page="currentPage"
+          :total-pages="pages.length"
+          :chapters="chapters"
+          :current-chapter-path="currentChapter?.path"
+          :hide-page-selector="readerStore.webtoonMode"
+          :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
+          :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
+          :disabled="loading"
+          @prev="previousPage"
+          @next="nextPage"
+          @change-page="goToPage"
+          @change-chapter="changeChapter"
+        />
+      </template>
+    </ReaderHeader>
+
+    <!-- Loading State -->
     <div
       v-if="loading"
       class="container mx-auto p-4 flex items-center justify-center h-[calc(100vh-280px)]"
@@ -14,37 +44,13 @@
       <LoadingIcon />
     </div>
 
+    <!-- Error State -->
     <div v-else-if="!manga || !currentChapter" class="container mx-auto p-4 text-center py-8">
       <p>Chapter not found</p>
     </div>
 
+    <!-- Content -->
     <div v-else>
-      <ReaderHeader
-        :manga-title="manga.title"
-        :manga-id="manga.id"
-        :current-page="currentPage"
-        :total-pages="pages.length"
-        :webtoon-mode="readerStore.webtoonMode"
-        @toggle-sidebar="emit('toggle-sidebar')"
-        @toggle-view-mode="readerStore.toggleWebtoonMode"
-      >
-        <template #pagination>
-          <Pagination
-            :current-page="currentPage"
-            :total-pages="pages.length"
-            :chapters="chapters"
-            :current-chapter-path="currentChapter?.path"
-            :hide-page-selector="readerStore.webtoonMode"
-            :disable-prev="readerStore.webtoonMode && currentChapterIndex === 0"
-            :disable-next="readerStore.webtoonMode && currentChapterIndex === chapters.length - 1"
-            @prev="previousPage"
-            @next="nextPage"
-            @change-page="goToPage"
-            @change-chapter="changeChapter"
-          />
-        </template>
-      </ReaderHeader>
-
       <PageViewer
         :pages="pages"
         :current-page="currentPage"

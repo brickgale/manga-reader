@@ -4,6 +4,7 @@ import { Logo } from '@/components/logo'
 
 interface Props {
   isOpen: boolean
+  readerView?: boolean
 }
 
 defineProps<Props>()
@@ -52,9 +53,9 @@ const handleNavigate = (navigateFn: () => void) => {
   <!-- Sidebar -->
   <aside
     :class="[
-      'fixed left-0 top-0 z-50 h-full w-64 border-r bg-background transition-transform duration-300',
-      'lg:sticky lg:top-0 lg:translate-x-0 lg:h-screen',
-      isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+      'fixed left-0 top-0 z-50 h-screen w-64 border-r bg-background transition-transform duration-300',
+      isOpen ? 'translate-x-0' : '-translate-x-full',
+      readerView ? '' : 'lg:translate-x-0',
     ]"
     :inert="!isOpen ? true : undefined"
     :aria-hidden="!isOpen ? 'true' : 'false'"
@@ -69,7 +70,7 @@ const handleNavigate = (navigateFn: () => void) => {
       </div>
 
       <!-- Navigation -->
-      <nav class="space-y-1 p-4">
+      <nav class="space-y-1 p-4 flex-1 overflow-y-auto">
         <router-link
           v-for="item in navItems"
           :key="item.to"
@@ -85,7 +86,7 @@ const handleNavigate = (navigateFn: () => void) => {
                 ? 'bg-primary/10 text-primary border-r-4 border-primary'
                 : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
             ]"
-            @click="(e) => handleNavigate(() => navigate(e))"
+            @click="e => handleNavigate(() => navigate(e))"
           >
             <component :is="item.icon" class="h-5 w-5" />
             {{ item.label }}
