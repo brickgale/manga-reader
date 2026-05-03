@@ -66,18 +66,16 @@ const formatRelativeTime = (timestamp: string) => {
 const loadHistory = async () => {
   loading.value = true
 
-  await trackPromise(
-    async () => {
-      try {
-        const response = await withMinimumLoadingTime(() => api.getHistory())
-        history.value = response.data
-      } catch (error) {
-        console.error('Failed to load history:', error)
-      } finally {
-        loading.value = false
-      }
+  await trackPromise(async () => {
+    try {
+      const response = await withMinimumLoadingTime(() => api.getHistory())
+      history.value = response.data
+    } catch (error) {
+      console.error('Failed to load history:', error)
+    } finally {
+      loading.value = false
     }
-  )
+  })
 }
 
 onMounted(() => {

@@ -11,7 +11,7 @@
       <p>Manga not found</p>
     </div>
 
-    <div v-else class="container mx-auto">
+    <div v-else class="w-full lg:container mx-auto">
       <MangaInfoCard :manga="manga" :progress="progress" @resume="resumeReading" />
       <ChapterList :chapters="chapters" @select="selectChapter" />
     </div>
@@ -41,28 +41,26 @@ const getChapterName = (chapterPath: string) => {
 
 const loadMangaDetails = async () => {
   loading.value = true
-  
-  await trackPromise(
-    async () => {
-      try {
-        const mangaId = route.params.id as string
-        const response = await api.getManga()
-        manga.value = response.data.find(m => m.id === mangaId) || null
 
-        if (manga.value) {
-          chapters.value = await api.getChapters(manga.value.id)
-          progress.value = await api.getProgress(manga.value.id)
+  await trackPromise(async () => {
+    try {
+      const mangaId = route.params.id as string
+      const response = await api.getManga()
+      manga.value = response.data.find(m => m.id === mangaId) || null
 
-          // Update page title
-          document.title = `${manga.value.title} | Manga Reader`
-        }
-      } catch (error) {
-        console.error('Failed to load manga:', error)
-      } finally {
-        loading.value = false
+      if (manga.value) {
+        chapters.value = await api.getChapters(manga.value.id)
+        progress.value = await api.getProgress(manga.value.id)
+
+        // Update page title
+        document.title = `${manga.value.title} | Manga Reader`
       }
+    } catch (error) {
+      console.error('Failed to load manga:', error)
+    } finally {
+      loading.value = false
     }
-  )
+  })
 }
 
 const selectChapter = (chapter: Chapter) => {

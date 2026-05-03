@@ -16,7 +16,11 @@
       <MainHeader v-if="!isReaderView" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
       <!-- Page Content -->
-      <main :class="isReaderView ? 'flex-1' : 'container mx-auto flex-1 p-4 overflow-visible'">
+      <main
+        :class="
+          isReaderView ? 'flex-1' : 'w-full lg:container mx-auto flex-1 px-6 py-4 overflow-visible'
+        "
+      >
         <router-view v-slot="{ Component }">
           <component :is="Component" @toggle-sidebar="sidebarOpen = !sidebarOpen" />
         </router-view>

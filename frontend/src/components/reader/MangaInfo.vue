@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-6">
+  <div class="mt-2 mb-6">
     <div v-if="progress" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left Half: Cover, Titles, Progress Bar -->
       <div class="flex gap-4">
