@@ -25,7 +25,7 @@ A simple manga/manhwa reader application with reading history, bookmarks, and pr
 
    ```bash
    git clone <repository-url>
-   cd manga-reader
+   cd yomiru
    ```
 
 2. **Configure manga storage path**
@@ -110,7 +110,7 @@ node sync-version.js 1.2.0
 ## Project Structure
 
 ```
-manga-reader/
+yomiru/
 ├── backend/          # Backend API server
 ├── frontend/         # Vue frontend application
 ├── storage/          # Data storage (covers, etc.)
