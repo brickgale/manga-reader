@@ -1,6 +1,6 @@
 # Entity Relationship Diagram
 
-This diagram represents the database schema for the Manga Reader application.
+This diagram represents the database schema for the Yomiru application.
 
 ```mermaid
 erDiagram
@@ -80,16 +80,19 @@ erDiagram
 The AppSettings table stores application-wide preferences:
 
 ### UI Settings
+
 - **theme**: Color theme (`dark`, `light`, `auto`)
 - **enableChapterView**: Show/hide chapter view in reader
 - **enableSideReader**: Open manga in drawer vs side panel
 - **showPageNumbers**: Display page numbers while reading
 
 ### Reading Settings
+
 - **readingDirection**: Reading flow direction (`ltr` for Western comics, `rtl` for manga)
 - **pageFitMode**: How pages are displayed (`fit-width`, `fit-height`, `original`)
 - **preloadNextPages**: Number of pages to preload ahead
 - **autoMarkAsRead**: Automatically mark chapters as read when completed
 
 ### Pagination Settings
+
 - **defaultPageSize**: Default number of items per page in lists

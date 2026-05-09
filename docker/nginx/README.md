@@ -1,9 +1,11 @@
 # Nginx Dynamic Vhost Setup Notes
 
 ## Overview
+
 This document describes the custom nginx setup used in this project to enable dynamic vhost configuration using environment variables and Docker Compose.
 
 ## Key Features
+
 - **Dynamic vhost domain**: The nginx config uses `${VHOST_DOMAIN}` from the `.env` file, allowing you to change the vhost domain without editing config files.
 - **envsubst for templating**: The nginx config is generated at container startup using `envsubst`, which substitutes environment variables in the config template.
 - **Custom entrypoint**: A shell script (`nginx-entrypoint.sh`) runs `envsubst` and then starts nginx, ensuring the config is always up-to-date with environment variables.
@@ -11,6 +13,7 @@ This document describes the custom nginx setup used in this project to enable dy
 - **.gitignore for generated config**: The generated config file (`nginx.vhost.conf.generated`) is excluded from version control.
 
 ## Implementation Steps
+
 1. **nginx.vhost.conf.template**
    - Uses `${VHOST_DOMAIN}` for the server_name.
    - Uses standard nginx variables (e.g., `$host`, `$remote_addr`).
@@ -25,11 +28,13 @@ This document describes the custom nginx setup used in this project to enable dy
    - Excludes `nginx.vhost.conf.generated` from version control.
 
 ## Example .env
+
 ```
-VHOST_DOMAIN=mangareader.local
+VHOST_DOMAIN=yomiru.local
 ```
 
 ## Usage
+
 - Change `VHOST_DOMAIN` in `.env` to update the vhost domain.
 - Recreate the nginx container to apply changes:
   ```sh
@@ -37,8 +42,10 @@ VHOST_DOMAIN=mangareader.local
   ```
 
 ## Troubleshooting
+
 - If the vhost is not accessible, ensure your `.env` is correct and the nginx container is receiving the variable.
 - Devices on your LAN must resolve the vhost domain to your server's IP (edit hosts file or set up local DNS).
 
 ---
+
 _Last updated: 2026-01-29_

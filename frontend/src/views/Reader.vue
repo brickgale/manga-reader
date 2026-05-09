@@ -102,6 +102,7 @@ import { PageViewer } from '@/components/reader'
 import { ReaderHeader } from '@/components/header'
 import { LoadingIcon } from '@/components/loading-icon'
 import { ReaderProgressBar } from '@/components/progress-bar'
+import { APP_CONFIG } from '@/constants/app'
 import {
   Button,
   Dialog,
@@ -510,9 +511,9 @@ watch(
 const updatePageTitle = () => {
   if (manga.value && currentChapter.value) {
     if (pages.value.length > 0) {
-      document.title = `${manga.value.title} - ${currentChapter.value.name} - Page ${currentPage.value + 1} | Manga Reader`
+      document.title = `${manga.value.title} - ${currentChapter.value.name} - Page ${currentPage.value + 1} | ${APP_CONFIG.name}`
     } else {
-      document.title = `${manga.value.title} - ${currentChapter.value.name} | Manga Reader`
+      document.title = `${manga.value.title} - ${currentChapter.value.name} | ${APP_CONFIG.name}`
     }
   }
 }

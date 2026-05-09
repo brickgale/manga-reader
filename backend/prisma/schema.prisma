@@ -1,4 +1,4 @@
-// Prisma schema for manga reader
+// Prisma schema for Yomiru
 
 generator client {
   provider = "prisma-client-js"

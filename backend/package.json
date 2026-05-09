@@ -1,7 +1,7 @@
 {
-  "name": "manga-reader-backend",
+  "name": "yomiru-backend",
   "version": "1.2.0",
-  "description": "Backend server for manga reader application",
+  "description": "Backend server for Yomiru",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
