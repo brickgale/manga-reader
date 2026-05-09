@@ -28,7 +28,7 @@ frontend/
 │   │   └── ThemeToggle.vue
 │   ├── views/
 │   │   ├── Home.vue          # Library & scan page
-│   │   ├── MangaReader.vue   # Reading interface
+│   │   ├── yomiru.vue   # Reading interface
 │   │   ├── History.vue       # Reading history
 │   │   └── Bookmarks.vue     # Saved bookmarks
 │   ├── lib/
