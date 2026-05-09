@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Library, Scroll, Bookmark, Settings } from 'lucide-vue-next'
 import { Logo } from '@/components/logo'
+import { APP_CONFIG } from '@/constants/app'
 
 interface Props {
   isOpen: boolean
@@ -65,7 +66,7 @@ const handleNavigate = (navigateFn: () => void) => {
       <div class="flex h-14 items-center justify-center border-b px-4">
         <router-link to="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Logo :width="32" :height="32" />
-          <span class="text-lg">Manga <span class="text-primary">Reader</span></span>
+          <span :class="APP_CONFIG.brandClasses">{{ APP_CONFIG.name }}</span>
         </router-link>
       </div>
 

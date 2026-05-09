@@ -1,8 +1,8 @@
-# Manga Reader
+# Yomiru
 
 A simple manga/manhwa reader application with reading history, bookmarks, and progress tracking.
 
-![Manga Reader Preview](/frontend/public/images/preview-mangareader.png)
+![Yomiru Preview](/frontend/public/images/preview-mangareader.png)
 
 ## Features
 

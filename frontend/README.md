@@ -1,4 +1,4 @@
-# Frontend - Manga Reader UI
+# Frontend - Yomiru UI
 
 Vue 3 frontend application for browsing and reading manga with a clean, responsive interface.
 
@@ -52,7 +52,7 @@ frontend/
    - Directory scanning
    - Recently read manga section
 
-2. **Manga Reader** (`/manga/:id`)
+2. **Reader** (`/manga/:id`)
    - Chapter selection
    - Page-by-page reading
    - Keyboard navigation (arrow keys)

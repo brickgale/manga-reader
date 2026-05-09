@@ -1,4 +1,4 @@
-# Backend - Manga Reader API
+# Backend - Yomiru API
 
 Express.js backend server providing REST API for manga management, reading history, bookmarks, and progress tracking.
 

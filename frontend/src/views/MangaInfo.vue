@@ -25,6 +25,7 @@ import { api, type Manga, type Chapter, type ReadingProgress } from '@/api'
 import { MangaInfo as MangaInfoCard, ChapterList } from '@/components/reader'
 import { LoadingIcon } from '@/components/loading-icon'
 import { usePageLoading } from '@/composables/usePageLoading'
+import { APP_CONFIG } from '@/constants/app'
 
 const route = useRoute()
 const router = useRouter()
@@ -53,7 +54,7 @@ const loadMangaDetails = async () => {
         progress.value = await api.getProgress(manga.value.id)
 
         // Update page title
-        document.title = `${manga.value.title} | Manga Reader`
+        document.title = `${manga.value.title} | ${APP_CONFIG.name}`
       }
     } catch (error) {
       console.error('Failed to load manga:', error)

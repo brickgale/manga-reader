@@ -74,6 +74,10 @@
 }
 
 @layer utilities {
+  .font-dela-gothic {
+    font-family: 'Dela Gothic One', sans-serif;
+  }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
