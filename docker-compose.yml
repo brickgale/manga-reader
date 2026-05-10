@@ -11,6 +11,7 @@ services:
     depends_on:
       - frontend
       - backend
+    restart: unless-stopped
     networks:
       - mangareader
     environment:
@@ -44,6 +45,7 @@ services:
           npm run build && echo 'Frontend built successfully';
         fi
       "
+    restart: unless-stopped
     networks:
       - mangareader
 
