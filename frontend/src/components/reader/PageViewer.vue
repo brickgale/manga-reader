@@ -1,5 +1,8 @@
 <template>
-  <div v-if="pages.length > 0" class="flex flex-col justify-center items-center mb-4">
+  <div
+    v-if="pages.length > 0"
+    class="flex flex-col lg:max-w-[900px] mx-auto justify-center items-center mb-4"
+  >
     <template v-if="webtoonMode">
       <LoadingIcon v-if="!allImagesLoaded" class="h-[calc(100vh-280px)]" />
       <template v-else>

@@ -50,15 +50,14 @@
     </div>
 
     <!-- Content -->
-    <div v-else>
-      <PageViewer
-        :pages="pages"
-        :current-page="currentPage"
-        :webtoon-mode="readerStore.webtoonMode"
-        @page-click="scrollDownPage"
-        @images-loaded="handleImagesLoaded"
-      />
-    </div>
+    <PageViewer
+      v-else
+      :pages="pages"
+      :current-page="currentPage"
+      :webtoon-mode="readerStore.webtoonMode"
+      @page-click="scrollDownPage"
+      @images-loaded="handleImagesLoaded"
+    />
 
     <!-- Bookmark Dialog -->
     <Dialog v-model:open="bookmarkDialogOpen">
