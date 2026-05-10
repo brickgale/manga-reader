@@ -103,7 +103,7 @@ async function downloadImage(
     return new Promise((resolve, reject) => {
       const options = {
         headers: {
-          'User-Agent': 'MangaReader/1.0',
+          'User-Agent': 'yomiru/1.0',
           Referer: 'https://mangadex.org/',
         },
       }
@@ -168,7 +168,7 @@ function httpsGet(url: string): Promise<any> {
         url,
         {
           headers: {
-            'User-Agent': 'MangaReader/1.0',
+            'User-Agent': 'yomiru/1.0',
           },
         },
         res => {

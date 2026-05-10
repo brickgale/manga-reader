@@ -4,7 +4,7 @@ This document contains API endpoints that are available in the backend.
 
 ## Settings API
 
-Manage application-wide settings for the manga reader.
+Manage application-wide settings for Yomiru.
 
 ### Get Settings
 

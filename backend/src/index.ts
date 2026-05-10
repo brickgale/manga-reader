@@ -10,6 +10,7 @@ import progressRoutes from './routes/progress'
 import settingsRoutes from './routes/settings'
 import path from 'path'
 import { readFileSync } from 'fs'
+import { APP_CONFIG } from './constants/app'
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3000', 10)
@@ -43,9 +44,9 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Manga Reader API',
+      title: `${APP_CONFIG.name} API`,
       version: VERSION,
-      description: 'API documentation for the Manga Reader application',
+      description: `API documentation for the ${APP_CONFIG.name} application`,
     },
     servers: [
       {

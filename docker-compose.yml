@@ -2,24 +2,24 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - '80:80'
     volumes:
       - ./docker/nginx/nginx.vhost.dev.conf.template:/etc/nginx/conf.d/nginx.vhost.dev.conf.template:ro
       - ./docker/nginx/nginx.vhost.prod.conf.template:/etc/nginx/conf.d/nginx.vhost.prod.conf.template:ro
       - ./docker/nginx/nginx-entrypoint.sh:/nginx-entrypoint.sh
-    entrypoint: ["sh", "-c", "chmod +x /nginx-entrypoint.sh && exec /nginx-entrypoint.sh"]
+    entrypoint: ['sh', '-c', 'chmod +x /nginx-entrypoint.sh && exec /nginx-entrypoint.sh']
     depends_on:
       - frontend
       - backend
     restart: unless-stopped
     networks:
-      - mangareader
+      - yomiru
     environment:
       - VHOST_DOMAIN=${VHOST_DOMAIN}
       - FRONTEND_PORT=${FRONTEND_PORT}
       - BACKEND_PORT=${BACKEND_PORT}
       - APP_ENV=${APP_ENV}
-      
+
   # Frontend service - builds for production or runs dev server
   frontend:
     build:
@@ -27,7 +27,7 @@ services:
       dockerfile: ../Dockerfile.frontend
       target: builder
     ports:
-      - "${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}"
+      - '${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}'
     volumes:
       - frontend-dist:/app/dist
       - ./frontend:/app:cached
@@ -47,7 +47,7 @@ services:
       "
     restart: unless-stopped
     networks:
-      - mangareader
+      - yomiru
 
   # Backend service - serves API and frontend
   backend:
@@ -57,7 +57,7 @@ services:
       args:
         - BACKEND_PORT=${BACKEND_PORT:-3000}
     ports:
-      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+      - '${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}'
     environment:
       - NODE_ENV=${APP_ENV:-production}
       - APP_ENV=${APP_ENV:-development}
@@ -84,12 +84,12 @@ services:
         fi
       "
     networks:
-      - mangareader
+      - yomiru
 
 volumes:
   frontend-dist:
   backend-data:
 
 networks:
-  mangareader:
+  yomiru:
     driver: bridge

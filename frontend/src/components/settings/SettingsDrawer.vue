@@ -4,6 +4,7 @@ import { Drawer, DrawerContent, DrawerClose } from '@/components/ui/drawer'
 import { Button } from '@/components/ui'
 import { X } from 'lucide-vue-next'
 import { api } from '@/api'
+import { APP_CONFIG } from '@/constants/app'
 
 interface Props {
   open: boolean
@@ -116,7 +117,7 @@ watch(
             <!-- About -->
             <div class="space-y-3">
               <h3 class="text-sm font-semibold">About</h3>
-              <p class="text-sm text-muted-foreground">Manga Reader v{{ appVersion }}</p>
+              <p class="text-sm text-muted-foreground">{{ APP_CONFIG.name }} v{{ appVersion }}</p>
             </div>
           </div>
         </div>

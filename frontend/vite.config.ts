@@ -4,7 +4,7 @@ import path from 'path'
 
 const BACKEND_PORT = parseInt(process.env.BACKEND_PORT || '3000')
 const FRONTEND_PORT = parseInt(process.env.FRONTEND_PORT || '5173')
-const VHOST_DOMAIN = process.env.VHOST_DOMAIN || 'mangareader.local'
+const VHOST_DOMAIN = process.env.VHOST_DOMAIN || 'yomiru.local'
 
 export default defineConfig({
   plugins: [vue()],
